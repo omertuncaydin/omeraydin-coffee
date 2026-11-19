@@ -5,8 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ömer Aydın | Coffee Education Worldwide</title>
 <meta name="description" content="International coffee education with Ömer Aydın, Authorized SCA Trainer and Q Instructor.">
-<meta name="version" content="v2026-11-19a">
+<meta name="version" content="v2026-11-19b">
 <meta name="theme-color" content="#F4F1E0">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="canonical" href="https://omeraydin.coffee/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Ömer Aydın">
@@ -21,7 +24,7 @@
 <link rel="preload" href="assets/fonts/averia-serif-libre-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-ext-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="style.css?v=2026-11-19a">
+<link rel="stylesheet" href="style.css?v=2026-11-19b">
 <script>document.documentElement.className = 'js';</script>
 </head>
 <body>
@@ -178,7 +181,7 @@
       <div class="foot-col">
         <h2>Social</h2>
         <a class="u" href="https://www.instagram.com/omeraydin.coffee/">Instagram</a>
-        <a class="u" id="foot-youtube" href="https://youtu.be/eTAqLuLb1LA">YouTube</a>
+        <a class="u" href="https://www.youtube.com/@coffeenutzofficial">YouTube</a>
       </div>
     </div>
     <div class="host">
@@ -189,12 +192,26 @@
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg>
       </a>
     </div>
+    <form class="msg" id="msg" action="https://api.web3forms.com/submit" method="POST" aria-labelledby="msg-title" hidden>
+      <h2 id="msg-title">Write to me</h2>
+      <input type="hidden" name="access_key" value="">
+      <input type="hidden" name="subject" value="New message from omeraydin.coffee">
+      <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">
+      <label for="msg-email">Email <span>(required)</span></label>
+      <input id="msg-email" name="email" type="email" required maxlength="200" autocomplete="email" spellcheck="false">
+      <label class="msg-check"><input type="checkbox" name="news" value="yes"><span>Send me news and updates</span></label>
+      <label for="msg-text">Message <span>(required)</span></label>
+      <textarea id="msg-text" name="message" required rows="4" maxlength="4000"></textarea>
+      <button class="pill pill-line-ink" type="submit">Send message</button>
+      <p class="msg-status" id="msg-status" role="status" aria-live="polite"></p>
+      <p class="msg-note">Sent by email through Web3Forms. Your address is used to reply, and for news only if you tick the box.</p>
+    </form>
   </div>
   <p class="copy">© Ömer Aydın · Independent coffee educator</p>
 </footer>
 
 </div>
 <script src="content.js"></script>
-<script src="site.js?v=2026-11-19a"></script>
+<script src="site.js?v=2026-11-19b"></script>
 </body>
 </html>

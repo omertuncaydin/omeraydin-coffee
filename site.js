@@ -1,5 +1,5 @@
-/* omeraydin.coffee v2026-11-19a
-   Reads window.siteContent (content.js) and fills the film, portrait, learner quotes and training dates. */
+/* omeraydin.coffee v2026-11-19b
+   Reads window.siteContent (content.js) and fills the film, portrait, learner quotes, training dates and the message form. */
 (() => {
   'use strict';
   const content = window.siteContent || {};
@@ -48,10 +48,8 @@
   if (film && videoId) {
     const watchUrl = 'https://youtu.be/' + videoId;
     film.href = watchUrl;
-    for (const id of ['#film-link', '#foot-youtube']) {
-      const link = $(id);
-      if (link) link.href = watchUrl;
-    }
+    const filmLink = $('#film-link');
+    if (filmLink) filmLink.href = watchUrl;
     film.addEventListener('click', (event) => {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button) return;
       event.preventDefault();
@@ -69,16 +67,14 @@
       player.focus();
     });
   } else if (film) {
-    /* no video set: keep the photo, drop the play sticker and the film links */
+    /* no video set: keep the photo, drop the play sticker and the film link */
     const still = make('div', 'film');
     still.id = 'film';
     const frame = film.querySelector('.film-frame');
     if (frame) still.append(frame);
     film.replaceWith(still);
-    for (const id of ['#film-caption', '#foot-youtube']) {
-      const node = $(id);
-      if (node) node.hidden = true;
-    }
+    const caption = $('#film-caption');
+    if (caption) caption.hidden = true;
   }
 
   /* portrait file from content.js, shown uncropped */
@@ -130,5 +126,44 @@
     }
     dateBox.replaceChildren(list);
     dateSection.classList.add('has-dates');
+  }
+
+  /* message form: stays hidden until content.js has a delivery key, then posts straight from the browser */
+  const form = $('#msg');
+  const messageKey = typeof content.messageKey === 'string' ? content.messageKey.trim() : '';
+  if (form && /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(messageKey)) {
+    const status = $('#msg-status');
+    const sendBtn = form.querySelector('button[type="submit"]');
+    form.elements.access_key.setAttribute('value', messageKey);
+    form.hidden = false;
+    const foot = form.closest('.foot');
+    if (foot) foot.classList.add('has-form');
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (sendBtn.disabled) return;
+      const fields = Object.fromEntries(new FormData(form));
+      if (!fields.news) fields.news = 'no';
+      sendBtn.disabled = true;
+      status.textContent = 'Sending\u2026';
+      let sent = false;
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(fields)
+        });
+        const result = await response.json().catch(() => null);
+        sent = response.status === 200 && !!result && result.success === true;
+      } catch (error) {
+        sent = false;
+      }
+      sendBtn.disabled = false;
+      if (sent) {
+        form.reset();
+        status.textContent = 'Thank you. Your message is on its way.';
+      } else {
+        status.textContent = 'That did not go through. Please try again in a moment, or write on Instagram.';
+      }
+    });
   }
 })();

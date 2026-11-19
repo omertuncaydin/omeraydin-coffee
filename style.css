@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-19a
+/* omeraydin.coffee v2026-11-19b
    Fonts: Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see assets/fonts/fonts-license.txt */
 
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
@@ -39,6 +39,8 @@ section,footer{scroll-margin-top:16px}
 /* buttons */
 .pill{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:11px 24px;border:2px solid;border-radius:300px;font-size:1.0625rem;transition:background-color .18s ease,color .18s ease,border-color .18s ease}
 .pill:hover{text-decoration:none}
+button.pill{background:transparent;font-family:inherit;letter-spacing:inherit;cursor:pointer}
+button.pill:disabled{opacity:.55;cursor:default}
 .pill-sm{min-height:44px;padding:9px 22px}
 .pill-line-verm{border-color:var(--verm-ink);color:var(--verm-ink)}
 .pill-line-verm:hover{background:var(--verm-ink);color:var(--cream)}
@@ -148,6 +150,23 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
 .host .pill{margin-top:14px}
 .copy{margin-top:clamp(44px,6vw,96px);font-size:.9375rem}
 
+/* message form, shown only when content.js has a delivery key */
+.foot.has-form .foot-cols{column-gap:clamp(32px,3.9vw,56px)}
+.foot.has-form .host{flex-basis:330px}
+.msg{flex:0 1 390px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.msg label{font-size:1.0625rem}
+.msg input[type="email"],.msg textarea{display:block;width:100%;margin:0 0 8px;border:0;background:var(--cream);color:var(--ink);font:inherit;font-size:1.0625rem;letter-spacing:inherit}
+.msg input[type="email"]{height:52px;padding:0 22px;border-radius:300px}
+.msg textarea{min-height:132px;padding:14px 22px;border-radius:26px;resize:vertical}
+.msg input:focus-visible,.msg textarea:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.msg-check{display:flex;align-items:center;gap:12px;min-height:44px;margin:-4px 0 4px;font-size:1rem;cursor:pointer}
+.msg-check input{flex:none;width:20px;height:20px;margin:0;accent-color:var(--ink)}
+.msg .pill{align-self:flex-start;margin-top:6px}
+.foot .pill-line-ink:hover{color:var(--cream)}
+.msg-status{min-height:1.3em;font-weight:700;font-size:1rem}
+.msg-status:empty{display:none}
+.msg-note{font-size:.875rem;text-wrap:pretty}
+
 /* small screens: menu button instead of the link row */
 @media (max-width:760px){
   .hd{padding:10px 0}
@@ -215,8 +234,9 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
   .foot .wordmark{margin-left:0;font-size:calc((100vw - 2 * var(--g) - 48px) / 2.652);font-size:calc((100cqw - 48px) / 2.652)}
   .foot-cols{flex-direction:column;flex-wrap:nowrap;gap:52px;margin-top:60px}
   .host{order:1;flex:none}
+  .msg{order:2;flex:none}
   .host .pill{margin-top:12px}
-  .foot-lists{order:2;flex:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+  .foot-lists{order:3;flex:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
   .foot-col{gap:4px}
   .foot-col a{padding:12px 0}
   .copy{margin-top:44px}
