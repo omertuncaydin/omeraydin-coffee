@@ -1,8 +1,27 @@
 # omeraydin.coffee
-Single-column static website for GitHub Pages. Upload the contents of this folder to your repository root, including .nojekyll. In Settings > Pages select Deploy from a branch > main > /(root).
 
-Edit content.js to add the YouTube video ID, portrait file path, approved learner testimonials (up to three), and confirmed training dates. Put your real portrait in assets/ and reference it there. The video and portrait show neutral placeholders until configured; testimonials are hidden until real quotations are entered. No endorsements are fabricated. The video uses YouTube's privacy-enhanced embed, and loads when scrolling near it. Test with your actual video (embedding must be allowed) and portrait before publishing. The Instagram links are the current enquiry route.
+Static one-page site, version v2026-11-19a. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
 
-For a custom domain, use GitHub Pages settings and the DNS instructions provided by GitHub and your registrar.
+## Changing content
 
-The supplied YouTube video, portrait and classroom photo are now configured. The portrait is shown uncropped. Add approved testimonials and dates in content.js.
+Edit `content.js`. It holds the YouTube video ID, the portrait file path, approved learner testimonials (up to three) and confirmed training dates. Leave unknown content empty.
+
+- Testimonials stay hidden until an entry has both a quote and a name. No endorsements are fabricated.
+- Training dates show the "will be announced" line until an entry has a date, a course and a location. A `url` starting with `https://` turns the row into a link.
+- The portrait is shown uncropped. Put a new picture in `assets/` and point `portrait` at it.
+- Without a valid video ID the film sticker and the film links are removed and the classroom photo stays as a picture.
+
+Course names, levels and their coffeenutz.net sales links are written in `index.html`, in the section with `id="courses"`.
+
+## Files
+
+- `index.html`: the page.
+- `style.css`: layout and colours. Desktop first, the menu button appears at 760 px and below, the phone layout at 520 px and below.
+- `site.js`: menu button, film player, and the parts filled from `content.js`.
+- `assets/`: photos and the two typefaces in `assets/fonts/` (Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see `assets/fonts/fonts-license.txt`).
+
+Nothing is requested from another host when the page loads. The film loads from YouTube's privacy-enhanced player only after a visitor presses play.
+
+## After changing style.css or site.js
+
+Raise the version in three places in `index.html`: the `version` meta tag and the two `?v=` values.
