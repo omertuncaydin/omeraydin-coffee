@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ömer Aydın | Coffee Education Worldwide</title>
 <meta name="description" content="International coffee education with Ömer Aydın, Authorized SCA Trainer and Q Instructor.">
-<meta name="version" content="v2026-11-19b">
+<meta name="version" content="v2026-11-19c">
 <meta name="theme-color" content="#F4F1E0">
-<link rel="icon" href="favicon.ico" sizes="32x32">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
+<link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2026-11-19c">
 <link rel="canonical" href="https://omeraydin.coffee/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Ömer Aydın">
@@ -24,7 +24,7 @@
 <link rel="preload" href="assets/fonts/averia-serif-libre-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-ext-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="style.css?v=2026-11-19b">
+<link rel="stylesheet" href="style.css?v=2026-11-19c">
 <script>document.documentElement.className = 'js';</script>
 </head>
 <body>
@@ -32,18 +32,20 @@
 <div class="page" id="top">
 
 <header class="hd">
-  <a class="brand" href="#top">Ömer Aydın</a>
-  <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
-    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 10h24"></path><path d="M2 18h24"></path></svg>
-  </button>
-  <nav class="nav" id="nav" aria-label="Main">
-    <a href="#courses">Courses</a>
-    <a href="#dates">Dates</a>
-    <a href="#about">About</a>
-    <a href="#host">Host a course</a>
-  </nav>
-  <div class="hd-cta">
-    <a class="pill pill-sm pill-line-verm" href="https://www.instagram.com/omeraydin.coffee/">Enquire</a>
+  <div class="hd-in">
+    <a class="brand" href="#top">Ömer Aydın</a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 10h24"></path><path d="M2 18h24"></path></svg>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="#courses">Courses</a>
+      <a href="#dates">Dates</a>
+      <a href="#about">About</a>
+      <a href="#host">Host a course</a>
+    </nav>
+    <div class="hd-cta">
+      <a class="pill pill-glass" href="https://www.instagram.com/omeraydin.coffee/">Enquire</a>
+    </div>
   </div>
 </header>
 
@@ -62,7 +64,7 @@
 
 <section class="film-sec">
   <a class="film" id="film" href="https://youtu.be/eTAqLuLb1LA">
-    <span class="film-frame">
+    <span class="film-frame" data-surface="media">
       <img src="assets/classroom.jpg" alt="Coffee learners evaluating samples at a cupping table" width="1600" height="1113" fetchpriority="high">
     </span>
     <span class="stk">
@@ -82,7 +84,7 @@
   </div>
 </section>
 
-<section class="panel panel-black courses" id="courses">
+<section class="panel panel-black courses" id="courses" data-surface="dark">
   <div class="panel-side">
     <h2 class="label">Explore the courses</h2>
     <p class="note">Course format, certification and availability are confirmed for each offering.</p>
@@ -148,11 +150,11 @@
     </div>
   </div>
   <div class="about-photo">
-    <img id="portrait" src="assets/portrait.jpg" alt="Ömer Aydın leaning on a red coffee roaster" width="900" height="1600" loading="lazy">
+    <img id="portrait" data-surface="media" src="assets/portrait.jpg" alt="Ömer Aydın leaning on a red coffee roaster" width="900" height="1600" loading="lazy">
   </div>
 </section>
 
-<section class="panel panel-blue dates" id="dates">
+<section class="panel panel-blue dates" id="dates" data-surface="dark">
   <h2 class="label">Training dates</h2>
   <div class="dates-body">
     <div class="dates-main" id="dates-list">
@@ -192,11 +194,9 @@
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg>
       </a>
     </div>
-    <form class="msg" id="msg" action="https://api.web3forms.com/submit" method="POST" aria-labelledby="msg-title" hidden>
+    <form class="msg" id="msg" aria-labelledby="msg-title" hidden>
       <h2 id="msg-title">Write to me</h2>
-      <input type="hidden" name="access_key" value="">
-      <input type="hidden" name="subject" value="New message from omeraydin.coffee">
-      <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">
+      <input class="msg-trap" type="text" name="fax" tabindex="-1" autocomplete="off" aria-hidden="true">
       <label for="msg-email">Email <span>(required)</span></label>
       <input id="msg-email" name="email" type="email" required maxlength="200" autocomplete="email" spellcheck="false">
       <label class="msg-check"><input type="checkbox" name="news" value="yes"><span>Send me news and updates</span></label>
@@ -204,7 +204,7 @@
       <textarea id="msg-text" name="message" required rows="4" maxlength="4000"></textarea>
       <button class="pill pill-line-ink" type="submit">Send message</button>
       <p class="msg-status" id="msg-status" role="status" aria-live="polite"></p>
-      <p class="msg-note">Sent by email through Web3Forms. Your address is used to reply, and for news only if you tick the box.</p>
+      <p class="msg-note">Your message is emailed to Ömer. Your address is used to reply, and for news only if you tick the box.</p>
     </form>
   </div>
   <p class="copy">© Ömer Aydın · Independent coffee educator</p>
@@ -212,6 +212,6 @@
 
 </div>
 <script src="content.js"></script>
-<script src="site.js?v=2026-11-19b"></script>
+<script src="site.js?v=2026-11-19c"></script>
 </body>
 </html>

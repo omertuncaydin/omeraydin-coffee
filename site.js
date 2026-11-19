@@ -1,5 +1,6 @@
-/* omeraydin.coffee v2026-11-19b
-   Reads window.siteContent (content.js) and fills the film, portrait, learner quotes, training dates and the message form. */
+/* omeraydin.coffee v2026-11-19c
+   Reads window.siteContent (content.js) and fills the film, portrait, learner quotes, training dates and the message form.
+   Keeps the glass menu readable: sets data-tone on the header from what is under its labels. */
 (() => {
   'use strict';
   const content = window.siteContent || {};
@@ -34,12 +35,55 @@
     header.addEventListener('click', (event) => {
       if (event.target.closest('.nav a, .hd-cta a')) setOpen(false);
     });
+    /* the open menu lies over the page: a tap anywhere else closes it */
+    document.addEventListener('click', (event) => {
+      if (header.classList.contains('is-open') && !header.contains(event.target)) setOpen(false);
+    });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && header.classList.contains('is-open')) {
         setOpen(false);
         menuBtn.focus();
       }
     });
+  }
+
+  /* glass menu: label colour follows what passes under the labels.
+     No tone at the top of the page, "page" once scrolled, "media" over a photo or the film, "dark" over dark panels.
+     The blocks that count as media or dark carry data-surface in index.html. */
+  if (header) {
+    const inkBox = (node) => {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      return range.getBoundingClientRect();
+    };
+    const overlaps = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+    let queued = false;
+    const setTone = () => {
+      queued = false;
+      const labels = [];
+      for (const node of header.querySelectorAll('.brand, .nav a, .menu-btn svg')) {
+        const box = node.matches('svg') ? node.getBoundingClientRect() : inkBox(node);
+        if (box.width && box.height) labels.push({ left: box.left - 4, right: box.right + 4, top: box.top - 4, bottom: box.bottom + 4 });
+      }
+      let tone = window.scrollY > 8 ? 'page' : '';
+      for (const zone of document.querySelectorAll('[data-surface]')) {
+        const box = zone.getBoundingClientRect();
+        if (!box.width || !box.height || !labels.some((label) => overlaps(label, box))) continue;
+        tone = zone.dataset.surface === 'media' && tone !== 'dark' ? 'media' : 'dark';
+      }
+      if (tone) header.dataset.tone = tone;
+      else delete header.dataset.tone;
+    };
+    const queueTone = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(setTone);
+    };
+    window.addEventListener('scroll', queueTone, { passive: true });
+    window.addEventListener('resize', queueTone);
+    window.addEventListener('load', queueTone);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(queueTone);
+    setTone();
   }
 
   /* film: nothing loads from YouTube until the visitor presses play */
@@ -59,6 +103,7 @@
       player.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
       player.allowFullscreen = true;
       const frame = make('div', 'film-frame');
+      frame.dataset.surface = 'media';
       frame.append(player);
       const box = make('div', 'film is-playing');
       box.id = 'film';
@@ -128,32 +173,37 @@
     dateSection.classList.add('has-dates');
   }
 
-  /* message form: stays hidden until content.js has a delivery key, then posts straight from the browser */
+  /* message form: stays hidden until content.js has the address of the function that emails it.
+     Nothing is sent anywhere before the visitor presses Send. */
   const form = $('#msg');
-  const messageKey = typeof content.messageKey === 'string' ? content.messageKey.trim() : '';
-  if (form && /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(messageKey)) {
+  const messageUrl = typeof content.messageUrl === 'string' ? content.messageUrl.trim() : '';
+  if (form && /^https:\/\/[a-z0-9.-]+\/[\w./-]+$/i.test(messageUrl)) {
     const status = $('#msg-status');
     const sendBtn = form.querySelector('button[type="submit"]');
-    form.elements.access_key.setAttribute('value', messageKey);
     form.hidden = false;
     const foot = form.closest('.foot');
     if (foot) foot.classList.add('has-form');
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (sendBtn.disabled) return;
-      const fields = Object.fromEntries(new FormData(form));
-      if (!fields.news) fields.news = 'no';
+      const fields = new FormData(form);
+      const payload = {
+        email: String(fields.get('email') || '').trim(),
+        message: String(fields.get('message') || '').trim(),
+        news: fields.get('news') === 'yes',
+        fax: String(fields.get('fax') || '')
+      };
       sendBtn.disabled = true;
-      status.textContent = 'Sending\u2026';
+      status.textContent = 'Sending…';
       let sent = false;
       try {
-        const response = await fetch(form.action, {
+        const response = await fetch(messageUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(fields)
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
         const result = await response.json().catch(() => null);
-        sent = response.status === 200 && !!result && result.success === true;
+        sent = response.status === 200 && !!result && result.ok === true;
       } catch (error) {
         sent = false;
       }

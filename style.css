@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-19b
+/* omeraydin.coffee v2026-11-19c
    Fonts: Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see assets/fonts/fonts-license.txt */
 
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
@@ -15,6 +15,9 @@
   --g:clamp(20px,3vw,52px);     /* page gutter */
   --p:clamp(28px,4vw,64px);     /* panel padding */
   --gap:clamp(14px,1.7vw,28px); /* space between panels */
+  --hd-h:64px;--hd-top:12px;    /* menu capsule: height and distance from the top of the window */
+  --rim:inset 0 0 0 1px rgba(255,255,255,.22),inset 1.6px 1.6px 1px -.6px rgba(255,255,255,.95),inset -1.6px -1.6px 1px -.6px rgba(255,255,255,.6),inset 0 0 12px 1px rgba(255,255,255,.14),inset 0 -8px 12px -8px rgba(29,29,29,.18);
+  --glint:linear-gradient(115deg,rgba(255,255,255,.34),rgba(255,255,255,0) 26px,rgba(255,255,255,0) calc(100% - 26px),rgba(255,255,255,.16));
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -27,10 +30,10 @@ a{color:inherit;text-decoration:none}
 a:hover{text-decoration:underline;text-underline-offset:.2em}
 a:focus-visible,button:focus-visible{outline:2px solid currentColor;outline-offset:4px}
 [hidden]{display:none!important}
-section,footer{scroll-margin-top:16px}
+section,footer{scroll-margin-top:calc(var(--hd-h) + var(--hd-top) + 16px)}
 
 .skip{position:absolute;left:-999rem;top:0}
-.skip:focus{left:1rem;top:1rem;z-index:10;padding:.6rem .9rem;border-radius:8px;background:var(--ink);color:var(--cream)}
+.skip:focus{left:1rem;top:1rem;z-index:30;padding:.6rem .9rem;border-radius:8px;background:var(--ink);color:var(--cream)}
 .page{max-width:1680px;margin:0 auto;padding:0 var(--g) var(--g);container-type:inline-size}
 .ic{width:20px;height:20px;flex:none}
 .u{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em}
@@ -52,14 +55,35 @@ button.pill:disabled{opacity:.55;cursor:default}
 .pill-line-cream:hover{background:var(--cream);color:var(--blue)}
 .pill-cream{border-color:var(--cream);background:var(--cream);color:var(--ink)}
 .pill-cream:hover{border-color:var(--ink);background:var(--ink);color:var(--cream)}
+.pill-glass{position:relative;isolation:isolate;min-height:46px;padding:10px 24px;border:0;background-color:rgba(174,46,18,.94);background-image:radial-gradient(130% 69px at 50% -16px,rgba(255,255,255,.3),rgba(255,255,255,0) 58%);box-shadow:var(--rim),0 1px 2px rgba(29,29,29,.2);color:var(--cream);text-shadow:none;transition:transform .28s cubic-bezier(.34,1.56,.64,1),filter .2s ease}
+.pill-glass::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background:var(--glint)}
+.pill-glass:hover{transform:scale(1.04)}
+.pill-glass:active{transform:scale(.97);filter:brightness(1.1)}
 
-/* header */
-.hd{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 32px;padding:18px 0}
-.brand{flex:1 1 0;min-width:max-content;padding:10px 0;font:700 1.4375rem/1.3 var(--serif);letter-spacing:-0.04em;color:var(--verm-ink)}
-.nav{display:flex;flex-wrap:wrap;gap:0 clamp(18px,2.1vw,30px);font-size:1.0625rem;color:var(--verm-ink)}
+/* header: a clear glass capsule that stays in view.
+   site.js sets data-tone from what passes under the labels: none at the top of the page, "page" over light
+   surfaces, "media" over a photo or the film, "dark" over dark panels (blocks marked data-surface in index.html).
+   The dark fill is deep enough to carry white labels over anything, so a late switch never costs legibility.
+   .hd keeps its place and height in the page; .hd-in is the glass, and on phones it opens over the page as a sheet. */
+.hd{--hd-ink:var(--verm-ink);--hd-fill:rgba(244,241,224,.94);--hd-sheen:.3;position:relative;z-index:20;margin-top:var(--hd-top);color:var(--hd-ink);transition:color .25s ease}
+.js .hd{position:sticky;top:var(--hd-top);height:var(--hd-h)}
+.hd-in{position:relative;isolation:isolate;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0 32px;min-height:var(--hd-h);padding:0 9px 0 28px;border-radius:calc(var(--hd-h) / 2);background-color:var(--hd-fill);background-image:radial-gradient(130% 96px at 50% -22px,rgba(255,255,255,var(--hd-sheen)),rgba(255,255,255,0) 58%);background-repeat:no-repeat;box-shadow:var(--rim),0 1px 3px rgba(29,29,29,.18),0 12px 26px -8px rgba(29,29,29,.38);transition:background-color .25s ease}
+.js .hd-in{position:absolute;top:0;left:0;right:0}
+.hd-in::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background:var(--glint)}
+.hd[data-tone="page"]{--hd-ink:var(--ink)}
+.hd[data-tone="media"],.hd[data-tone="dark"]{--hd-ink:#FFFFFF;--hd-fill:rgba(18,18,18,.92);--hd-sheen:.14;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+@supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  .hd{--hd-fill:rgba(244,241,224,.35)}
+  .hd-in{-webkit-backdrop-filter:blur(10px) saturate(140%);backdrop-filter:blur(10px) saturate(140%)}
+  .hd[data-tone="media"],.hd[data-tone="dark"]{--hd-fill:rgba(18,18,18,.62)}
+  .hd[data-tone="media"] .hd-in{-webkit-backdrop-filter:blur(2.5px) saturate(140%);backdrop-filter:blur(2.5px) saturate(140%)}
+}
+.brand{flex:1 1 0;display:flex;align-items:center;min-width:max-content;min-height:var(--hd-h);font:700 1.4375rem/1.3 var(--serif);letter-spacing:-0.04em}
+.nav{display:flex;flex-wrap:wrap;gap:0 clamp(18px,2.1vw,30px);font-size:1.0625rem}
 .nav a{padding:12px 0}
 .hd-cta{flex:1 1 0;min-width:max-content;display:flex;justify-content:flex-end}
-.menu-btn{display:none;place-items:center;width:44px;height:44px;margin-right:-8px;padding:0;border:0;background:transparent;color:var(--verm-ink);cursor:pointer}
+.hd .pill-glass:focus-visible{outline-color:var(--hd-ink)}
+.menu-btn{display:none;place-items:center;width:44px;height:44px;padding:0;border:0;background:transparent;color:inherit;cursor:pointer}
 .menu-btn svg{width:28px;height:28px}
 .menu-btn path{transform-box:view-box;transform-origin:center;transition:transform .2s ease}
 
@@ -150,7 +174,7 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
 .host .pill{margin-top:14px}
 .copy{margin-top:clamp(44px,6vw,96px);font-size:.9375rem}
 
-/* message form, shown only when content.js has a delivery key */
+/* message form, shown only when content.js has the address it is sent to */
 .foot.has-form .foot-cols{column-gap:clamp(32px,3.9vw,56px)}
 .foot.has-form .host{flex-basis:330px}
 .msg{flex:0 1 390px;display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -163,20 +187,26 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
 .msg-check input{flex:none;width:20px;height:20px;margin:0;accent-color:var(--ink)}
 .msg .pill{align-self:flex-start;margin-top:6px}
 .foot .pill-line-ink:hover{color:var(--cream)}
+.msg-trap{position:absolute;left:-999rem;width:1px;height:1px;opacity:0}
 .msg-status{min-height:1.3em;font-weight:700;font-size:1rem}
 .msg-status:empty{display:none}
 .msg-note{font-size:.875rem;text-wrap:pretty}
 
 /* small screens: menu button instead of the link row */
 @media (max-width:760px){
-  .hd{padding:10px 0}
+  :root{--hd-h:56px;--hd-top:8px}
+  .hd-in{gap:0 16px;padding:0 20px}
   .brand{font-size:1.375rem}
   .nav{order:3;flex-basis:100%}
-  .js .menu-btn{display:grid}
-  .js .nav{display:none;flex-direction:column;flex-wrap:nowrap;gap:0;margin-top:6px;border-bottom:1px solid var(--verm-ink);font-size:1.5rem}
-  .js .nav a{padding:13px 0;border-top:1px solid var(--verm-ink)}
-  .js .hd-cta{display:none;order:4;flex-basis:100%;justify-content:flex-start;padding:16px 0 12px}
+  .hd-cta{padding:5px 0}
+  .js .menu-btn{display:grid;margin-right:-12px}
+  .js .nav{display:none;flex-direction:column;flex-wrap:nowrap;gap:0;border-bottom:1px solid var(--line-ink);font-size:1.5rem}
+  .js .nav a{padding:13px 0;border-top:1px solid var(--line-ink)}
+  .js .hd-cta{display:none;order:4;flex-basis:100%;justify-content:flex-start;padding:16px 0 20px}
   .js .hd.is-open .nav,.js .hd.is-open .hd-cta{display:flex}
+  /* open menu: a nearly solid sheet laid over the page, so the list reads over anything and nothing below moves */
+  .js .hd.is-open{--hd-ink:var(--ink);--hd-fill:rgba(244,241,224,.94);--hd-sheen:.3;text-shadow:none}
+  .js .hd.is-open .hd-in{max-height:calc(100vh - 2 * var(--hd-top));max-height:calc(100dvh - 2 * var(--hd-top));overflow-y:auto;overscroll-behavior:contain;-webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%)}
   .hd.is-open .menu-btn path:first-child{transform:rotate(45deg) translateY(4px)}
   .hd.is-open .menu-btn path:last-child{transform:rotate(-45deg) translateY(-4px)}
   .course{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:2px}
@@ -244,5 +274,13 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
 
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .pill,.stk,.lvl svg,.date-row svg,.menu-btn path{transition:none}
+  .pill,.stk,.lvl svg,.date-row svg,.menu-btn path,.hd,.hd-in{transition:none}
+  .pill-glass:hover,.pill-glass:active{transform:none}
+}
+
+/* visitors who ask their device for less transparency get a solid menu */
+@media (prefers-reduced-transparency:reduce){
+  .hd,.js .hd.is-open{--hd-fill:#F4F1E0}
+  .hd[data-tone="media"],.hd[data-tone="dark"]{--hd-fill:#1D1D1D}
+  .hd .hd-in,.hd[data-tone] .hd-in,.js .hd.is-open .hd-in{-webkit-backdrop-filter:none;backdrop-filter:none}
 }
