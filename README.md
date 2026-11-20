@@ -1,6 +1,6 @@
 # omeraydin.coffee
 
-Static one-page site, version v2026-11-20b, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
+Static one-page site, version v2026-11-20c, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
 
 ## What changes without an upload
 
@@ -41,7 +41,7 @@ Edit `content.js`: the YouTube video ID, the portrait file path, the store, the 
 - The portrait is shown uncropped. Put a new picture in `assets/` and point `portrait` at it.
 - Without a valid video ID the film sticker and the film link are removed and the classroom photo stays as a picture.
 
-Written in `index.html`: course names, levels and their coffeenutz.net sales links (section `id="courses"`), and the background pop-up that the CoffeeNutz button under "Your instructor" opens (`<dialog id="bg">` near the end). Without scripts that button is a plain link to coffeenutz.net.
+Written in `index.html`: course names, levels and their coffeenutz.net sales links (section `id="courses"`), and the background pop-up that the "More about Ömer Aydın" button under "Your instructor" opens (`<dialog id="bg">` near the end; the button is the link with `id="bg-open"`). Without scripts that button is a plain link to coffeenutz.net.
 
 ## Message form
 
