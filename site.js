@@ -157,18 +157,37 @@
     });
   }
 
-  /* learner quotes: up to three, only entries with a quote and a name */
-  const quotes = (content.testimonials || []).filter((q) => q && q.quote && q.name).slice(0, 3);
+  /* learners: up to three, only entries with a quote and a name.
+     With a headline: photo (if any), headline, the quote in small type, then "name, position · company".
+     Without one: the quote in large type and "name · course", as before v2026-11-20d. */
+  const text = (v) => (typeof v === 'string' ? v.trim() : '');
+  const quotes = (content.testimonials || []).filter((q) => q && text(q.quote) && text(q.name)).slice(0, 3);
   const quoteSection = $('#quotes');
   const quoteGrid = $('#quote-grid');
   if (quotes.length && quoteSection && quoteGrid) {
     for (const q of quotes) {
-      const figure = make('figure', 'quote');
-      const by = make('figcaption', '', [q.name, q.role].filter(Boolean).join(' · '));
-      if (q.note) by.append(make('span', 'quote-note', q.note));
-      figure.append(make('blockquote', '', '“' + q.quote + '”'), by);
+      const headline = text(q.headline);
+      const figure = make('figure', headline ? 'quote has-hl' : 'quote');
+      if (headline) {
+        if (/^assets\/[\w./-]+\.(?:jpe?g|png|webp|avif)$/i.test(text(q.photo))) {
+          /* The picture is fetched right away and joins its card only once it has arrived: a missing or empty
+             file leaves no hole and no jump. Arriving above the reader, it does not move what is being read. */
+          const photo = make('img', 'quote-ph');
+          photo.alt = text(q.photoAlt) || 'Photo posted with the review by ' + text(q.name);
+          photo.width = 800; photo.height = 600; photo.decoding = 'async';
+          if (/^\d{1,3}% \d{1,3}%$/.test(text(q.photoAt))) photo.style.objectPosition = text(q.photoAt);
+          photo.addEventListener('load', () => { if (photo.naturalWidth) steady(() => figure.prepend(photo)); }, { once: true });
+          photo.src = text(q.photo);
+        }
+        figure.append(make('h3', 'quote-hl', headline));
+      }
+      const who = text(q.name) + (headline && text(q.position) ? ', ' + text(q.position) : '');
+      const by = make('figcaption', '', [who, headline ? text(q.company) : text(q.course) || text(q.role)].filter(Boolean).join(' · '));
+      if (text(q.note)) by.append(make('span', 'quote-note', text(q.note)));
+      figure.append(make('blockquote', '', '“' + text(q.quote) + '”'), by);
       quoteGrid.append(figure);
     }
+    quoteGrid.classList.toggle('has-hl', quotes.some((q) => text(q.headline)));
     quoteSection.hidden = false;
   }
 

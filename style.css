@@ -140,6 +140,21 @@ button.pill:disabled{opacity:.55;cursor:default}
 .quote blockquote{font-size:clamp(1.375rem,1.9vw,1.6875rem);line-height:1.16;letter-spacing:-0.04em}
 .quote figcaption{font-size:1rem}
 .quote-note{display:block}
+/* a learner with a headline: photo, what Ömer says about the learner, then the learner's own words in small type */
+.quote.has-hl{gap:20px;padding-top:0;border-top:0}
+.quote-ph{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;border-radius:20px;background:rgba(29,29,29,.08)}
+.quote-hl{font-weight:700;font-size:clamp(1.375rem,1.9vw,1.6875rem);line-height:1.14;letter-spacing:-0.04em;text-wrap:balance}
+.quote.has-hl blockquote{font-size:1.0625rem;line-height:1.36;letter-spacing:inherit}
+.quote.has-hl figcaption{margin-top:auto;padding-top:16px;border-top:1px solid var(--verm-ink)}
+@supports (grid-template-rows:subgrid){   /* cards in one row share their four lines: photo, headline, quote, name */
+  .quote-grid.has-hl>.quote{grid-row:span 4}
+  .quote-grid.has-hl>.quote.has-hl{display:grid;grid-template-rows:subgrid;row-gap:20px}
+  .quote.has-hl>*{min-width:0}
+  .quote.has-hl>.quote-ph{grid-row:1}
+  .quote.has-hl>.quote-hl{grid-row:2}
+  .quote.has-hl>blockquote{grid-row:3}
+  .quote.has-hl>figcaption{grid-row:4;margin-top:0}
+}
 .quote-src{font-size:1rem}
 
 /* about */
@@ -272,6 +287,8 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
   .course{padding:16px 0 8px}
   .course-name{font-size:2.1875rem}
   .quotes{padding:28px 0 14px;gap:36px}
+  .quote.has-hl,.quote-grid.has-hl>.quote.has-hl{gap:16px}
+  .quote-hl{font-size:1.4375rem}
   .about{flex-direction:column;flex-wrap:nowrap;gap:30px}
   .about-text,.about-body{display:contents}
   .about .label{order:1}

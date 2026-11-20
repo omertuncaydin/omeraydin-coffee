@@ -1,6 +1,6 @@
 # omeraydin.coffee
 
-Static one-page site, version v2026-11-20c, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
+Static one-page site, version v2026-11-20d, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
 
 ## What changes without an upload
 
@@ -35,9 +35,11 @@ With no upcoming class the block shows the "will be announced" sentence. The `da
 
 ## Changing content
 
-Edit `content.js`: the YouTube video ID, the portrait file path, the store, the place shown with the dates, and the learner quotes (up to three are shown).
+Edit `content.js`: the YouTube video ID, the portrait file path, the store, the place shown with the dates, and the learners (up to three are shown).
 
-- Learner quotes are excerpts from the public course reviews on coffeenutz.net, in the reviewers' own words, with the names as they appear there. A translated quote carries a `note`. No endorsements are fabricated.
+- Each learner entry has two voices. `headline`, `position` and `company` are what Ömer says about the learner: plain facts he can stand behind. `quote` is the learner's own words, an excerpt from the public course reviews on coffeenutz.net; a translated quote carries a `note`. Nothing is put into a learner's mouth. A company is named in a sentence, never shown as a logo and never made to speak.
+- `photo` is a file in `assets/learners/`, shown in a 4:3 box above the headline. `photoAt` moves the crop inside that box (`"50% 16%"` is centred, a little below the top edge). A photo wider than 800 px stays sharp on every screen. Save the photos into that folder yourself, straight from your own files, under the names written in `content.js`. A missing or empty file is simply left out: the card then shows without a picture. Names, employers and photos only with the learner's agreement.
+- An entry without a `headline` is shown the earlier way: the quote in large type with the name and `course` under it.
 - The portrait is shown uncropped. Put a new picture in `assets/` and point `portrait` at it.
 - Without a valid video ID the film sticker and the film link are removed and the classroom photo stays as a picture.
 
@@ -57,10 +59,11 @@ The menu is a glass capsule that stays in view while the page scrolls. Its label
 
 - `index.html`: the page.
 - `style.css`: layout and colours. Desktop first. Date rows stack at 1000 px and below, the menu button appears at 760 px and below, the phone layout at 520 px and below. The glass of the menu is in the header section.
-- `site.js`: menu button, menu label colours, film player, background pop-up, learner quotes, and everything that comes from the store (hidden blocks, dates, message form).
+- `site.js`: menu button, menu label colours, film player, background pop-up, the learner cards, and everything that comes from the store (hidden blocks, dates, message form).
 - `content.js`: the values described above.
 - `manage.html`: the site manager, served at `/manage`. It loads the Supabase sign-in library from cdn.jsdelivr.net, as the other CoffeeNutz tools do.
 - `favicon.svg`, `favicon.ico`, `apple-touch-icon.png`: the ÖA mark for browser tabs and phone home screens.
+- `assets/learners/`: the photos of the learner cards.
 - `assets/`: photos and the two typefaces in `assets/fonts/` (Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see `assets/fonts/fonts-license.txt`).
 
 When the page loads it asks the store one question (two when the stored calendar copy is older than ten minutes). Nothing else is requested from another host. The film loads from YouTube's privacy-enhanced player only after a visitor presses play.

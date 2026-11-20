@@ -12,12 +12,27 @@ window.siteContent = {
   // Shown with every class from the calendar. The calendar holds the classes taught at CoffeeNutz, İzmir.
   datesPlace: "İzmir",
 
-  // Learner quotes: the reviewers' own words from the public course reviews on coffeenutz.net, as excerpts.
-  // Full names only where the person has agreed to it. "note" is for a translation remark. Up to three are shown.
+  // Learners. Up to three are shown. Two voices, kept apart:
+  //   headline, position, company   what Ömer says about the learner: plain facts he can stand behind. A company
+  //                                 is named in a sentence, never shown as a logo and never made to speak.
+  //   quote                         the learner's own words from the public course reviews on coffeenutz.net, as an
+  //                                 excerpt. "note" is for a translation remark.
+  // photo is a file in assets/learners, shown 4:3. photoAt moves the crop: "50% 16%" means centred, a little below
+  // the top edge. Full names, employers and photos only where the person has agreed to it. "course" is kept for the
+  // record and is shown only for an entry without a headline.
   testimonials: [
-    { quote: "He is extremely knowledgeable, highly professional, and has a great teaching style that makes complex roasting concepts easy to understand.", name: "Samuel Murgatroyd", role: "Roasting · Professional" },
-    { quote: "…in our three-day one-to-one training for the Professional level at the Tchibo head office, Ömer’s command of the subject and his systematic teaching method made even complex technical details easy to understand.", name: "Kağan Giritli", role: "Barista Skills · Professional", note: "translated from Turkish" },
-    { quote: "One of the best if not the best teacher in the industry", name: "Doruk Osman", role: "Roasting · Foundation + Intermediate" },
+    { headline: "A Starbucks Reserve roaster in Milan chose Ömer for SCA Roasting Professional.",
+      photo: "assets/learners/samuel-murgatroyd.jpg", photoAt: "50% 50%",
+      quote: "He is extremely knowledgeable, highly professional, and has a great teaching style that makes complex roasting concepts easy to understand.",
+      name: "Samuel Murgatroyd", position: "roaster", company: "Starbucks Reserve, Milan", course: "Roasting · Professional" },
+    { headline: "Years of SCA training for Tchibo Türkiye’s head barista and dozens of his trainers.",
+      photo: "assets/learners/kagan-giritli.jpg", photoAt: "50% 16%",
+      quote: "…Ömer’s command of the subject and his systematic teaching method made even complex technical details easy to understand. Thanks to the patience, one-to-one guidance and professional approach he showed throughout the training, I was fully prepared for every learning outcome.",
+      name: "Kağan Giritli", position: "head barista", company: "Tchibo Türkiye", course: "Barista Skills · Professional", note: "translated from Turkish" },
+    { headline: "A historic boutique coffee shop in Greece chose Ömer for SCA Roasting.",
+      photo: "assets/learners/doruk-osman.jpg", photoAt: "50% 66%",
+      quote: "One of the best if not the best teacher in the industry",
+      name: "Doruk Osman", course: "Roasting · Foundation + Intermediate" },
   ],
 
   // Only used when the store above is empty or cannot be reached and has never been read on this device.
