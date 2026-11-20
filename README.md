@@ -1,6 +1,6 @@
 # omeraydin.coffee
 
-Static one-page site, version v2026-11-20a, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
+Static one-page site, version v2026-11-20b, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
 
 ## What changes without an upload
 
@@ -67,4 +67,4 @@ When the page loads it asks the store one question (two when the stored calendar
 
 ## After changing style.css, site.js or content.js
 
-Raise the version in `index.html`: the `version` meta tag and the `?v=` values (stylesheet, both scripts, and the three icon links when an icon changes). `manage.html` carries its own version in its `version` meta tag, in its footer line and in its `?v=` for `content.js`.
+Raise the version in `index.html`: the `version` meta tag and the `?v=` value of each file that changed (stylesheet, the two scripts, and the three icon links when an icon changes). A file that did not change keeps its value. `manage.html` carries its own version in its `version` meta tag, in its footer line and in its `?v=` for `content.js`.
