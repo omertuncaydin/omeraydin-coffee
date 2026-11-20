@@ -1,6 +1,6 @@
 # omeraydin.coffee
 
-Static one-page site, version v2026-11-20d, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
+Static one-page site, version v2026-11-20e, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
 
 ## What changes without an upload
 
@@ -37,7 +37,7 @@ With no upcoming class the block shows the "will be announced" sentence. The `da
 
 Edit `content.js`: the YouTube video ID, the portrait file path, the store, the place shown with the dates, and the learners (up to three are shown).
 
-- Each learner entry has two voices. `headline`, `position` and `company` are what Ömer says about the learner: plain facts he can stand behind. `quote` is the learner's own words, an excerpt from the public course reviews on coffeenutz.net; a translated quote carries a `note`. Nothing is put into a learner's mouth. A company is named in a sentence, never shown as a logo and never made to speak.
+- Each learner entry has two voices. `headline`, `position` and `company` are Ömer's own words about the learner, written as he gives them. `quote` is the learner's own words, an excerpt from the public course reviews on coffeenutz.net; a translated quote carries a `note`.
 - `photo` is a file in `assets/learners/`, shown in a 4:3 box above the headline. `photoAt` moves the crop inside that box (`"50% 16%"` is centred, a little below the top edge). A photo wider than 800 px stays sharp on every screen. Save the photos into that folder yourself, straight from your own files, under the names written in `content.js`. A missing or empty file is simply left out: the card then shows without a picture. Names, employers and photos only with the learner's agreement.
 - An entry without a `headline` is shown the earlier way: the quote in large type with the name and `course` under it.
 - The portrait is shown uncropped. Put a new picture in `assets/` and point `portrait` at it.

@@ -13,15 +13,14 @@ window.siteContent = {
   datesPlace: "İzmir",
 
   // Learners. Up to three are shown. Two voices, kept apart:
-  //   headline, position, company   what Ömer says about the learner: plain facts he can stand behind. A company
-  //                                 is named in a sentence, never shown as a logo and never made to speak.
+  //   headline, position, company   Ömer's own words about the learner, written as he gives them.
   //   quote                         the learner's own words from the public course reviews on coffeenutz.net, as an
   //                                 excerpt. "note" is for a translation remark.
   // photo is a file in assets/learners, shown 4:3. photoAt moves the crop: "50% 16%" means centred, a little below
   // the top edge. Full names, employers and photos only where the person has agreed to it. "course" is kept for the
   // record and is shown only for an entry without a headline.
   testimonials: [
-    { headline: "A Starbucks Reserve roaster in Milan chose Ömer for SCA Roasting Professional.",
+    { headline: "Starbucks Reserve Roaster in Milan chose Ömer for SCA Roasting Professional.",
       photo: "assets/learners/samuel-murgatroyd.jpg", photoAt: "50% 50%",
       quote: "He is extremely knowledgeable, highly professional, and has a great teaching style that makes complex roasting concepts easy to understand.",
       name: "Samuel Murgatroyd", position: "roaster", company: "Starbucks Reserve, Milan", course: "Roasting · Professional" },
