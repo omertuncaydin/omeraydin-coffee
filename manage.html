@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Site manager · omeraydin.coffee</title>
 <meta name="robots" content="noindex,nofollow">
-<meta name="version" content="v2026-11-20a">
+<meta name="version" content="v2026-11-20f">
 <meta name="theme-color" content="#F4F1E0">
 <link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
 <link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
 <style>
-/* omeraydin.coffee site manager v2026-11-20a. Same colours and fonts as the site it manages. */
+/* omeraydin.coffee site manager v2026-11-20f. Same colours and fonts as the site it manages. */
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-ext-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -101,8 +101,22 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 .dot{width:10px;height:10px;border-radius:50%;background:var(--verm-ink)}
 .flag{padding:2px 10px;border-radius:300px;background:var(--yellow);color:var(--ink);font-size:.8125rem}
 .mail-text{white-space:pre-wrap;overflow-wrap:anywhere;text-wrap:pretty}
-.mail-acts{display:flex;flex-wrap:wrap;gap:8px}
+.mail-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.mail-acts .ask{flex:1 1 100%;font-weight:700}
 .empty{padding:28px 22px;border-radius:20px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);color:var(--soft)}
+
+.learner{display:grid;grid-template-columns:minmax(0,264px) minmax(0,1fr);gap:18px 24px;align-items:start;margin-top:12px;padding:20px 22px;border-radius:20px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.learner.changed{box-shadow:inset 0 0 0 2px var(--verm-ink)}
+.frame{position:relative;display:grid;place-items:center;aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:rgba(29,29,29,.07);color:var(--soft);font-size:.9375rem;text-align:center}
+.frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;-webkit-user-drag:none;-webkit-user-select:none;user-select:none}
+.frame.move{cursor:grab;touch-action:none}
+.frame.move:active{cursor:grabbing}
+.frame.move:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.learner-what{display:flex;flex-direction:column;gap:6px;min-width:0}
+.learner-what .name{font-size:1.125rem}
+.learner-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px}
+.learner-acts .ask{flex:1 1 100%;font-weight:700}
+.learner .say{margin-top:8px}
 .foot{margin-top:34px;font-size:.875rem;color:var(--soft)}
 
 @media (max-width:560px){
@@ -112,6 +126,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
   .state{display:none}
   .tabs{width:100%}
   .tab{flex:1 1 0;justify-content:center;padding:6px 10px}
+  .learner{grid-template-columns:minmax(0,1fr)}
 }
 @media (prefers-reduced-motion:reduce){.pill,.eye{transition:none}}
 </style>
@@ -147,6 +162,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
   <div class="tabs" role="tablist" aria-label="Site manager">
     <button class="tab" id="tab-vis" type="button" role="tab" aria-selected="true" aria-controls="pane-vis">Visibility</button>
     <button class="tab" id="tab-inbox" type="button" role="tab" aria-selected="false" aria-controls="pane-inbox">Messages <span class="count" id="new-count"></span></button>
+    <button class="tab" id="tab-learn" type="button" role="tab" aria-selected="false" aria-controls="pane-learn">Learners</button>
   </div>
 
   <section id="pane-vis" role="tabpanel" aria-labelledby="tab-vis">
@@ -166,7 +182,13 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     <div id="mails"></div>
   </section>
 
-  <p class="foot">Site manager v2026-11-20a · <a href="./">Open omeraydin.coffee</a></p>
+  <section id="pane-learn" role="tabpanel" aria-labelledby="tab-learn" hidden>
+    <p class="lead">The photo on each learner card. Choose a picture from your computer, drag it inside the frame until the crop is right, then save. The picture is made smaller before it is sent, and the site shows it the next time someone opens the page.</p>
+    <p class="say" id="learn-say" role="status" aria-live="polite"></p>
+    <div id="learners"></div>
+  </section>
+
+  <p class="foot">Site manager v2026-11-20f · <a href="./">Open omeraydin.coffee</a></p>
 </main>
 
 <div class="publish" id="publish" hidden>
@@ -178,16 +200,18 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 </div>
 
 </div>
-<script src="content.js?v=2026-11-20a"></script>
+<script src="content.js?v=2026-11-20f"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* omeraydin.coffee site manager v2026-11-20a
+/* omeraydin.coffee site manager v2026-11-20f
    Signs in with the CoffeeNutz admin account and edits what the store holds for the site:
-   which blocks are hidden (table site_settings) and the messages visitors sent (table site_messages).
-   The list of blocks is read from the live page itself: every element there that carries data-vis is one row here. */
+   which blocks are hidden (table site_settings), the messages visitors sent (table site_messages) and the photos
+   of the learner cards (table site_photos, files in the photo store "site").
+   The list of blocks is read from the live page itself: every element there that carries data-vis is one row here.
+   The list of learners is read from content.js. */
 (() => {
   'use strict';
-  const VERSION = 'v2026-11-20a';
+  const VERSION = 'v2026-11-20f';
   const content = window.siteContent || {};
   const $ = (id) => document.getElementById(id);
   const make = (tag, cls, text) => {
@@ -405,7 +429,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     drawTree();
   });
   window.addEventListener('beforeunload', (event) => {
-    if (!views.work.hidden && changes().length) {
+    if (!views.work.hidden && (changes().length || unsaved())) {
       event.preventDefault();
       event.returnValue = '';
     }
@@ -414,6 +438,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
   /* ---------- messages ---------- */
   let mails = [];
   let onlyNew = false;
+  let asking = null;          // id of the message whose Delete was pressed once
   const drawMails = () => {
     const box = $('mails');
     box.replaceChildren();
@@ -461,7 +486,42 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
         $('in-say').textContent = '';
         drawMails();
       });
-      acts.append(reply, mark);
+      const del = make('button', 'pill pill-sm', 'Delete');
+      del.type = 'button';
+      del.addEventListener('click', () => {
+        asking = m.id;
+        $('in-say').textContent = '';
+        drawMails();
+        const yes = box.querySelector('.mail[data-id="' + m.id + '"] .ask + button');
+        if (yes) yes.focus();
+      });
+      if (asking === m.id) {
+        /* second press: a deleted message cannot be brought back */
+        const yes = make('button', 'pill pill-sm pill-solid', 'Delete for good');
+        yes.type = 'button';
+        const no = make('button', 'pill pill-sm', 'Keep');
+        no.type = 'button';
+        no.addEventListener('click', () => { asking = null; drawMails(); });
+        yes.addEventListener('click', async () => {
+          yes.disabled = true;
+          no.disabled = true;
+          const { data, error } = await SB.from('site_messages').delete().eq('id', m.id).select('id');
+          if (error || !Array.isArray(data) || !data.length) {
+            $('in-say').textContent = 'The message was not deleted' + (error && error.message ? ': ' + error.message : '') + '. If the newest omeraydin-site.sql has not been run in the Supabase SQL editor yet, run it once and try again.';
+            asking = null;
+            drawMails();
+            return;
+          }
+          mails = mails.filter((x) => x.id !== m.id);
+          asking = null;
+          $('in-say').textContent = 'Message deleted.';
+          drawMails();
+        });
+        acts.append(make('span', 'ask', 'Delete this message for good?'), yes, no);
+      } else {
+        acts.append(reply, mark, del);
+      }
+      card.dataset.id = String(m.id);
       card.append(head, make('p', 'mail-text', m.message), acts);
       box.append(card);
     }
@@ -474,6 +534,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     }
     $('in-say').textContent = '';
     mails = data || [];
+    if (!mails.some((m) => m.id === asking)) asking = null;
     drawMails();
   };
   $('in-all').addEventListener('click', () => { onlyNew = false; drawMails(); });
@@ -484,17 +545,301 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     $('in-load').disabled = false;
   });
 
+  /* ---------- learners: the photo of each card ---------- */
+  const text = (v) => (typeof v === 'string' ? v.trim() : '');
+  const LEARNER_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  const PHOTO_PATH = /^learners\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:jpg|png|webp)$/;
+  const PHOTO_AT = /^(100|\d{1,2})% (100|\d{1,2})%$/;
+  const learners = (Array.isArray(content.testimonials) ? content.testimonials : [])
+    .filter((q) => q && text(q.quote) && text(q.name)).slice(0, 3)
+    .map((q) => ({
+      id: LEARNER_ID.test(text(q.id)) ? text(q.id) : '',
+      name: text(q.name),
+      headline: text(q.headline),
+      file: /^assets\/[\w./-]+\.(?:jpe?g|png|webp|avif)$/i.test(text(q.photo)) ? text(q.photo) : '',
+      fileAt: PHOTO_AT.test(text(q.photoAt)) ? text(q.photoAt) : '50% 50%'
+    }));
+  let photos = {};            // slot -> { path, at, updated_at } as the store holds it
+  let photoStore = null;      // 'ready', or the reason the photo store is not set up
+  let photosOff = '';         // why the list of photos could not be read
+  const pending = {};         // learner id -> { blob, url, w, h, at } chosen here and not saved yet
+  const said = {};            // learner id -> line shown under its buttons
+  let dropping = null;        // learner id whose Remove was pressed once
+  const publicUrl = (path) => url + '/storage/v1/object/public/site/' + path;
+  const unsaved = () => Object.keys(pending).length;
+  const forget = (id) => {
+    if (pending[id] && pending[id].url) URL.revokeObjectURL(pending[id].url);
+    delete pending[id];
+  };
+  /* a picture from the computer: turned upright, made at most 1600 px on its long side, saved as JPEG.
+     That also drops what a camera writes into a file (place, time, device). */
+  const shrink = async (file) => {
+    let source = null;
+    try {
+      source = await createImageBitmap(file);
+    } catch (error) {
+      source = await new Promise((resolve, reject) => {
+        const img = new Image();
+        const blobUrl = URL.createObjectURL(file);
+        img.onload = () => { URL.revokeObjectURL(blobUrl); resolve(img); };
+        img.onerror = () => { URL.revokeObjectURL(blobUrl); reject(new Error('unreadable')); };
+        img.src = blobUrl;
+      });
+    }
+    const fullW = source.width || source.naturalWidth;
+    const fullH = source.height || source.naturalHeight;
+    if (!fullW || !fullH) throw new Error('unreadable');
+    let blob = null, w = 0, h = 0;
+    for (const [longest, quality] of [[1600, 0.86], [1400, 0.8], [1200, 0.72]]) {
+      const k = Math.min(1, longest / Math.max(fullW, fullH));
+      w = Math.max(1, Math.round(fullW * k));
+      h = Math.max(1, Math.round(fullH * k));
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const pen = canvas.getContext('2d');
+      pen.fillStyle = '#FFFFFF';
+      pen.fillRect(0, 0, w, h);
+      pen.drawImage(source, 0, 0, w, h);
+      blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+      if (blob && blob.size <= 2800000) break;
+    }
+    if (source.close) source.close();
+    if (!blob) throw new Error('unreadable');
+    if (blob.size > 2800000) throw new Error('large');
+    return { blob, w, h, fullW, fullH };
+  };
+  const drawLearners = () => {
+    const box = $('learners');
+    box.replaceChildren();
+    const top = $('learn-say');
+    top.textContent = photosOff || (photoStore && photoStore !== 'ready' ? 'Photos cannot be uploaded yet: ' + photoStore + '. Run the newest omeraydin-site.sql once in the Supabase SQL editor and send the result row if this stays.' : '');
+    if (!learners.length) {
+      box.append(make('p', 'empty', 'content.js has no learner cards yet.'));
+      return;
+    }
+    const canUpload = !photosOff && photoStore === 'ready';
+    for (const L of learners) {
+      const slot = 'learner:' + L.id;
+      const kept = L.id && photos[slot] && PHOTO_PATH.test(photos[slot].path) ? photos[slot] : null;
+      const next = pending[L.id] || null;
+      const card = make('article', 'learner' + (next ? ' changed' : ''));
+      card.dataset.id = L.id;
+      const frame = make('div', 'frame');
+      const src = next && next.url ? next.url : kept ? publicUrl(kept.path) : L.file ? './' + L.file : '';
+      let at = next && next.at ? next.at : kept ? (PHOTO_AT.test(kept.at) ? kept.at : '50% 50%') : L.fileAt;
+      const movable = !!(next && next.url) || !!kept;
+      const save = make('button', 'pill pill-sm pill-solid', 'Save');
+      save.type = 'button';
+      save.hidden = !next;
+      const cancel = make('button', 'pill pill-sm', 'Cancel');
+      cancel.type = 'button';
+      cancel.hidden = !next;
+      if (src) {
+        const img = make('img');
+        img.alt = 'Photo on the card of ' + L.name;
+        img.draggable = false;
+        img.style.objectPosition = at;
+        img.addEventListener('error', () => { img.remove(); frame.append('This picture did not load.'); });
+        img.src = src;
+        frame.append(img);
+        if (movable && canUpload) {
+          /* drag, or the arrow keys, to move the picture inside the 4:3 frame the site shows */
+          frame.classList.add('move');
+          frame.tabIndex = 0;
+          frame.setAttribute('role', 'group');
+          frame.setAttribute('aria-label', 'Crop of the photo for ' + L.name + '. Drag the picture, or use the arrow keys.');
+          const set = (x, y) => {
+            const fit = (v) => Math.max(0, Math.min(100, Math.round(v)));
+            at = fit(x) + '% ' + fit(y) + '%';
+            img.style.objectPosition = at;
+            pending[L.id] = Object.assign(pending[L.id] || {}, { at });
+            card.classList.add('changed');
+            save.hidden = false;
+            cancel.hidden = false;
+            said[L.id] = '';
+            line.textContent = '';
+          };
+          const now = () => at.split(' ').map((v) => parseInt(v, 10));
+          let grip = null;
+          frame.addEventListener('pointerdown', (event) => {
+            if (event.button || !img.naturalWidth) return;
+            grip = { x: event.clientX, y: event.clientY, at: now() };
+            try { frame.setPointerCapture(event.pointerId); } catch (error) { /* older browsers */ }
+            event.preventDefault();
+            frame.focus();
+          });
+          frame.addEventListener('pointermove', (event) => {
+            if (!grip) return;
+            const size = frame.getBoundingClientRect();
+            const scale = Math.max(size.width / img.naturalWidth, size.height / img.naturalHeight);
+            const spareX = img.naturalWidth * scale - size.width;
+            const spareY = img.naturalHeight * scale - size.height;
+            set(spareX > 1 ? grip.at[0] - (event.clientX - grip.x) / spareX * 100 : grip.at[0],
+                spareY > 1 ? grip.at[1] - (event.clientY - grip.y) / spareY * 100 : grip.at[1]);
+          });
+          const drop = () => { grip = null; };
+          frame.addEventListener('pointerup', drop);
+          frame.addEventListener('pointercancel', drop);
+          frame.addEventListener('keydown', (event) => {
+            const step = event.shiftKey ? 10 : 2;
+            const move = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[event.key];
+            if (!move) return;
+            event.preventDefault();
+            const [x, y] = now();
+            set(x + move[0], y + move[1]);
+          });
+        }
+      } else {
+        frame.append('No photo');
+      }
+      const what = make('div', 'learner-what');
+      what.append(make('span', 'name', L.name));
+      if (L.headline) what.append(make('span', 'sub', L.headline));
+      const from = next && next.url ? 'New picture, not saved yet (' + next.w + ' × ' + next.h + ' px).'
+        : kept ? 'Uploaded here on ' + when(kept.updated_at) + '.' + (next ? ' Crop changed, not saved yet.' : '')
+        : L.file ? 'The site shows the file ' + L.file + '. A picture uploaded here takes its place.'
+        : 'No picture on this card yet.';
+      what.append(make('span', 'sub', from));
+      const acts = make('div', 'learner-acts');
+      const line = make('p', 'say', said[L.id] || '');
+      line.setAttribute('role', 'status');
+      if (!L.id) {
+        line.textContent = 'This card has no "id" in content.js, so a photo cannot be attached to it here.';
+      } else if (dropping === L.id && kept) {
+        const yes = make('button', 'pill pill-sm pill-solid', 'Remove it');
+        yes.type = 'button';
+        const no = make('button', 'pill pill-sm', 'Keep');
+        no.type = 'button';
+        no.addEventListener('click', () => { dropping = null; drawLearners(); });
+        yes.addEventListener('click', async () => {
+          yes.disabled = true;
+          no.disabled = true;
+          const { data, error } = await SB.from('site_photos').delete().eq('slot', slot).select('slot');
+          dropping = null;
+          if (error || !Array.isArray(data) || !data.length) {
+            said[L.id] = 'The picture was not removed' + (error && error.message ? ': ' + error.message : '') + '.';
+            return drawLearners();
+          }
+          delete photos[slot];
+          try { await SB.storage.from('site').remove([kept.path]); } catch (failed) { /* the file stays in the store, unused */ }
+          said[L.id] = L.file ? 'Removed. The site shows the file ' + L.file + ' again.' : 'Removed. The card shows without a picture.';
+          drawLearners();
+        });
+        acts.append(make('span', 'ask', 'Remove the uploaded picture from this card?'), yes, no);
+      } else {
+        const input = make('input');
+        input.type = 'file';
+        input.accept = 'image/jpeg,image/png,image/webp,image/heic,image/heif,image/avif';
+        input.hidden = true;
+        input.setAttribute('aria-label', 'Picture file for ' + L.name);
+        const choose = make('button', 'pill pill-sm', kept || next ? 'Choose another photo' : 'Choose photo');
+        choose.type = 'button';
+        choose.disabled = !canUpload;
+        choose.addEventListener('click', () => input.click());
+        input.addEventListener('change', async () => {
+          const file = input.files && input.files[0];
+          input.value = '';
+          if (!file) return;
+          said[L.id] = 'Reading the picture…';
+          line.textContent = said[L.id];
+          choose.disabled = true;
+          try {
+            const made = await shrink(file);
+            forget(L.id);
+            pending[L.id] = { blob: made.blob, url: URL.createObjectURL(made.blob), w: made.w, h: made.h, at: '50% 50%' };
+            said[L.id] = Math.max(made.fullW, made.fullH) < 800 ? 'This picture is only ' + made.fullW + ' × ' + made.fullH + ' px. It will look soft on the site; a larger one is better.' : 'Drag the picture to set the crop, then press Save.';
+          } catch (error) {
+            said[L.id] = error && error.message === 'large' ? 'This picture is too large even after shrinking. Please try another one.' : 'This file could not be read as a picture. JPEG or PNG works everywhere; a HEIC photo from an iPhone opens only in Safari.';
+          }
+          drawLearners();
+        });
+        save.addEventListener('click', async () => {
+          const job = pending[L.id];
+          if (!job) return;
+          save.disabled = true;
+          cancel.disabled = true;
+          choose.disabled = true;
+          line.textContent = 'Saving…';
+          let row = null, failed = '';
+          if (job.blob) {
+            const path = 'learners/' + L.id + '-' + Date.now().toString(36) + '.jpg';
+            const sent = await SB.storage.from('site').upload(path, job.blob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: false });
+            if (sent.error) failed = sent.error.message || 'the photo store refused it';
+            else {
+              const { data, error } = await SB.from('site_photos').upsert({ slot, path, at: job.at || '50% 50%' }, { onConflict: 'slot' }).select('slot,path,at,updated_at').maybeSingle();
+              if (error || !data) {
+                failed = (error && error.message) || 'the store did not keep it';
+                try { await SB.storage.from('site').remove([path]); } catch (ignored) { /* an unused file is harmless */ }
+              } else {
+                row = data;
+                if (kept && kept.path !== path) { try { await SB.storage.from('site').remove([kept.path]); } catch (ignored) { /* the old file stays, unused */ } }
+              }
+            }
+          } else if (kept) {
+            const { data, error } = await SB.from('site_photos').update({ at: job.at }).eq('slot', slot).select('slot,path,at,updated_at').maybeSingle();
+            if (error || !data) failed = (error && error.message) || 'the store did not keep it';
+            else row = data;
+          }
+          if (!row) {
+            said[L.id] = 'That was not saved: ' + failed + '. Nothing changed on the site.';
+            return drawLearners();
+          }
+          photos[slot] = row;
+          forget(L.id);
+          said[L.id] = 'Saved. Visitors see it the next time they open the site.';
+          drawLearners();
+        });
+        cancel.addEventListener('click', () => {
+          forget(L.id);
+          said[L.id] = '';
+          drawLearners();
+        });
+        acts.append(input, choose, save, cancel);
+        if (kept && !next) {
+          const remove = make('button', 'pill pill-sm', 'Remove uploaded photo');
+          remove.type = 'button';
+          remove.addEventListener('click', () => {
+            dropping = L.id;
+            drawLearners();
+            const yes = box.querySelector('.learner[data-id="' + L.id + '"] .ask + button');
+            if (yes) yes.focus();
+          });
+          acts.append(remove);
+        }
+      }
+      what.append(acts, line);
+      card.append(frame, what);
+      box.append(card);
+    }
+  };
+  const loadPhotos = async () => {
+    const { data, error } = await SB.from('site_photos').select('slot,path,at,updated_at');
+    if (error) {
+      const missing = error.code === '42P01' || error.code === 'PGRST205' || /does not exist|could not find the table/i.test(error.message || '');
+      photosOff = missing ? 'Photos are not switched on yet. Run the newest omeraydin-site.sql once in the Supabase SQL editor, then load this page again.' : 'The photos could not be read: ' + (error.message || 'no answer') + '.';
+      photos = {};
+    } else {
+      photosOff = '';
+      photos = {};
+      for (const row of data || []) if (row && typeof row.slot === 'string') photos[row.slot] = row;
+    }
+    drawLearners();
+  };
+
   /* ---------- tabs ---------- */
   const tab = (name) => {
-    for (const t of ['vis', 'inbox']) {
+    for (const t of ['vis', 'inbox', 'learn']) {
       $('tab-' + t).setAttribute('aria-selected', t === name ? 'true' : 'false');
       $('pane-' + t).hidden = t !== name;
     }
     $('publish').hidden = name !== 'vis';
     if (name === 'inbox') loadMails();
+    if (name === 'learn' && !unsaved()) loadPhotos();
   };
   $('tab-vis').addEventListener('click', () => tab('vis'));
   $('tab-inbox').addEventListener('click', () => tab('inbox'));
+  $('tab-learn').addEventListener('click', () => tab('learn'));
 
   /* ---------- signing in and loading ---------- */
   const start = async () => {
@@ -529,10 +874,13 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     drawTree();
     SB.rpc('site_feed_status').then(async (answer) => {
       feed = (answer && answer.data) || { count: null, fetched_at: null, tried_at: null, error: null };
+      photoStore = typeof feed.photo_store === 'string' ? feed.photo_store : 'the photo store is not set up';
+      drawLearners();
       await countListed();
       drawTree();
     });
     loadMails();
+    loadPhotos();
   };
   $('g-go').addEventListener('click', async () => {
     const email = $('g-email').value.trim();
@@ -566,6 +914,11 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     live = new Set();
     draft = new Set();
     mails = [];
+    asking = null;
+    photos = {};
+    dropping = null;
+    for (const id of Object.keys(pending)) forget(id);
+    for (const id of Object.keys(said)) delete said[id];
     $('who').textContent = '';
     $('out').hidden = true;
     document.title = 'Site manager · omeraydin.coffee';

@@ -1,7 +1,7 @@
-/* omeraydin.coffee v2026-11-20a
-   Reads window.siteContent (content.js) and fills the film, portrait and learner quotes.
-   Asks the store behind the site manager which blocks are switched off and which classes are on the calendar,
-   and sends the message form there.
+/* omeraydin.coffee v2026-11-20f
+   Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
+   Asks the store behind the site manager which blocks are switched off, which classes are on the calendar and
+   which photos were uploaded for the learner cards, and sends the message form there.
    Keeps the glass menu readable: sets data-tone on the header from what is under its labels. */
 (() => {
   'use strict';
@@ -159,8 +159,13 @@
 
   /* learners: up to three, only entries with a quote and a name.
      With a headline: photo (if any), headline, the quote in small type, then "name, position · company".
-     Without one: the quote in large type and "name · course", as before v2026-11-20d. */
+     Without one: the quote in large type and "name · course", as before v2026-11-20d.
+     The photo of a card is the one uploaded in the site manager, else the file named in content.js (see setPhotos). */
   const text = (v) => (typeof v === 'string' ? v.trim() : '');
+  const LEARNER_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  const PHOTO_PATH = /^learners\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:jpg|png|webp)$/;
+  const PHOTO_AT = /^(?:100|\d{1,2})% (?:100|\d{1,2})%$/;
+  const cards = [];   /* one entry per card that can carry a photo: { figure, slot, alt, file, fileAt, img, want } */
   const quotes = (content.testimonials || []).filter((q) => q && text(q.quote) && text(q.name)).slice(0, 3);
   const quoteSection = $('#quotes');
   const quoteGrid = $('#quote-grid');
@@ -169,16 +174,15 @@
       const headline = text(q.headline);
       const figure = make('figure', headline ? 'quote has-hl' : 'quote');
       if (headline) {
-        if (/^assets\/[\w./-]+\.(?:jpe?g|png|webp|avif)$/i.test(text(q.photo))) {
-          /* The picture is fetched right away and joins its card only once it has arrived: a missing or empty
-             file leaves no hole and no jump. Arriving above the reader, it does not move what is being read. */
-          const photo = make('img', 'quote-ph');
-          photo.alt = text(q.photoAlt) || 'Photo posted with the review by ' + text(q.name);
-          photo.width = 800; photo.height = 600; photo.decoding = 'async';
-          if (/^\d{1,3}% \d{1,3}%$/.test(text(q.photoAt))) photo.style.objectPosition = text(q.photoAt);
-          photo.addEventListener('load', () => { if (photo.naturalWidth) steady(() => figure.prepend(photo)); }, { once: true });
-          photo.src = text(q.photo);
-        }
+        cards.push({
+          figure,
+          slot: LEARNER_ID.test(text(q.id)) ? 'learner:' + text(q.id) : '',
+          alt: text(q.photoAlt) || 'Photo of ' + text(q.name),
+          file: /^assets\/[\w./-]+\.(?:jpe?g|png|webp|avif)$/i.test(text(q.photo)) ? text(q.photo) : '',
+          fileAt: PHOTO_AT.test(text(q.photoAt)) ? text(q.photoAt) : '50% 50%',
+          img: null,
+          want: null
+        });
         figure.append(make('h3', 'quote-hl', headline));
       }
       const who = text(q.name) + (headline && text(q.position) ? ', ' + text(q.position) : '');
@@ -238,6 +242,68 @@
     root.style.scrollBehavior = 'auto';   /* this correction must not glide */
     window.scrollBy(0, moved);
     root.style.scrollBehavior = '';
+  };
+
+  /* the photos of the learner cards. "over" is what the site manager holds: { "learner:<id>": { path, at } }.
+     A photo uploaded there exists for sure, so its place is kept free at once and it loads when it comes near.
+     A file named in content.js may be missing, so it joins its card only once it has arrived: no hole, no jump. */
+  const cleanPhotos = (given) => {
+    const clean = {};
+    if (!given || typeof given !== 'object' || Array.isArray(given)) return clean;
+    for (const slot of Object.keys(given)) {
+      const one = given[slot];
+      if (!/^learner:[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slot) || !one || typeof one.path !== 'string' || !PHOTO_PATH.test(one.path)) continue;
+      clean[slot] = { path: one.path, at: typeof one.at === 'string' && PHOTO_AT.test(one.at) ? one.at : '50% 50%' };
+    }
+    return clean;
+  };
+  const putPhoto = (card, src, at, sure) => {
+    const old = card.img && card.img.isConnected ? card.img : null;
+    if (!src) {
+      card.img = null;
+      if (old) steady(() => old.remove());
+      return;
+    }
+    const img = make('img', 'quote-ph');
+    img.alt = card.alt;
+    img.width = 800; img.height = 600;   /* 4:3, the shape the card shows */
+    img.decoding = 'async';
+    img.style.objectPosition = at;
+    img.dataset.src = src;
+    card.img = img;
+    const place = () => steady(() => { if (old && old.isConnected) old.replaceWith(img); else card.figure.prepend(img); });
+    if (sure) {
+      img.loading = 'lazy';
+      img.addEventListener('error', () => {
+        if (card.img !== img) return;
+        card.img = null;
+        steady(() => img.remove());
+        card.want = card.file ? card.file + '|' + card.fileAt : '';
+        putPhoto(card, card.file, card.fileAt, false);   /* the uploaded file is gone: back to the one named in content.js */
+      }, { once: true });
+      img.src = src;
+      place();
+    } else {
+      img.addEventListener('load', () => { if (card.img === img && img.naturalWidth) place(); }, { once: true });
+      img.addEventListener('error', () => {
+        if (card.img !== img) return;
+        card.img = null;
+        if (old && old.isConnected) steady(() => old.remove());
+      }, { once: true });
+      img.src = src;
+    }
+  };
+  const setPhotos = (over) => {
+    for (const card of cards) {
+      const pick = over && card.slot && over[card.slot] ? over[card.slot] : null;
+      const src = pick ? store.url + '/storage/v1/object/public/site/' + pick.path : card.file;
+      const at = pick ? pick.at : card.fileAt;
+      const want = src ? src + '|' + at : '';
+      if (card.want === want) continue;
+      card.want = want;
+      if (card.img && card.img.dataset.src === src) card.img.style.objectPosition = at;   /* only the crop changed */
+      else putPhoto(card, src, at, !!pick);
+    }
   };
 
   /* hidden blocks. Every switchable block carries data-vis="key" in index.html; the keys that are switched off
@@ -417,18 +483,22 @@
     /* no store: every block shows, hand-written dates if any, no form */
     remember(null);
     show({ hidden: [], trainings: null, form: false });
+    setPhotos(null);
     settled();
     return;
   }
   const kept = recall();
   const week = 7 * 24 * 3600 * 1000;
+  let photos = null;   /* which uploaded photos the store holds; null until this browser has heard from the store */
   if (kept && typeof kept.hide === 'string') {
     const recent = typeof kept.at === 'number' && Date.now() - kept.at < week;
     show({ hidden: kept.hide.split(' '), trainings: recent ? kept.trainings : null, form: recent && kept.form === true });
+    photos = cleanPhotos(kept.photos);
+    setPhotos(photos);
   } else {
-    show({ hidden: [], trainings: null, form: false });
+    show({ hidden: [], trainings: null, form: false });   /* first visit: the photos wait for the store's answer */
   }
-  const keep = () => remember({ hide: state.hide, trainings: state.trainings, form: state.form, at: Date.now() });
+  const keep = () => remember({ hide: state.hide, trainings: state.trainings, form: state.form, photos: photos || {}, at: Date.now() });
   (async () => {
     let now;
     try {
@@ -436,8 +506,13 @@
     } catch (error) {
       now = null;   /* the store did not answer: the page stays as this browser last saw it */
     }
-    if (!now || typeof now !== 'object' || !Array.isArray(now.hidden)) return settled();
+    if (!now || typeof now !== 'object' || !Array.isArray(now.hidden)) {
+      if (!photos) setPhotos(null);   /* no answer and nothing remembered: the files named in content.js */
+      return settled();
+    }
     show({ hidden: now.hidden, trainings: Array.isArray(now.trainings) ? now.trainings : state.trainings, form: now.form === true });
+    photos = cleanPhotos(now.photos);
+    setPhotos(photos);
     settled();
     keep();
     if (now.stale !== true) return;

@@ -16,19 +16,24 @@ window.siteContent = {
   //   headline, position, company   Ömer's own words about the learner, written as he gives them.
   //   quote                         the learner's own words from the public course reviews on coffeenutz.net, as an
   //                                 excerpt. "note" is for a translation remark.
-  // photo is a file in assets/learners, shown 4:3. photoAt moves the crop: "50% 16%" means centred, a little below
-  // the top edge. Full names, employers and photos only where the person has agreed to it. "course" is kept for the
-  // record and is shown only for an entry without a headline.
+  // id names the card for the site manager (omeraydin.coffee/manage, Learners): a photo uploaded there is shown on
+  // the card with that id. Small letters, digits and hyphens. Do not change an id once a photo was uploaded for it.
+  // photo is the picture used when none was uploaded: a file in assets/learners, shown 4:3. photoAt moves its crop:
+  // "50% 16%" means centred, a little below the top edge. Full names, employers and photos only where the person
+  // has agreed to it. "course" is kept for the record and is shown only for an entry without a headline.
   testimonials: [
-    { headline: "Starbucks Reserve Roaster in Milan chose Ömer for SCA Roasting Professional.",
+    { id: "samuel-murgatroyd",
+      headline: "Starbucks Reserve Roaster in Milan chose Ömer for SCA Roasting Professional.",
       photo: "assets/learners/samuel-murgatroyd.jpg", photoAt: "50% 50%",
       quote: "He is extremely knowledgeable, highly professional, and has a great teaching style that makes complex roasting concepts easy to understand.",
       name: "Samuel Murgatroyd", position: "roaster", company: "Starbucks Reserve, Milan", course: "Roasting · Professional" },
-    { headline: "Years of SCA training for Tchibo Türkiye’s head barista and dozens of his trainers.",
+    { id: "kagan-giritli",
+      headline: "Years of SCA training for Tchibo Türkiye’s head barista and dozens of his trainers.",
       photo: "assets/learners/kagan-giritli.jpg", photoAt: "50% 16%",
       quote: "…Ömer’s command of the subject and his systematic teaching method made even complex technical details easy to understand. Thanks to the patience, one-to-one guidance and professional approach he showed throughout the training, I was fully prepared for every learning outcome.",
       name: "Kağan Giritli", position: "head barista", company: "Tchibo Türkiye", course: "Barista Skills · Professional", note: "translated from Turkish" },
-    { headline: "A historic boutique coffee shop in Greece chose Ömer for SCA Roasting.",
+    { id: "doruk-osman",
+      headline: "A historic boutique coffee shop in Greece chose Ömer for SCA Roasting.",
       photo: "assets/learners/doruk-osman.jpg", photoAt: "50% 66%",
       quote: "One of the best if not the best teacher in the industry",
       name: "Doruk Osman", course: "Roasting · Foundation + Intermediate" },
