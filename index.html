@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ömer Aydın | Coffee Education Worldwide</title>
 <meta name="description" content="International coffee education with Ömer Aydın, Authorized SCA Trainer and Q Instructor.">
-<meta name="version" content="v2026-11-19c">
+<meta name="version" content="v2026-11-20a">
 <meta name="theme-color" content="#F4F1E0">
 <link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
 <link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
@@ -24,8 +24,29 @@
 <link rel="preload" href="assets/fonts/averia-serif-libre-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-ext-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="style.css?v=2026-11-19c">
-<script>document.documentElement.className = 'js';</script>
+<link rel="preconnect" href="https://efjvfggwnhqkunjvoyjb.supabase.co" crossorigin>
+<link rel="stylesheet" href="style.css?v=2026-11-20a">
+<script>
+(function (d) {
+  var h = d.documentElement, known = false;
+  h.className = 'js';
+  try {
+    var kept = JSON.parse(localStorage.getItem('oa-site') || 'null'), keys = kept && typeof kept.hide === 'string' ? kept.hide : null;
+    known = keys !== null;
+    if (known && /^[a-z0-9:-]+( [a-z0-9:-]+)*$/.test(keys)) {
+      var rule = d.createElement('style');
+      rule.id = 'vis';
+      rule.textContent = keys.split(' ').map(function (k) { return '[data-vis="' + k + '"],a[href="#' + k + '"]'; }).join(',') + '{display:none!important}';
+      d.head.appendChild(rule);
+    }
+  } catch (e) {}
+  if (!known) {
+    /* first visit: the menu links wait for the answer about hidden blocks, at most half a second */
+    h.className = 'js fresh';
+    setTimeout(function () { h.classList.remove('fresh'); }, 450);
+  }
+})(document);
+</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -51,7 +72,7 @@
 
 <main id="main">
 
-<section class="hero">
+<section class="hero" data-vis="hero" data-vis-name="Opening: name and introduction">
   <h1 class="wordmark"><span>Ömer</span> <span>Aydın</span></h1>
   <div class="hero-text">
     <p class="lead">is a coffee roaster and educator based in İzmir, Türkiye, and an Authorized SCA Trainer and Q Instructor. Coffee education without borders.</p>
@@ -62,7 +83,7 @@
   </div>
 </section>
 
-<section class="film-sec">
+<section class="film-sec" data-vis="film" data-vis-name="Film">
   <a class="film" id="film" href="https://youtu.be/eTAqLuLb1LA">
     <span class="film-frame" data-surface="media">
       <img src="assets/classroom.jpg" alt="Coffee learners evaluating samples at a cupping table" width="1600" height="1113" fetchpriority="high">
@@ -84,77 +105,51 @@
   </div>
 </section>
 
-<section class="panel panel-black courses" id="courses" data-surface="dark">
+<section class="panel panel-black courses" id="courses" data-surface="dark" data-vis="courses" data-vis-name="Explore the courses">
   <div class="panel-side">
     <h2 class="label">Explore the courses</h2>
     <p class="note">Course format, certification and availability are confirmed for each offering.</p>
   </div>
   <ul class="course-list">
-    <li class="course">
+    <li class="course" data-vis="course:barista">
       <h3 class="course-name">Barista Skills</h3>
       <div class="levels">
-        <a class="lvl" href="https://www.coffeenutz.net/products/barista-egitimi-sca-sertifikali-foundation" aria-label="Barista Skills, Foundation, book on coffeenutz.net"><span>Foundation</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
-        <a class="lvl" href="https://www.coffeenutz.net/products/sca-barista-foundation-intermediate" aria-label="Barista Skills, Foundation + Intermediate, book on coffeenutz.net"><span>Foundation + Intermediate</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
-        <a class="lvl" href="https://www.coffeenutz.net/products/barista-professional" aria-label="Barista Skills, Professional, book on coffeenutz.net"><span>Professional</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
+        <a class="lvl" data-vis="level:barista-foundation" href="https://www.coffeenutz.net/products/barista-egitimi-sca-sertifikali-foundation" aria-label="Barista Skills, Foundation, book on coffeenutz.net"><span>Foundation</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
+        <a class="lvl" data-vis="level:barista-fi" href="https://www.coffeenutz.net/products/sca-barista-foundation-intermediate" aria-label="Barista Skills, Foundation + Intermediate, book on coffeenutz.net"><span>Foundation + Intermediate</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
+        <a class="lvl" data-vis="level:barista-pro" href="https://www.coffeenutz.net/products/barista-professional" aria-label="Barista Skills, Professional, book on coffeenutz.net"><span>Professional</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
       </div>
     </li>
-    <li class="course">
+    <li class="course" data-vis="course:roasting">
       <h3 class="course-name">Roasting</h3>
       <div class="levels">
-        <a class="lvl" href="https://www.coffeenutz.net/products/roasting-foundation-intermediate" aria-label="Roasting, Foundation + Intermediate, book on coffeenutz.net"><span>Foundation + Intermediate</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
-        <a class="lvl" href="https://www.coffeenutz.net/products/roasting-professional" aria-label="Roasting, Professional, book on coffeenutz.net"><span>Professional</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
+        <a class="lvl" data-vis="level:roasting-fi" href="https://www.coffeenutz.net/products/roasting-foundation-intermediate" aria-label="Roasting, Foundation + Intermediate, book on coffeenutz.net"><span>Foundation + Intermediate</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
+        <a class="lvl" data-vis="level:roasting-pro" href="https://www.coffeenutz.net/products/roasting-professional" aria-label="Roasting, Professional, book on coffeenutz.net"><span>Professional</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
       </div>
     </li>
-    <li class="course">
+    <li class="course" data-vis="course:sensory">
       <h3 class="course-name">Sensory Skills</h3>
       <div class="levels">
-        <a class="lvl" href="https://www.coffeenutz.net/products/sca-sensory-skills-foundation-intermediate" aria-label="Sensory Skills, Foundation + Intermediate, book on coffeenutz.net"><span>Foundation + Intermediate</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
-        <a class="lvl" href="https://www.coffeenutz.net/products/sca-sensory-skills-professional" aria-label="Sensory Skills, Professional, book on coffeenutz.net"><span>Professional</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
+        <a class="lvl" data-vis="level:sensory-fi" href="https://www.coffeenutz.net/products/sca-sensory-skills-foundation-intermediate" aria-label="Sensory Skills, Foundation + Intermediate, book on coffeenutz.net"><span>Foundation + Intermediate</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
+        <a class="lvl" data-vis="level:sensory-pro" href="https://www.coffeenutz.net/products/sca-sensory-skills-professional" aria-label="Sensory Skills, Professional, book on coffeenutz.net"><span>Professional</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
       </div>
     </li>
-    <li class="course">
+    <li class="course" data-vis="course:brewing">
       <h3 class="course-name">Brewing</h3>
       <div class="levels">
-        <a class="lvl" href="https://www.coffeenutz.net/products/sca-brewing-foundation-intermediate" aria-label="Brewing, Foundation + Intermediate, book on coffeenutz.net"><span>Foundation + Intermediate</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
-        <a class="lvl" href="https://www.coffeenutz.net/products/sca-brewing-professional" aria-label="Brewing, Professional, book on coffeenutz.net"><span>Professional</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
+        <a class="lvl" data-vis="level:brewing-fi" href="https://www.coffeenutz.net/products/sca-brewing-foundation-intermediate" aria-label="Brewing, Foundation + Intermediate, book on coffeenutz.net"><span>Foundation + Intermediate</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
+        <a class="lvl" data-vis="level:brewing-pro" href="https://www.coffeenutz.net/products/sca-brewing-professional" aria-label="Brewing, Professional, book on coffeenutz.net"><span>Professional</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
       </div>
     </li>
-    <li class="course">
+    <li class="course" data-vis="course:q">
       <h3 class="course-name">Q Grader</h3>
       <div class="levels">
-        <a class="lvl" href="https://www.coffeenutz.net/products/q-grader" aria-label="Q Grader, Certification programme, book on coffeenutz.net"><span>Certification programme</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
+        <a class="lvl" data-vis="level:q-programme" href="https://www.coffeenutz.net/products/q-grader" aria-label="Q Grader, Certification programme, book on coffeenutz.net"><span>Certification programme</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></a>
       </div>
     </li>
   </ul>
 </section>
 
-<section class="quotes" id="quotes" hidden>
-  <h2 class="label">What learners say</h2>
-  <div class="quote-grid" id="quote-grid"></div>
-</section>
-
-<section class="panel panel-yellow about" id="about">
-  <div class="about-text">
-    <h2 class="label">Your instructor</h2>
-    <div class="about-body">
-      <p class="statement">Coffee roaster and educator based in İzmir, Türkiye. My approach connects coffee science, sensory experience and practical skills through professional coffee education.</p>
-      <ul class="creds">
-        <li>Authorized SCA Trainer</li>
-        <li>Q Instructor</li>
-        <li>Zurich University of Applied Sciences (ZHAW) · CAS Coffee Excellence</li>
-      </ul>
-      <a class="pill pill-line-ink" href="https://coffeenutz.net/">
-        <span>CoffeeNutz</span>
-        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg>
-      </a>
-    </div>
-  </div>
-  <div class="about-photo">
-    <img id="portrait" data-surface="media" src="assets/portrait.jpg" alt="Ömer Aydın leaning on a red coffee roaster" width="900" height="1600" loading="lazy">
-  </div>
-</section>
-
-<section class="panel panel-blue dates" id="dates" data-surface="dark">
+<section class="panel panel-blue dates" id="dates" data-surface="dark" data-vis="dates" data-vis-name="Training dates">
   <h2 class="label">Training dates</h2>
   <div class="dates-body">
     <div class="dates-main" id="dates-list">
@@ -165,6 +160,33 @@
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg>
     </a>
   </div>
+</section>
+
+<section class="panel panel-yellow about" id="about" data-vis="about" data-vis-name="Your instructor">
+  <div class="about-text">
+    <h2 class="label">Your instructor</h2>
+    <div class="about-body">
+      <p class="statement">Coffee roaster and educator based in İzmir, Türkiye. My approach connects coffee science, sensory experience and practical skills through professional coffee education.</p>
+      <ul class="creds">
+        <li>Authorized SCA Trainer</li>
+        <li>Q Instructor</li>
+        <li>Zurich University of Applied Sciences (ZHAW) · CAS Coffee Excellence</li>
+      </ul>
+      <a class="pill pill-line-ink" id="bg-open" href="https://coffeenutz.net/">
+        <span>CoffeeNutz</span>
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg>
+      </a>
+    </div>
+  </div>
+  <div class="about-photo">
+    <img id="portrait" data-surface="media" src="assets/portrait.jpg" alt="Ömer Aydın leaning on a red coffee roaster" width="900" height="1600" loading="lazy">
+  </div>
+</section>
+
+<section class="quotes" id="quotes" data-vis="quotes" data-vis-name="What learners say" hidden>
+  <h2 class="label">What learners say</h2>
+  <div class="quote-grid" id="quote-grid"></div>
+  <p class="quote-src">Excerpts from the public course reviews on <a class="u" href="https://www.coffeenutz.net/collections/egitimler">coffeenutz.net</a>.</p>
 </section>
 
 </main>
@@ -186,7 +208,7 @@
         <a class="u" href="https://www.youtube.com/@coffeenutzofficial">YouTube</a>
       </div>
     </div>
-    <div class="host">
+    <div class="host" data-vis="host" data-vis-name="Host a course">
       <h2>Host a course</h2>
       <p class="statement">For coffee academies, roasteries and training organisations interested in bringing professional coffee education to their city.</p>
       <a class="pill pill-cream" href="https://www.instagram.com/omeraydin.coffee/">
@@ -194,8 +216,9 @@
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg>
       </a>
     </div>
-    <form class="msg" id="msg" aria-labelledby="msg-title" hidden>
+    <form class="msg" id="msg" data-vis="message" data-vis-name="Write to me: message form" aria-labelledby="msg-title" hidden>
       <h2 id="msg-title">Write to me</h2>
+      <p class="msg-lead">A question about a course, an idea to work on together, or simply a hello.</p>
       <input class="msg-trap" type="text" name="fax" tabindex="-1" autocomplete="off" aria-hidden="true">
       <label for="msg-email">Email <span>(required)</span></label>
       <input id="msg-email" name="email" type="email" required maxlength="200" autocomplete="email" spellcheck="false">
@@ -204,14 +227,49 @@
       <textarea id="msg-text" name="message" required rows="4" maxlength="4000"></textarea>
       <button class="pill pill-line-ink" type="submit">Send message</button>
       <p class="msg-status" id="msg-status" role="status" aria-live="polite"></p>
-      <p class="msg-note">Your message is emailed to Ömer. Your address is used to reply, and for news only if you tick the box.</p>
+      <p class="msg-note">Your message goes straight to Ömer. Your address is used to reply, and for news only if you tick the box.</p>
     </form>
   </div>
   <p class="copy">© Ömer Aydın · Independent coffee educator</p>
 </footer>
 
 </div>
-<script src="content.js"></script>
-<script src="site.js?v=2026-11-19c"></script>
+
+<dialog class="bg" id="bg" aria-labelledby="bg-title">
+  <div class="bg-in">
+    <div class="bg-head">
+      <h2 class="label" id="bg-title">Background</h2>
+      <button class="bg-x" type="button" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"></path></svg>
+      </button>
+    </div>
+    <p class="statement">Fifteen years as a coffee roaster. Eleven years teaching in the SCA format.</p>
+    <p>I roast at <a class="u" href="https://coffeenutz.net/">CoffeeNutz</a>, my roasting company in İzmir, and teach as an Authorized SCA Trainer and Q Instructor. I bring the coffee science of the ZHAW CAS Coffee Excellence programme into my courses.</p>
+    <div class="bg-block">
+      <h3>Milestones</h3>
+      <ul class="creds">
+        <li>The first SCA Roasting certificate ever given to Türkiye</li>
+        <li>One of the first barrelled Nitro Brew deployments in the world</li>
+      </ul>
+    </div>
+    <div class="bg-block">
+      <h3>What learners say</h3>
+      <p class="bg-score"><b>5.0 out of 5</b> across 14 public reviews on the CoffeeNutz course pages, as of November 2026.</p>
+      <figure class="bg-quote">
+        <blockquote>“I can say that training with Ömer was the most valuable investment I have made in coffee.”</blockquote>
+        <figcaption>Hamza H. · Roasting · Foundation + Intermediate · translated from Turkish</figcaption>
+      </figure>
+    </div>
+    <div class="bg-actions">
+      <a class="pill pill-solid" href="https://coffeenutz.net/">
+        <span>Visit CoffeeNutz</span>
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg>
+      </a>
+      <button class="pill pill-line-ink" type="button" data-close>Close</button>
+    </div>
+  </div>
+</dialog>
+<script src="content.js?v=2026-11-20a"></script>
+<script src="site.js?v=2026-11-20a"></script>
 </body>
 </html>

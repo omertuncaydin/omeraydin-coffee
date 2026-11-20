@@ -1,9 +1,12 @@
-/* omeraydin.coffee v2026-11-19c
-   Reads window.siteContent (content.js) and fills the film, portrait, learner quotes, training dates and the message form.
+/* omeraydin.coffee v2026-11-20a
+   Reads window.siteContent (content.js) and fills the film, portrait and learner quotes.
+   Asks the store behind the site manager which blocks are switched off and which classes are on the calendar,
+   and sends the message form there.
    Keeps the glass menu readable: sets data-tone on the header from what is under its labels. */
 (() => {
   'use strict';
   const content = window.siteContent || {};
+  const root = document.documentElement;
   const $ = (sel) => document.querySelector(sel);
   const make = (tag, cls, text) => {
     const node = document.createElement(tag);
@@ -21,6 +24,7 @@
     svg.append(path);
     return svg;
   };
+  const plainClick = (event) => !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button);
 
   /* menu button on small screens */
   const header = $('.hd');
@@ -50,6 +54,7 @@
   /* glass menu: label colour follows what passes under the labels.
      No tone at the top of the page, "page" once scrolled, "media" over a photo or the film, "dark" over dark panels.
      The blocks that count as media or dark carry data-surface in index.html. */
+  let retone = () => {};
   if (header) {
     const inkBox = (node) => {
       const range = document.createRange();
@@ -79,6 +84,7 @@
       queued = true;
       requestAnimationFrame(setTone);
     };
+    retone = queueTone;
     window.addEventListener('scroll', queueTone, { passive: true });
     window.addEventListener('resize', queueTone);
     window.addEventListener('load', queueTone);
@@ -95,7 +101,7 @@
     const filmLink = $('#film-link');
     if (filmLink) filmLink.href = watchUrl;
     film.addEventListener('click', (event) => {
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button) return;
+      if (!plainClick(event)) return;
       event.preventDefault();
       const player = document.createElement('iframe');
       player.src = 'https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&rel=0';
@@ -134,6 +140,23 @@
     probe.src = content.portrait;
   }
 
+  /* background pop-up: the CoffeeNutz button under "Your instructor" opens it.
+     Without scripts, with a modifier key or in a browser without <dialog>, the button stays a link to coffeenutz.net. */
+  const card = $('#bg');
+  const cardBtn = $('#bg-open');
+  if (card && cardBtn && typeof card.showModal === 'function') {
+    cardBtn.setAttribute('aria-haspopup', 'dialog');
+    cardBtn.addEventListener('click', (event) => {
+      if (!plainClick(event)) return;
+      event.preventDefault();
+      card.showModal();
+      card.scrollTop = 0;
+    });
+    card.addEventListener('click', (event) => {
+      if (event.target === card || event.target.closest('[data-close]')) card.close();   /* the dark surround, or a close button */
+    });
+  }
+
   /* learner quotes: up to three, only entries with a quote and a name */
   const quotes = (content.testimonials || []).filter((q) => q && q.quote && q.name).slice(0, 3);
   const quoteSection = $('#quotes');
@@ -141,29 +164,172 @@
   if (quotes.length && quoteSection && quoteGrid) {
     for (const q of quotes) {
       const figure = make('figure', 'quote');
-      figure.append(
-        make('blockquote', '', '“' + q.quote + '”'),
-        make('figcaption', '', [q.name, q.role].filter(Boolean).join(' · '))
-      );
+      const by = make('figcaption', '', [q.name, q.role].filter(Boolean).join(' · '));
+      if (q.note) by.append(make('span', 'quote-note', q.note));
+      figure.append(make('blockquote', '', '“' + q.quote + '”'), by);
       quoteGrid.append(figure);
     }
     quoteSection.hidden = false;
   }
 
-  /* training dates: only entries with a date, a course and a location */
-  const dates = (content.dates || []).filter((d) => d && d.date && d.course && d.location);
+  /* ---------- what the site manager controls: hidden blocks, training dates, the message form ---------- */
+
+  const store = {
+    url: typeof content.storeUrl === 'string' && /^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(content.storeUrl.trim()) ? content.storeUrl.trim() : '',
+    key: typeof content.storeKey === 'string' ? content.storeKey.trim() : ''
+  };
+  const storeOn = !!(store.url && store.key);
+  const ask = async (name, args) => {
+    const options = {
+      method: 'POST',
+      headers: { apikey: store.key, Authorization: 'Bearer ' + store.key, 'Content-Type': 'application/json' },
+      body: JSON.stringify(args || {})
+    };
+    if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) options.signal = AbortSignal.timeout(9000);
+    const response = await fetch(store.url + '/rest/v1/rpc/' + name, options);
+    if (!response.ok) throw new Error(name + ' ' + response.status);
+    return response.json();
+  };
+  /* what this browser saw last time: applied at once, so nothing jumps while the store answers */
+  const MEMORY = 'oa-site';
+  const recall = () => {
+    try {
+      const kept = JSON.parse(localStorage.getItem(MEMORY) || 'null');
+      return kept && typeof kept === 'object' ? kept : null;
+    } catch (error) {
+      return null;
+    }
+  };
+  const remember = (value) => {
+    try {
+      if (value) localStorage.setItem(MEMORY, JSON.stringify(value));
+      else localStorage.removeItem(MEMORY);
+    } catch (error) { /* private mode: the page works without it */ }
+  };
+  /* a change above the visitor's place must not push what they are looking at: the block in the middle of the window stays put */
+  const steady = (change) => {
+    const blocks = [...document.querySelectorAll('main > section, footer')];
+    const middle = window.innerHeight / 2;
+    const mark = blocks.find((el) => el.getClientRects().length && el.getBoundingClientRect().bottom > middle);
+    const before = mark ? mark.getBoundingClientRect().top : 0;
+    change();
+    if (!mark || !mark.getClientRects().length) return;
+    const moved = mark.getBoundingClientRect().top - before;
+    if (Math.abs(moved) < 1) return;
+    root.style.scrollBehavior = 'auto';   /* this correction must not glide */
+    window.scrollBy(0, moved);
+    root.style.scrollBehavior = '';
+  };
+
+  /* hidden blocks. Every switchable block carries data-vis="key" in index.html; the keys that are switched off
+     become one style rule (the line in the head of the page writes the same rule from the last visit).
+     Links that point at a hidden block go with it. */
+  const KEY = /^[a-z0-9]+(?::[a-z0-9-]+)?$/;
+  const setHidden = (list) => {
+    const off = new Set((Array.isArray(list) ? list : []).filter((key) => typeof key === 'string' && KEY.test(key)));
+    const courses = [...document.querySelectorAll('.course[data-vis]')];
+    for (const course of courses) {
+      /* a course with no level left to show goes too, and so does the whole block when no course is left */
+      const levels = [...course.querySelectorAll('.lvl[data-vis]')];
+      if (levels.length && levels.every((level) => off.has(level.dataset.vis))) off.add(course.dataset.vis);
+    }
+    if (courses.length && courses.every((course) => off.has(course.dataset.vis))) off.add('courses');
+    const keys = [...off].sort();
+    let rule = document.getElementById('vis');
+    if (!keys.length) {
+      if (rule) rule.remove();
+      return '';
+    }
+    if (!rule) {
+      rule = document.createElement('style');
+      rule.id = 'vis';
+      document.head.append(rule);
+    }
+    const text = keys.map((key) => '[data-vis="' + key + '"],a[href="#' + key + '"]').join(',') + '{display:none!important}';
+    if (rule.textContent !== text) rule.textContent = text;
+    return keys.join(' ');
+  };
+
+  /* training dates: the classes on the CoffeeNutz calendar that are open or confirmed and have not started */
   const dateSection = $('#dates');
   const dateBox = $('#dates-list');
-  if (dates.length && dateSection && dateBox) {
+  const noDates = dateBox ? dateBox.firstElementChild : null;
+  const ISO = /^\d{4}-\d{2}-\d{2}$/;
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const FIELDS = { barista: 'Barista Skills', roasting: 'Roasting', sensory: 'Sensory Skills', brewing: 'Brewing', 'green coffee': 'Green Coffee' };
+  const LEVELS = { 'f+i': 'Foundation + Intermediate', pro: 'Professional', professional: 'Professional', foundation: 'Foundation', intermediate: 'Intermediate' };
+  const todayIn = (zone) => {
+    try {
+      const parts = new Intl.DateTimeFormat('en-GB', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+      const part = (type) => parts.find((p) => p.type === type).value;
+      return part('year') + '-' + part('month') + '-' + part('day');
+    } catch (error) {
+      return new Date().toISOString().slice(0, 10);
+    }
+  };
+  /* "SCA Barista F+I" on the calendar is "Barista Skills" + "Foundation + Intermediate" here */
+  const courseOf = (name) => {
+    const plain = String(name).replace(/^SCA\s+/i, '').trim();
+    if (/^q[\s-]*grader/i.test(plain)) return { field: 'Q Grader', level: 'Certification programme' };
+    const parts = plain.match(/^(.+?)\s+(F\+I|Pro|Professional|Foundation|Intermediate)$/i);
+    if (parts && FIELDS[parts[1].toLowerCase()]) return { field: FIELDS[parts[1].toLowerCase()], level: LEVELS[parts[2].toLowerCase()] };
+    return { field: plain, level: '' };
+  };
+  const period = (from, to, spoken) => {
+    const a = { y: +from.slice(0, 4), m: +from.slice(5, 7), d: +from.slice(8, 10) };
+    const b = { y: +to.slice(0, 4), m: +to.slice(5, 7), d: +to.slice(8, 10) };
+    const month = (m) => (spoken ? MONTHS[m - 1] : MONTHS[m - 1].slice(0, 3));
+    if (from === to) return a.d + ' ' + month(a.m) + ' ' + a.y;
+    if (a.y === b.y && a.m === b.m) return a.d + (spoken ? ' to ' : '–') + b.d + ' ' + month(a.m) + ' ' + a.y;
+    const join = spoken ? ' to ' : ' – ';
+    if (a.y === b.y) return a.d + ' ' + month(a.m) + join + b.d + ' ' + month(b.m) + ' ' + a.y;
+    return a.d + ' ' + month(a.m) + ' ' + a.y + join + b.d + ' ' + month(b.m) + ' ' + b.y;
+  };
+  const upcoming = (trainings) => {
+    const today = todayIn('Europe/Istanbul');
+    return (Array.isArray(trainings) ? trainings : [])
+      .filter((x) => x && typeof x.name === 'string' && x.name.trim() && ISO.test(x.start) && ISO.test(x.end) && x.end >= x.start)
+      .filter((x) => (x.status === 'Registration open' || x.status === 'Confirmed') && x.start > today)
+      .sort((x, y) => (x.start < y.start ? -1 : x.start > y.start ? 1 : x.name < y.name ? -1 : x.name > y.name ? 1 : 0))
+      .slice(0, 8);
+  };
+  const manualDates = (content.dates || []).filter((d) => d && d.date && d.course && d.location);
+  let datesDrawn = null;
+  const drawDates = (trainings) => {
+    if (!dateSection || !dateBox) return;
+    const place = typeof content.datesPlace === 'string' ? content.datesPlace.trim() : '';
+    const rows = upcoming(trainings).map((x) => {
+      const course = courseOf(x.name);
+      const lang = typeof x.lang === 'string' && /^[A-Za-zÀ-ɏ ]{2,30}$/.test(x.lang.trim()) ? x.lang.trim() : '';
+      return {
+        when: period(x.start, x.end, false),
+        said: period(x.start, x.end, true),
+        course: course.field,
+        lines: [course.level, [place, lang ? 'in ' + lang : ''].filter(Boolean).join(' · ')].filter(Boolean),
+        url: x.url
+      };
+    });
+    /* nothing from the calendar: the rows written by hand in content.js, if any */
+    if (!rows.length) for (const d of manualDates) rows.push({ when: d.date, said: d.date, course: d.course, lines: [d.location], url: d.url });
+    const print = JSON.stringify(rows);
+    if (print === datesDrawn) return;
+    datesDrawn = print;
+    if (!rows.length) {
+      if (noDates) dateBox.replaceChildren(noDates);
+      dateSection.classList.remove('has-dates');
+      return;
+    }
     const list = make('ul', 'date-list');
-    for (const d of dates) {
-      const hasLink = /^https:\/\//.test(d.url || '');
+    for (const r of rows) {
+      const hasLink = /^https:\/\//.test(r.url || '');
       const row = make(hasLink ? 'a' : 'div', 'date-row');
       if (hasLink) {
-        row.href = d.url;
-        row.setAttribute('aria-label', d.course + ', ' + d.date + ', ' + d.location + ', course details');
+        row.href = r.url;
+        row.setAttribute('aria-label', [r.course].concat(r.lines.map((line) => line.replace(/ · /g, ', ')), r.said, 'course details').join(', '));
       }
-      row.append(make('span', 'date-when', d.date), make('span', 'date-course', d.course), make('span', 'date-where', d.location));
+      const where = make('span', 'date-where');
+      for (const line of r.lines) where.append(make('span', '', line));
+      row.append(make('span', 'date-when', r.when), make('span', 'date-course', r.course), where);
       if (hasLink) row.append(arrow());
       const item = make('li');
       item.append(row);
@@ -171,49 +337,98 @@
     }
     dateBox.replaceChildren(list);
     dateSection.classList.add('has-dates');
-  }
+  };
 
-  /* message form: stays hidden until content.js has the address of the function that emails it.
+  /* message form: shown once the store has answered (now, or on an earlier visit of this browser).
      Nothing is sent anywhere before the visitor presses Send. */
   const form = $('#msg');
-  const messageUrl = typeof content.messageUrl === 'string' ? content.messageUrl.trim() : '';
-  if (form && /^https:\/\/[a-z0-9.-]+\/[\w./-]+$/i.test(messageUrl)) {
+  const foot = form ? form.closest('.foot') : null;
+  const showForm = (ready, hide) => {
+    if (!form) return;
+    const on = !!ready && storeOn;
+    form.hidden = !on;
+    if (foot) foot.classList.toggle('has-form', on && !(' ' + hide + ' ').includes(' message '));
+  };
+  if (form && storeOn) {
     const status = $('#msg-status');
     const sendBtn = form.querySelector('button[type="submit"]');
-    form.hidden = false;
-    const foot = form.closest('.foot');
-    if (foot) foot.classList.add('has-form');
+    const SAID = {
+      email: 'Please check the email address and try again.',
+      message: 'Please write a few words (up to 4,000 characters).',
+      busy: 'Too many messages just now. Please try again in a few minutes.'
+    };
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (sendBtn.disabled) return;
       const fields = new FormData(form);
-      const payload = {
-        email: String(fields.get('email') || '').trim(),
-        message: String(fields.get('message') || '').trim(),
-        news: fields.get('news') === 'yes',
-        fax: String(fields.get('fax') || '')
+      const letter = {
+        p_email: String(fields.get('email') || '').trim(),
+        p_message: String(fields.get('message') || '').trim(),
+        p_news: fields.get('news') === 'yes',
+        p_fax: String(fields.get('fax') || '')
       };
       sendBtn.disabled = true;
       status.textContent = 'Sending…';
-      let sent = false;
+      let answer = null;
       try {
-        const response = await fetch(messageUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const result = await response.json().catch(() => null);
-        sent = response.status === 200 && !!result && result.ok === true;
+        answer = await ask('site_message_send', letter);
       } catch (error) {
-        sent = false;
+        answer = null;
       }
       sendBtn.disabled = false;
-      if (sent) {
+      if (answer && answer.ok === true) {
         form.reset();
-        status.textContent = 'Thank you. Your message is on its way.';
+        status.textContent = 'Thank you. Your message has reached Ömer.';
       } else {
-        status.textContent = 'That did not go through. Please try again in a moment, or write on Instagram.';
+        status.textContent = (answer && SAID[answer.error]) || 'That did not go through. Please try again in a moment, or write on Instagram.';
       }
     });
   }
+
+  /* first what this browser remembers, then what the store says now */
+  let state = { hide: '', trainings: null, form: false };
+  const show = (next) => steady(() => {
+    state = { hide: setHidden(next.hidden), trainings: Array.isArray(next.trainings) ? next.trainings : null, form: !!next.form };
+    drawDates(state.trainings);
+    showForm(state.form, state.hide);
+    retone();
+  });
+  const settled = () => root.classList.remove('fresh');   /* the menu links stop waiting (see the head of the page) */
+  if (!storeOn) {
+    /* no store: every block shows, hand-written dates if any, no form */
+    remember(null);
+    show({ hidden: [], trainings: null, form: false });
+    settled();
+    return;
+  }
+  const kept = recall();
+  const week = 7 * 24 * 3600 * 1000;
+  if (kept && typeof kept.hide === 'string') {
+    const recent = typeof kept.at === 'number' && Date.now() - kept.at < week;
+    show({ hidden: kept.hide.split(' '), trainings: recent ? kept.trainings : null, form: recent && kept.form === true });
+  } else {
+    show({ hidden: [], trainings: null, form: false });
+  }
+  const keep = () => remember({ hide: state.hide, trainings: state.trainings, form: state.form, at: Date.now() });
+  (async () => {
+    let now;
+    try {
+      now = await ask('site_public');
+    } catch (error) {
+      now = null;   /* the store did not answer: the page stays as this browser last saw it */
+    }
+    if (!now || typeof now !== 'object' || !Array.isArray(now.hidden)) return settled();
+    show({ hidden: now.hidden, trainings: Array.isArray(now.trainings) ? now.trainings : state.trainings, form: now.form === true });
+    settled();
+    keep();
+    if (now.stale !== true) return;
+    /* the store's copy of the calendar is older than ten minutes: have it read again */
+    try {
+      const again = await ask('site_refresh');
+      if (again && Array.isArray(again.trainings)) {
+        show({ hidden: state.hide.split(' '), trainings: again.trainings, form: state.form });
+        keep();
+      }
+    } catch (error) { /* the dates shown stay */ }
+  })();
 })();

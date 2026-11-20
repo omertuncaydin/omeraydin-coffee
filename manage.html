@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Site manager · omeraydin.coffee</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="version" content="v2026-11-20a">
+<meta name="theme-color" content="#F4F1E0">
+<link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
+<link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
+<style>
+/* omeraydin.coffee site manager v2026-11-20a. Same colours and fonts as the site it manages. */
+@font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-ext-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-ext-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{--cream:#F4F1E0;--paper:#FBF9EE;--ink:#1D1D1D;--verm:#EB5027;--verm-ink:#C23B1A;--blue:#2B6CA6;--yellow:#F6CD45;--soft:#5E5B51;--line:rgba(29,29,29,.22);--line-strong:rgba(29,29,29,.5);
+  --serif:"Averia Serif Libre",Georgia,"Times New Roman",serif;--sans:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--cream)}
+body{margin:0;background:var(--cream);color:var(--ink);font:400 1.0625rem/1.35 var(--sans);letter-spacing:-0.02em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+h1,h2,h3,p,ul{margin:0}
+ul{padding:0;list-style:none}
+svg{display:block}
+a{color:inherit;text-underline-offset:.2em;text-decoration-thickness:1px}
+button,input{font:inherit;letter-spacing:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:default}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+[hidden]{display:none!important}
+.app{max-width:920px;margin:0 auto;padding:0 clamp(16px,3vw,32px) 120px}
+
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:22px 0 20px}
+.brand{font:700 1.4375rem/1.2 var(--serif);letter-spacing:-0.04em;color:var(--verm-ink);text-decoration:none}
+.tag{font-size:1.0625rem}
+.grow{flex:1 1 auto}
+.who{font-size:.9375rem;color:var(--soft)}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:9px 20px;border:2px solid var(--ink);border-radius:300px;background:transparent;font-size:1rem;text-decoration:none;transition:background-color .15s ease,color .15s ease,border-color .15s ease}
+.pill:hover:not(:disabled){background:var(--ink);color:var(--cream)}
+.pill:disabled{opacity:.4}
+.pill-solid{border-color:var(--verm-ink);background:var(--verm-ink);color:var(--cream)}
+.pill-solid:hover:not(:disabled){border-color:var(--ink);background:var(--ink)}
+.pill-sm{min-height:38px;padding:6px 16px;font-size:.9375rem}
+.pill svg{width:18px;height:18px;flex:none}
+
+.card{padding:clamp(22px,3.4vw,36px);border-radius:24px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.card h1{font-weight:400;font-size:clamp(1.3125rem,2.4vw,1.625rem);line-height:1.2}
+.card p{margin-top:12px;text-wrap:pretty}
+.gate{display:flex;flex-direction:column;gap:10px;max-width:440px;margin:6vh auto 0}
+.gate label{margin-top:8px;font-size:1rem}
+.gate input{display:block;width:100%;height:50px;padding:0 20px;border:0;border-radius:300px;background:var(--cream);box-shadow:inset 0 0 0 1px var(--line-strong)}
+.gate .pill{align-self:flex-start;margin-top:14px}
+.say{min-height:1.35em;margin-top:6px;font-weight:700;font-size:1rem;color:var(--verm-ink)}
+.say:empty{display:none}
+
+.tabs{display:flex;gap:8px;margin:4px 0 22px;padding:5px;border-radius:300px;background:rgba(29,29,29,.07);width:max-content;max-width:100%}
+.tab{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:6px 20px;border:0;border-radius:300px;background:transparent;font-size:1rem}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--cream)}
+.count{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--verm-ink);color:var(--cream);font-weight:700;font-size:.8125rem;letter-spacing:0}
+.count:empty{display:none}
+
+.lead{max-width:640px;margin:0 0 18px;color:var(--soft)}
+.tree{border-radius:24px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
+.row{display:flex;align-items:center;gap:14px;min-height:64px;padding:8px 12px 8px 20px;border-top:1px solid var(--line)}
+.tree>li:first-child>.row{border-top:0}
+.row[data-depth="1"]{min-height:54px;padding-left:54px;background:rgba(29,29,29,.035)}
+.row[data-depth="2"]{min-height:46px;padding-left:88px;background:rgba(29,29,29,.035);border-top-style:dashed}
+.chip{flex:none;width:14px;height:14px;margin:0 2px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--line-strong)}
+.row[data-depth="1"] .chip,.row[data-depth="2"] .chip{display:none}
+.what{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
+.name{font-weight:700}
+.row[data-depth="1"] .name{font-family:var(--serif);font-size:1.25rem;letter-spacing:-0.04em}
+.row[data-depth="2"] .name{font-weight:400;font-size:1rem}
+.sub{font-size:.9375rem;color:var(--soft);text-wrap:pretty}
+.sub button{padding:0;border:0;background:transparent;text-decoration:underline;text-underline-offset:.2em;color:var(--ink)}
+.sub .bad{color:var(--verm-ink);font-weight:700}
+.state{flex:none;font-size:.9375rem;color:var(--soft)}
+.eye{flex:none;display:grid;place-items:center;width:48px;height:48px;padding:0;border:0;border-radius:50%;background:transparent;transition:background-color .15s ease}
+.eye:hover{background:rgba(29,29,29,.08)}
+.eye svg{width:26px;height:26px}
+.eye .shut{display:none}
+.row.off .eye .open{display:none}
+.row.off .eye .shut{display:block}
+.row.off .eye{color:var(--verm-ink)}
+.row.off .name,.row.under .name{color:var(--soft);text-decoration:line-through;text-decoration-thickness:1px}
+.row.under .eye{opacity:.45}
+.row.changed{box-shadow:inset 4px 0 0 var(--verm)}
+
+.publish{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:12px clamp(16px,3vw,32px) calc(12px + env(safe-area-inset-bottom,0px));background:rgba(244,241,224,.94);box-shadow:0 -1px 0 var(--line);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.publish-in{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;max-width:856px;margin:0 auto}
+.publish-in p{flex:1 1 220px;font-size:1rem}
+.publish-in p b{font-weight:700}
+
+.inbox-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:16px}
+.mail{display:flex;flex-direction:column;gap:12px;margin-top:12px;padding:20px 22px;border-radius:20px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.mail.new{box-shadow:inset 0 0 0 2px var(--verm-ink)}
+.mail-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:.9375rem;color:var(--soft)}
+.mail-head a{color:var(--ink);font-weight:700;font-size:1.0625rem;overflow-wrap:anywhere}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--verm-ink)}
+.flag{padding:2px 10px;border-radius:300px;background:var(--yellow);color:var(--ink);font-size:.8125rem}
+.mail-text{white-space:pre-wrap;overflow-wrap:anywhere;text-wrap:pretty}
+.mail-acts{display:flex;flex-wrap:wrap;gap:8px}
+.empty{padding:28px 22px;border-radius:20px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);color:var(--soft)}
+.foot{margin-top:34px;font-size:.875rem;color:var(--soft)}
+
+@media (max-width:560px){
+  .row{gap:10px;padding-left:16px}
+  .row[data-depth="1"]{padding-left:30px}
+  .row[data-depth="2"]{padding-left:46px}
+  .state{display:none}
+  .tabs{width:100%}
+  .tab{flex:1 1 0;justify-content:center;padding:6px 10px}
+}
+@media (prefers-reduced-motion:reduce){.pill,.eye{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="bar">
+  <a class="brand" href="./">Ömer Aydın</a>
+  <span class="tag">Site manager</span>
+  <span class="grow"></span>
+  <span class="who" id="who"></span>
+  <button class="pill pill-sm" id="out" type="button" hidden>Sign out</button>
+</header>
+
+<section class="card gate" id="gate" hidden>
+  <h1>Sign in</h1>
+  <p>With the CoffeeNutz admin account, the same one as for the other tools.</p>
+  <label for="g-email">Email</label>
+  <input id="g-email" type="email" autocomplete="username" spellcheck="false">
+  <label for="g-pass">Password</label>
+  <input id="g-pass" type="password" autocomplete="current-password">
+  <button class="pill pill-solid" id="g-go" type="button">Sign in</button>
+  <p class="say" id="g-say" role="status" aria-live="polite"></p>
+</section>
+
+<section class="card" id="note" hidden>
+  <h1 id="note-title"></h1>
+  <p id="note-text"></p>
+</section>
+
+<main id="work" hidden>
+  <div class="tabs" role="tablist" aria-label="Site manager">
+    <button class="tab" id="tab-vis" type="button" role="tab" aria-selected="true" aria-controls="pane-vis">Visibility</button>
+    <button class="tab" id="tab-inbox" type="button" role="tab" aria-selected="false" aria-controls="pane-inbox">Messages <span class="count" id="new-count"></span></button>
+  </div>
+
+  <section id="pane-vis" role="tabpanel" aria-labelledby="tab-vis">
+    <p class="lead">An open eye means the block shows on omeraydin.coffee, a closed eye hides it. The list follows the page from top to bottom. Nothing changes on the site until you press Publish.</p>
+    <ul class="tree" id="tree"></ul>
+    <p class="say" id="vis-say" role="status" aria-live="polite"></p>
+  </section>
+
+  <section id="pane-inbox" role="tabpanel" aria-labelledby="tab-inbox" hidden>
+    <div class="inbox-top">
+      <button class="pill pill-sm" id="in-all" type="button" aria-pressed="true">All</button>
+      <button class="pill pill-sm" id="in-new" type="button" aria-pressed="false">Unread</button>
+      <span class="grow"></span>
+      <button class="pill pill-sm" id="in-load" type="button">Check for new</button>
+    </div>
+    <p class="say" id="in-say" role="status" aria-live="polite"></p>
+    <div id="mails"></div>
+  </section>
+
+  <p class="foot">Site manager v2026-11-20a · <a href="./">Open omeraydin.coffee</a></p>
+</main>
+
+<div class="publish" id="publish" hidden>
+  <div class="publish-in">
+    <p id="pub-text"></p>
+    <button class="pill pill-sm" id="pub-undo" type="button">Undo</button>
+    <button class="pill pill-sm pill-solid" id="pub-go" type="button">Publish</button>
+  </div>
+</div>
+
+</div>
+<script src="content.js?v=2026-11-20a"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* omeraydin.coffee site manager v2026-11-20a
+   Signs in with the CoffeeNutz admin account and edits what the store holds for the site:
+   which blocks are hidden (table site_settings) and the messages visitors sent (table site_messages).
+   The list of blocks is read from the live page itself: every element there that carries data-vis is one row here. */
+(() => {
+  'use strict';
+  const VERSION = 'v2026-11-20a';
+  const content = window.siteContent || {};
+  const $ = (id) => document.getElementById(id);
+  const make = (tag, cls, text) => {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  };
+  const icon = (paths, cls) => {
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    const set = { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.6', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' };
+    for (const key of Object.keys(set)) svg.setAttribute(key, set[key]);
+    if (cls) svg.setAttribute('class', cls);
+    for (const d of paths) {
+      const path = document.createElementNS(ns, 'path');
+      path.setAttribute('d', d);
+      svg.append(path);
+    }
+    return svg;
+  };
+  const EYE = ['M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z', 'M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z'];
+  const EYE_SHUT = ['M4 4l16 16', 'M9.6 6A9.6 9.6 0 0 1 12 5.5C18 5.5 21.5 12 21.5 12a17.6 17.6 0 0 1-2.9 3.7', 'M15.4 17.8A9 9 0 0 1 12 18.5C6 18.5 2.5 12 2.5 12a17 17 0 0 1 3.9-4.4', 'M10 10.1a3.2 3.2 0 0 0 4.2 4.3'];
+  const when = (iso) => {
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  };
+  const ago = (iso) => {
+    const min = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (!(min >= 0)) return '';
+    if (min < 1) return 'just now';
+    if (min < 60) return min + ' min ago';
+    if (min < 48 * 60) return Math.round(min / 60) + ' h ago';
+    return Math.round(min / 1440) + ' days ago';
+  };
+
+  const views = { gate: $('gate'), note: $('note'), work: $('work') };
+  const view = (name) => {
+    for (const key of Object.keys(views)) views[key].hidden = key !== name;
+    $('publish').hidden = name !== 'work' || $('pane-vis').hidden;
+  };
+  const note = (title, text) => {
+    $('note-title').textContent = title;
+    $('note-text').textContent = text;
+    view('note');
+  };
+
+  const url = typeof content.storeUrl === 'string' ? content.storeUrl.trim() : '';
+  const key = typeof content.storeKey === 'string' ? content.storeKey.trim() : '';
+  if (!url || !key) return note('No store set', 'content.js has no storeUrl and storeKey, so there is nothing to manage.');
+  if (typeof supabase === 'undefined' || !supabase.createClient) return note('The sign-in part did not load', 'Check the connection and load this page again.');
+  const SB = supabase.createClient(url, key);
+
+  /* ---------- blocks of the page ---------- */
+  let blocks = [];            // { key, name, depth, parent, tone } in page order
+  let live = new Set();       // hidden keys as published
+  let draft = new Set();      // hidden keys as shown here
+  let liveAt = null;
+  let feed = null;            // { count, fetched_at, tried_at, error } from the store
+  let listed = null;          // how many classes the site lists right now
+  const TONES = { 'panel-black': '#1D1D1D', 'panel-blue': '#2B6CA6', 'panel-yellow': '#F6CD45', 'panel-verm': '#EB5027' };
+  const readPage = async () => {
+    const response = await fetch('./?manage=' + Date.now(), { cache: 'no-store' });
+    if (!response.ok) throw new Error('page ' + response.status);
+    const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+    const found = [];
+    for (const el of doc.querySelectorAll('[data-vis]')) {
+      const key = el.getAttribute('data-vis');
+      if (!/^[a-z0-9]+(?::[a-z0-9-]+)?$/.test(key) || found.some((b) => b.key === key)) continue;
+      const up = el.parentElement ? el.parentElement.closest('[data-vis]') : null;
+      const head = el.querySelector('.course-name');
+      const panel = el.closest('.panel');
+      const toneClass = panel ? Object.keys(TONES).find((cls) => panel.classList.contains(cls)) : null;
+      const parent = up ? found.find((b) => b.key === up.getAttribute('data-vis')) : null;
+      found.push({
+        key,
+        name: (el.getAttribute('data-vis-name') || (el.classList.contains('course') && head ? head.textContent : el.textContent) || key).replace(/\s+/g, ' ').trim().slice(0, 80),
+        parent: parent ? parent.key : null,
+        depth: parent ? parent.depth + 1 : 0,
+        tone: toneClass ? TONES[toneClass] : '#F4F1E0'
+      });
+    }
+    if (!found.length) throw new Error('no blocks');
+    return found;
+  };
+  const under = (block, set) => {
+    for (let b = block; b && b.parent; ) {
+      b = blocks.find((x) => x.key === b.parent);
+      if (b && set.has(b.key)) return b;
+    }
+    return null;
+  };
+  const kids = (block) => blocks.filter((b) => b.parent === block.key);
+  /* the site drops a course when no level of it is left, and the whole list when no course is left */
+  const emptied = (block, set) => {
+    const below = kids(block);
+    return below.length > 0 && below.every((b) => set.has(b.key) || emptied(b, set));
+  };
+  const changes = () => blocks.filter((b) => live.has(b.key) !== draft.has(b.key));
+  const todayIstanbul = () => {
+    try {
+      const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+      const part = (type) => parts.find((p) => p.type === type).value;
+      return part('year') + '-' + part('month') + '-' + part('day');
+    } catch (error) {
+      return new Date().toISOString().slice(0, 10);
+    }
+  };
+
+  const drawTree = () => {
+    const tree = $('tree');
+    tree.replaceChildren();
+    for (const block of blocks) {
+      const off = draft.has(block.key);
+      const above = under(block, draft);
+      const row = make('div', 'row' + (off ? ' off' : '') + (above ? ' under' : '') + (live.has(block.key) !== off ? ' changed' : ''));
+      row.dataset.depth = String(block.depth);
+      row.dataset.key = block.key;
+      const chip = make('span', 'chip');
+      chip.style.background = block.tone;
+      const what = make('div', 'what');
+      what.append(make('span', 'name', block.name));
+      if (above) what.append(make('span', 'sub', 'Not on the site while “' + above.name + '” is hidden.'));
+      else if (!off && emptied(block, draft)) what.append(make('span', 'sub', 'Nothing inside it is left to show, so the site hides it too.'));
+      if (block.key === 'dates' && !off) what.append(feedLine());
+      const state = make('span', 'state', off ? 'Hidden' : 'Shown');
+      const eye = make('button', 'eye');
+      eye.type = 'button';
+      eye.setAttribute('aria-pressed', off ? 'false' : 'true');
+      eye.setAttribute('aria-label', block.name + ': ' + (off ? 'hidden. Press to show.' : 'shown. Press to hide.'));
+      eye.title = off ? 'Hidden. Press to show.' : 'Shown. Press to hide.';
+      eye.append(icon(EYE, 'open'), icon(EYE_SHUT, 'shut'));
+      eye.addEventListener('click', () => {
+        if (draft.has(block.key)) draft.delete(block.key);
+        else draft.add(block.key);
+        $('vis-say').textContent = '';
+        drawTree();
+        const again = tree.querySelector('.row[data-key="' + block.key + '"] .eye');
+        if (again) again.focus();
+      });
+      row.append(chip, what, state, eye);
+      const item = make('li');
+      item.append(row);
+      tree.append(item);
+    }
+    drawPublish();
+  };
+  const feedLine = () => {
+    const line = make('span', 'sub');
+    if (!feed) {
+      line.textContent = 'Reading the calendar…';
+      return line;
+    }
+    if (feed.error) {
+      line.append(make('span', 'bad', 'The calendar could not be read: ' + feed.error + '. '));
+      if (feed.fetched_at) line.append('The site shows the copy from ' + ago(feed.fetched_at) + '. ');
+    } else if (feed.fetched_at) {
+      line.append((listed === null ? feed.count + ' classes on your calendar' : listed === 0 ? 'No upcoming class on your calendar, so the site shows the sentence about announcements' : listed === 1 ? '1 class from your calendar is listed' : listed + ' classes from your calendar are listed') + ' · read ' + ago(feed.fetched_at) + '. ');
+    } else {
+      line.append('The calendar has not been read yet. ');
+    }
+    const again = make('button', '', 'Read it again');
+    again.type = 'button';
+    again.addEventListener('click', async () => {
+      again.disabled = true;
+      again.textContent = 'Reading…';
+      const { data, error } = await SB.rpc('site_feed_refresh');
+      if (!error && data) feed = data;
+      await countListed();
+      drawTree();
+    });
+    line.append(again);
+    return line;
+  };
+  const countListed = async () => {
+    const { data, error } = await SB.rpc('site_public');
+    if (error || !data || !Array.isArray(data.trainings)) {
+      listed = null;
+      return;
+    }
+    const today = todayIstanbul();
+    listed = data.trainings.filter((x) => x && (x.status === 'Registration open' || x.status === 'Confirmed') && typeof x.start === 'string' && x.start > today).length;
+  };
+  const drawPublish = () => {
+    const n = changes().length;
+    $('pub-go').disabled = n === 0;
+    $('pub-undo').disabled = n === 0;
+    const text = $('pub-text');
+    text.replaceChildren();
+    if (n) text.append(make('b', '', n === 1 ? '1 change' : n + ' changes'), ' not on the site yet.');
+    else text.append(liveAt ? 'The site shows what you see here. Last published ' + when(liveAt) + '.' : 'The site shows what you see here.');
+  };
+  $('pub-undo').addEventListener('click', () => {
+    draft = new Set(live);
+    $('vis-say').textContent = '';
+    drawTree();
+  });
+  $('pub-go').addEventListener('click', async () => {
+    const known = new Set(blocks.map((b) => b.key));
+    const hidden = [...draft].filter((k) => known.has(k)).sort();
+    $('pub-go').disabled = true;
+    $('pub-undo').disabled = true;
+    $('pub-text').textContent = 'Publishing…';
+    const { data, error } = await SB.from('site_settings').upsert({ id: 1, data: { hidden } }).select('data,updated_at').maybeSingle();
+    if (error || !data) {
+      $('vis-say').textContent = 'That was not saved' + (error && error.message ? ': ' + error.message : '') + '. Nothing changed on the site.';
+      drawPublish();
+      return;
+    }
+    live = new Set(Array.isArray(data.data && data.data.hidden) ? data.data.hidden : hidden);
+    draft = new Set(live);
+    liveAt = data.updated_at || new Date().toISOString();
+    $('vis-say').textContent = 'Published. Visitors see it the next time they open the site.';
+    drawTree();
+  });
+  window.addEventListener('beforeunload', (event) => {
+    if (!views.work.hidden && changes().length) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  });
+
+  /* ---------- messages ---------- */
+  let mails = [];
+  let onlyNew = false;
+  const drawMails = () => {
+    const box = $('mails');
+    box.replaceChildren();
+    const fresh = mails.filter((m) => !m.seen_at).length;
+    $('new-count').textContent = fresh ? String(fresh) : '';
+    document.title = (fresh ? '(' + fresh + ') ' : '') + 'Site manager · omeraydin.coffee';
+    $('in-all').textContent = 'All ' + mails.length;
+    $('in-new').textContent = 'Unread ' + fresh;
+    $('in-all').setAttribute('aria-pressed', onlyNew ? 'false' : 'true');
+    $('in-new').setAttribute('aria-pressed', onlyNew ? 'true' : 'false');
+    $('in-all').classList.toggle('pill-solid', !onlyNew);
+    $('in-new').classList.toggle('pill-solid', onlyNew);
+    const shown = mails.filter((m) => !onlyNew || !m.seen_at);
+    if (!shown.length) {
+      box.append(make('p', 'empty', mails.length ? 'No unread messages.' : 'No messages yet. What visitors write with the form at the bottom of the site arrives here.'));
+      return;
+    }
+    for (const m of shown) {
+      const card = make('article', 'mail' + (m.seen_at ? '' : ' new'));
+      const head = make('div', 'mail-head');
+      if (!m.seen_at) {
+        const dot = make('span', 'dot');
+        dot.title = 'Unread';
+        head.append(dot);
+      }
+      const from = make('a', '', m.email);
+      from.href = 'mailto:' + encodeURIComponent(m.email).replace(/%40/g, '@') + '?subject=' + encodeURIComponent('Your message on omeraydin.coffee');
+      head.append(from, make('span', '', when(m.created_at)));
+      if (m.news) head.append(make('span', 'flag', 'wants news and updates'));
+      const acts = make('div', 'mail-acts');
+      const reply = make('a', 'pill pill-sm', 'Reply by email');
+      reply.href = from.href;
+      const mark = make('button', 'pill pill-sm', m.seen_at ? 'Mark as unread' : 'Mark as read');
+      mark.type = 'button';
+      mark.addEventListener('click', async () => {
+        mark.disabled = true;
+        const seen_at = m.seen_at ? null : new Date().toISOString();
+        const { error } = await SB.from('site_messages').update({ seen_at }).eq('id', m.id);
+        if (error) {
+          $('in-say').textContent = 'That was not saved: ' + error.message;
+          mark.disabled = false;
+          return;
+        }
+        m.seen_at = seen_at;
+        $('in-say').textContent = '';
+        drawMails();
+      });
+      acts.append(reply, mark);
+      card.append(head, make('p', 'mail-text', m.message), acts);
+      box.append(card);
+    }
+  };
+  const loadMails = async () => {
+    const { data, error } = await SB.from('site_messages').select('id,created_at,email,message,news,seen_at').order('created_at', { ascending: false }).limit(300);
+    if (error) {
+      $('in-say').textContent = 'The messages could not be read: ' + error.message;
+      return;
+    }
+    $('in-say').textContent = '';
+    mails = data || [];
+    drawMails();
+  };
+  $('in-all').addEventListener('click', () => { onlyNew = false; drawMails(); });
+  $('in-new').addEventListener('click', () => { onlyNew = true; drawMails(); });
+  $('in-load').addEventListener('click', async () => {
+    $('in-load').disabled = true;
+    await loadMails();
+    $('in-load').disabled = false;
+  });
+
+  /* ---------- tabs ---------- */
+  const tab = (name) => {
+    for (const t of ['vis', 'inbox']) {
+      $('tab-' + t).setAttribute('aria-selected', t === name ? 'true' : 'false');
+      $('pane-' + t).hidden = t !== name;
+    }
+    $('publish').hidden = name !== 'vis';
+    if (name === 'inbox') loadMails();
+  };
+  $('tab-vis').addEventListener('click', () => tab('vis'));
+  $('tab-inbox').addEventListener('click', () => tab('inbox'));
+
+  /* ---------- signing in and loading ---------- */
+  const start = async () => {
+    let user = null;
+    try {
+      const got = await SB.auth.getUser();
+      user = (got && got.data && got.data.user) || null;
+    } catch (error) {
+      user = null;
+    }
+    $('who').textContent = user ? user.email : '';
+    $('out').hidden = !user;
+    if (!user) return view('gate');
+    const { data, error } = await SB.from('site_settings').select('data,updated_at').eq('id', 1).maybeSingle();
+    if (error) {
+      const missing = error.code === '42P01' || error.code === 'PGRST205' || /does not exist|could not find the table/i.test(error.message || '');
+      return note(missing ? 'The store is not set up yet' : 'The store did not answer',
+        missing ? 'Run the file omeraydin-site.sql once in the Supabase SQL editor, then load this page again.' : (error.message || 'Please try again in a moment.'));
+    }
+    if (!data) return note('This account cannot manage the site', 'You are signed in as ' + user.email + '. Only the CoffeeNutz admin account can change omeraydin.coffee. Sign out and sign in with that account.');
+    try {
+      blocks = await readPage();
+    } catch (error) {
+      return note('The page could not be read', 'The list of blocks comes from the live page, and that did not load. Load this page again.');
+    }
+    const hidden = data.data && Array.isArray(data.data.hidden) ? data.data.hidden : [];
+    live = new Set(hidden.filter((k) => blocks.some((b) => b.key === k)));
+    draft = new Set(live);
+    liveAt = data.updated_at || null;
+    view('work');
+    tab('vis');
+    drawTree();
+    SB.rpc('site_feed_status').then(async (answer) => {
+      feed = (answer && answer.data) || { count: null, fetched_at: null, tried_at: null, error: null };
+      await countListed();
+      drawTree();
+    });
+    loadMails();
+  };
+  $('g-go').addEventListener('click', async () => {
+    const email = $('g-email').value.trim();
+    const password = $('g-pass').value;
+    const say = $('g-say');
+    if (!email || !password) {
+      say.textContent = 'Email and password, please.';
+      return;
+    }
+    say.textContent = 'Signing in…';
+    $('g-go').disabled = true;
+    let failed = '';
+    try {
+      const { error } = await SB.auth.signInWithPassword({ email, password });
+      if (error) failed = error.message || 'check the email and the password';
+    } catch (error) {
+      failed = 'no connection';
+    }
+    $('g-go').disabled = false;
+    if (failed) {
+      say.textContent = 'That did not work: ' + failed + '.';
+      return;
+    }
+    $('g-pass').value = '';
+    say.textContent = '';
+    start();
+  });
+  for (const id of ['g-email', 'g-pass']) $(id).addEventListener('keydown', (event) => { if (event.key === 'Enter') $('g-go').click(); });
+  $('out').addEventListener('click', async () => {
+    try { await SB.auth.signOut(); } catch (error) { /* signed out here either way */ }
+    live = new Set();
+    draft = new Set();
+    mails = [];
+    $('who').textContent = '';
+    $('out').hidden = true;
+    document.title = 'Site manager · omeraydin.coffee';
+    view('gate');
+  });
+  /* back on this tab after a while: new messages may have arrived */
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !views.work.hidden) loadMails(); });
+  start();
+})();
+</script>
+</body>
+</html>
