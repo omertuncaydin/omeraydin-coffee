@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Site manager · omeraydin.coffee</title>
 <meta name="robots" content="noindex,nofollow">
-<meta name="version" content="v2026-11-20f">
+<meta name="version" content="v2026-11-20g">
 <meta name="theme-color" content="#F4F1E0">
 <link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
 <link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
 <style>
-/* omeraydin.coffee site manager v2026-11-20f. Same colours and fonts as the site it manages. */
+/* omeraydin.coffee site manager v2026-11-20g. Same colours and fonts as the site it manages. */
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-ext-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -117,6 +117,18 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 .learner-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px}
 .learner-acts .ask{flex:1 1 100%;font-weight:700}
 .learner .say{margin-top:8px}
+.learner-top{display:flex;align-items:flex-start;gap:10px}
+.learner-who{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:6px}
+.learner-top .state{align-self:flex-start;margin-top:3px}
+.learner-top .eye{margin:-10px -10px -6px 0}
+.learner.off .eye .open{display:none}
+.learner.off .eye .shut{display:block}
+.learner.off .eye{color:var(--verm-ink)}
+.learner.off .name,.learner.under .name{color:var(--soft);text-decoration:line-through;text-decoration-thickness:1px}
+.learner.off .frame img,.learner.under .frame img{opacity:.45}
+.learner.under .eye{opacity:.45}
+.learner.pub{box-shadow:inset 4px 0 0 var(--verm),inset 0 0 0 1px var(--line)}
+.learner.changed.pub{box-shadow:inset 4px 0 0 var(--verm),inset 0 0 0 2px var(--verm-ink)}
 .foot{margin-top:34px;font-size:.875rem;color:var(--soft)}
 
 @media (max-width:560px){
@@ -183,12 +195,13 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
   </section>
 
   <section id="pane-learn" role="tabpanel" aria-labelledby="tab-learn" hidden>
-    <p class="lead">The photo on each learner card. Choose a picture from your computer, drag it inside the frame until the crop is right, then save. The picture is made smaller before it is sent, and the site shows it the next time someone opens the page.</p>
+    <p class="lead">The learner cards of the site, in their order on the page. The eye shows or hides a card; like on the Visibility tab, that reaches the site when you press Publish. For the photo: choose a picture from your computer, drag it inside the frame until the crop is right, then save. The picture is made smaller before it is sent, and the site shows it the next time someone opens the page. Download saves the picture of a card to your computer.</p>
     <p class="say" id="learn-say" role="status" aria-live="polite"></p>
+    <p class="say" id="learn-pub-say" role="status" aria-live="polite"></p>
     <div id="learners"></div>
   </section>
 
-  <p class="foot">Site manager v2026-11-20f · <a href="./">Open omeraydin.coffee</a></p>
+  <p class="foot">Site manager v2026-11-20g · <a href="./">Open omeraydin.coffee</a></p>
 </main>
 
 <div class="publish" id="publish" hidden>
@@ -200,7 +213,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 </div>
 
 </div>
-<script src="content.js?v=2026-11-20f"></script>
+<script src="content.js?v=2026-11-20g"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* omeraydin.coffee site manager v2026-11-20f
@@ -211,7 +224,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
    The list of learners is read from content.js. */
 (() => {
   'use strict';
-  const VERSION = 'v2026-11-20f';
+  const VERSION = 'v2026-11-20g';
   const content = window.siteContent || {};
   const $ = (id) => document.getElementById(id);
   const make = (tag, cls, text) => {
@@ -312,6 +325,10 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     return below.length > 0 && below.every((b) => set.has(b.key) || emptied(b, set));
   };
   const changes = () => blocks.filter((b) => live.has(b.key) !== draft.has(b.key));
+  const sayPub = (line) => { $('vis-say').textContent = line; $('learn-pub-say').textContent = line; };
+  let tabNow = 'vis';
+  /* the Publish bar: always on the Visibility tab, on the Learners tab while a card's eye waits to be published */
+  const showBar = () => { $('publish').hidden = !(tabNow === 'vis' || (tabNow === 'learn' && changes().length > 0)); };
   const todayIstanbul = () => {
     try {
       const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
@@ -348,8 +365,9 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
       eye.addEventListener('click', () => {
         if (draft.has(block.key)) draft.delete(block.key);
         else draft.add(block.key);
-        $('vis-say').textContent = '';
+        sayPub('');
         drawTree();
+        drawLearners();
         const again = tree.querySelector('.row[data-key="' + block.key + '"] .eye');
         if (again) again.focus();
       });
@@ -404,11 +422,13 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     text.replaceChildren();
     if (n) text.append(make('b', '', n === 1 ? '1 change' : n + ' changes'), ' not on the site yet.');
     else text.append(liveAt ? 'The site shows what you see here. Last published ' + when(liveAt) + '.' : 'The site shows what you see here.');
+    showBar();
   };
   $('pub-undo').addEventListener('click', () => {
     draft = new Set(live);
-    $('vis-say').textContent = '';
+    sayPub('');
     drawTree();
+    drawLearners();
   });
   $('pub-go').addEventListener('click', async () => {
     const known = new Set(blocks.map((b) => b.key));
@@ -418,15 +438,16 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     $('pub-text').textContent = 'Publishing…';
     const { data, error } = await SB.from('site_settings').upsert({ id: 1, data: { hidden } }).select('data,updated_at').maybeSingle();
     if (error || !data) {
-      $('vis-say').textContent = 'That was not saved' + (error && error.message ? ': ' + error.message : '') + '. Nothing changed on the site.';
+      sayPub('That was not saved' + (error && error.message ? ': ' + error.message : '') + '. Nothing changed on the site.');
       drawPublish();
       return;
     }
     live = new Set(Array.isArray(data.data && data.data.hidden) ? data.data.hidden : hidden);
     draft = new Set(live);
     liveAt = data.updated_at || new Date().toISOString();
-    $('vis-say').textContent = 'Published. Visitors see it the next time they open the site.';
+    sayPub('Published. Visitors see it the next time they open the site.');
     drawTree();
+    drawLearners();
   });
   window.addEventListener('beforeunload', (event) => {
     if (!views.work.hidden && (changes().length || unsaved())) {
@@ -545,16 +566,17 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     $('in-load').disabled = false;
   });
 
-  /* ---------- learners: the photo of each card ---------- */
+  /* ---------- learners: the photo of each card, its eye, and a copy of the picture for the computer ---------- */
   const text = (v) => (typeof v === 'string' ? v.trim() : '');
   const LEARNER_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
   const PHOTO_PATH = /^learners\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:jpg|png|webp)$/;
   const PHOTO_AT = /^(100|\d{1,2})% (100|\d{1,2})%$/;
   const learners = (Array.isArray(content.testimonials) ? content.testimonials : [])
-    .filter((q) => q && text(q.quote) && text(q.name)).slice(0, 3)
+    .filter((q) => q && text(q.quote) && text(q.name))
     .map((q) => ({
       id: LEARNER_ID.test(text(q.id)) ? text(q.id) : '',
       name: text(q.name),
+      company: text(q.company),
       headline: text(q.headline),
       file: /^assets\/[\w./-]+\.(?:jpe?g|png|webp|avif)$/i.test(text(q.photo)) ? text(q.photo) : '',
       fileAt: PHOTO_AT.test(text(q.photoAt)) ? text(q.photoAt) : '50% 50%'
@@ -567,6 +589,27 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
   let dropping = null;        // learner id whose Remove was pressed once
   const publicUrl = (path) => url + '/storage/v1/object/public/site/' + path;
   const unsaved = () => Object.keys(pending).length;
+  /* the cards join the list of blocks right under "What learners say", so the eye, Undo and Publish treat them like any other block */
+  const withLearners = (found) => {
+    const at = found.findIndex((b) => b.key === 'quotes');
+    if (at < 0) return found;
+    const host = found[at];
+    const rows = learners.filter((L) => L.id && !found.some((b) => b.key === 'learner:' + L.id))
+      .map((L) => ({ key: 'learner:' + L.id, name: [L.name, L.company].filter(Boolean).join(' · '), parent: host.key, depth: host.depth + 1, tone: host.tone }));
+    return found.slice(0, at + 1).concat(rows, found.slice(at + 1));
+  };
+  /* the picture of a card as a file on this computer */
+  const saveAs = (blob, name) => {
+    const href = URL.createObjectURL(blob);
+    const link = make('a');
+    link.href = href;
+    link.download = name;
+    link.hidden = true;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(href), 30000);
+  };
   const forget = (id) => {
     if (pending[id] && pending[id].url) URL.revokeObjectURL(pending[id].url);
     delete pending[id];
@@ -623,7 +666,10 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
       const slot = 'learner:' + L.id;
       const kept = L.id && photos[slot] && PHOTO_PATH.test(photos[slot].path) ? photos[slot] : null;
       const next = pending[L.id] || null;
-      const card = make('article', 'learner' + (next ? ' changed' : ''));
+      const block = L.id ? blocks.find((b) => b.key === slot) : null;
+      const off = !!block && draft.has(slot);
+      const above = block ? under(block, draft) : null;
+      const card = make('article', 'learner' + (next ? ' changed' : '') + (off ? ' off' : '') + (above ? ' under' : '') + (block && live.has(slot) !== off ? ' pub' : ''));
       card.dataset.id = L.id;
       const frame = make('div', 'frame');
       const src = next && next.url ? next.url : kept ? publicUrl(kept.path) : L.file ? './' + L.file : '';
@@ -694,8 +740,33 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
         frame.append('No photo');
       }
       const what = make('div', 'learner-what');
-      what.append(make('span', 'name', L.name));
-      if (L.headline) what.append(make('span', 'sub', L.headline));
+      const who = make('div', 'learner-who');
+      who.append(make('span', 'name', L.name));
+      if (L.headline) who.append(make('span', 'sub', L.headline));
+      const head = make('div', 'learner-top');
+      head.append(who);
+      if (block) {
+        const eye = make('button', 'eye');
+        eye.type = 'button';
+        eye.setAttribute('aria-pressed', off ? 'false' : 'true');
+        eye.setAttribute('aria-label', 'Card of ' + L.name + ': ' + (off ? 'hidden. Press to show.' : 'shown. Press to hide.'));
+        eye.title = off ? 'Hidden. Press to show.' : 'Shown. Press to hide.';
+        eye.append(icon(EYE, 'open'), icon(EYE_SHUT, 'shut'));
+        eye.addEventListener('click', () => {
+          if (draft.has(slot)) draft.delete(slot);
+          else draft.add(slot);
+          sayPub('');
+          drawTree();
+          drawLearners();
+          const again = box.querySelector('.learner[data-id="' + L.id + '"] .eye');
+          if (again) again.focus();
+        });
+        head.append(make('span', 'state', off ? 'Hidden' : 'Shown'), eye);
+      }
+      what.append(head);
+      if (above) what.append(make('span', 'sub', 'Not on the site while “' + above.name + '” is hidden.'));
+      else if (off) what.append(make('span', 'sub', live.has(slot) ? 'This card is hidden on the site.' : 'Hidden here. Press Publish to take it off the site.'));
+      else if (block && live.has(slot)) what.append(make('span', 'sub', 'Shown here. Press Publish to put it back on the site.'));
       const from = next && next.url ? 'New picture, not saved yet (' + next.w + ' × ' + next.h + ' px).'
         : kept ? 'Uploaded here on ' + when(kept.updated_at) + '.' + (next ? ' Crop changed, not saved yet.' : '')
         : L.file ? 'The site shows the file ' + L.file + '. A picture uploaded here takes its place.'
@@ -796,6 +867,42 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
           drawLearners();
         });
         acts.append(input, choose, save, cancel);
+        if ((kept || L.file) && !(next && next.url)) {
+          /* a copy of the picture the site shows on this card: the uploaded one, else the file from content.js */
+          const fileName = kept ? (L.id || 'learner') + '.' + (kept.path.split('.').pop() || 'jpg') : L.file.split('/').pop();
+          const download = make('button', 'pill pill-sm', 'Download');
+          download.type = 'button';
+          download.setAttribute('aria-label', 'Download the picture of ' + L.name);
+          download.addEventListener('click', async () => {
+            download.disabled = true;
+            line.textContent = 'Fetching the picture…';
+            let blob = null;
+            try {
+              const response = await fetch(kept ? publicUrl(kept.path) : './' + L.file, { cache: 'no-store' });
+              if (response.ok) blob = await response.blob();
+            } catch (error) {
+              blob = null;
+            }
+            if (!blob && kept) {
+              try {
+                const got = await SB.storage.from('site').download(kept.path);   /* second way in: signed in, straight from the photo store */
+                if (got && got.data && !got.error) blob = got.data;
+              } catch (error) {
+                blob = null;
+              }
+            }
+            download.disabled = false;
+            if (!blob || !blob.size) {
+              said[L.id] = 'The picture could not be fetched. Please try again in a moment.';
+              line.textContent = said[L.id];
+              return;
+            }
+            saveAs(blob, fileName);
+            said[L.id] = 'Downloaded as ' + fileName + '. It is in the folder your browser saves to.';
+            line.textContent = said[L.id];
+          });
+          acts.append(download);
+        }
         if (kept && !next) {
           const remove = make('button', 'pill pill-sm', 'Remove uploaded photo');
           remove.type = 'button';
@@ -833,7 +940,8 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
       $('tab-' + t).setAttribute('aria-selected', t === name ? 'true' : 'false');
       $('pane-' + t).hidden = t !== name;
     }
-    $('publish').hidden = name !== 'vis';
+    tabNow = name;
+    showBar();
     if (name === 'inbox') loadMails();
     if (name === 'learn' && !unsaved()) loadPhotos();
   };
@@ -861,7 +969,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     }
     if (!data) return note('This account cannot manage the site', 'You are signed in as ' + user.email + '. Only the CoffeeNutz admin account can change omeraydin.coffee. Sign out and sign in with that account.');
     try {
-      blocks = await readPage();
+      blocks = withLearners(await readPage());
     } catch (error) {
       return note('The page could not be read', 'The list of blocks comes from the live page, and that did not load. Load this page again.');
     }
@@ -917,6 +1025,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     asking = null;
     photos = {};
     dropping = null;
+    sayPub('');
     for (const id of Object.keys(pending)) forget(id);
     for (const id of Object.keys(said)) delete said[id];
     $('who').textContent = '';

@@ -12,12 +12,13 @@ window.siteContent = {
   // Shown with every class from the calendar. The calendar holds the classes taught at CoffeeNutz, İzmir.
   datesPlace: "İzmir",
 
-  // Learners. Up to three are shown. Two voices, kept apart:
+  // Learners. Every entry is shown, in this order, three to a row. Two voices, kept apart:
   //   headline, position, company   Ömer's own words about the learner, written as he gives them.
-  //   quote                         the learner's own words from the public course reviews on coffeenutz.net, as an
-  //                                 excerpt. "note" is for a translation remark.
+  //   quote                         the learner's own words from a public review (the course reviews on coffeenutz.net,
+  //                                 or Google), as an excerpt. "note" is for the source and a translation remark.
   // id names the card for the site manager (omeraydin.coffee/manage, Learners): a photo uploaded there is shown on
-  // the card with that id. Small letters, digits and hyphens. Do not change an id once a photo was uploaded for it.
+  // the card with that id, and the eye there shows or hides the card. Small letters, digits and hyphens. Do not
+  // change an id once a photo was uploaded for it.
   // photo is the picture used when none was uploaded: a file in assets/learners, shown 4:3. photoAt moves its crop:
   // "50% 16%" means centred, a little below the top edge. Full names, employers and photos only where the person
   // has agreed to it. "course" is kept for the record and is shown only for an entry without a headline.
@@ -37,6 +38,10 @@ window.siteContent = {
       photo: "assets/learners/doruk-osman.jpg", photoAt: "50% 66%",
       quote: "One of the best if not the best teacher in the industry",
       name: "Doruk Osman", course: "Roasting · Foundation + Intermediate" },
+    { id: "yakup-cankir",
+      headline: "Head roaster of Türkiye’s most popular coffee roasting company kahve.com chose Ömer for roasting training.",
+      quote: "I took roasting training from Ömer and left 100% satisfied. His knowledge and the way he conveys it were truly incredible. A professional extremely well versed in his field, who blends his passion for coffee with science and combines a scientist’s rigour with a coffee lover’s excitement…",
+      name: "Yakup Çankır", position: "head roaster", company: "kahve.com", course: "Roasting", note: "Google review, translated from Turkish" },
   ],
 
   // Only used when the store above is empty or cannot be reached and has never been read on this device.

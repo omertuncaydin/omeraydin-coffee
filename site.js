@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-20f
+/* omeraydin.coffee v2026-11-20g
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar and
    which photos were uploaded for the learner cards, and sends the message form there.
@@ -157,22 +157,24 @@
     });
   }
 
-  /* learners: up to three, only entries with a quote and a name.
+  /* learners: every entry with a quote and a name, three to a row on a wide screen.
      With a headline: photo (if any), headline, the quote in small type, then "name, position · company".
      Without one: the quote in large type and "name · course", as before v2026-11-20d.
-     The photo of a card is the one uploaded in the site manager, else the file named in content.js (see setPhotos). */
+     The photo of a card is the one uploaded in the site manager, else the file named in content.js (see setPhotos).
+     A card with an id carries data-vis="learner:<id>", so the site manager can switch it off like any other block. */
   const text = (v) => (typeof v === 'string' ? v.trim() : '');
   const LEARNER_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
   const PHOTO_PATH = /^learners\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:jpg|png|webp)$/;
   const PHOTO_AT = /^(?:100|\d{1,2})% (?:100|\d{1,2})%$/;
   const cards = [];   /* one entry per card that can carry a photo: { figure, slot, alt, file, fileAt, img, want } */
-  const quotes = (content.testimonials || []).filter((q) => q && text(q.quote) && text(q.name)).slice(0, 3);
+  const quotes = (content.testimonials || []).filter((q) => q && text(q.quote) && text(q.name));
   const quoteSection = $('#quotes');
   const quoteGrid = $('#quote-grid');
   if (quotes.length && quoteSection && quoteGrid) {
     for (const q of quotes) {
       const headline = text(q.headline);
       const figure = make('figure', headline ? 'quote has-hl' : 'quote');
+      if (LEARNER_ID.test(text(q.id))) figure.dataset.vis = 'learner:' + text(q.id);
       if (headline) {
         cards.push({
           figure,
@@ -319,6 +321,9 @@
       if (levels.length && levels.every((level) => off.has(level.dataset.vis))) off.add(course.dataset.vis);
     }
     if (courses.length && courses.every((course) => off.has(course.dataset.vis))) off.add('courses');
+    /* the same for the learner cards: with every card switched off, the block and its menu link go too */
+    const people = [...document.querySelectorAll('#quote-grid > .quote')];
+    if (people.length && people.every((person) => person.dataset.vis && off.has(person.dataset.vis))) off.add('quotes');
     const keys = [...off].sort();
     let rule = document.getElementById('vis');
     if (!keys.length) {
