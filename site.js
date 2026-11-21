@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-20g
+/* omeraydin.coffee v2026-11-21a
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar and
    which photos were uploaded for the learner cards, and sends the message form there.
@@ -158,42 +158,49 @@
   }
 
   /* learners: every entry with a quote and a name, three to a row on a wide screen.
-     With a headline: photo (if any), headline, the quote in small type, then "name, position · company".
-     Without one: the quote in large type and "name · course", as before v2026-11-20d.
+     A card with a headline or an id: photo (if any), headline (if any), the quote in small type, then
+     "name, position · company" (without a headline: "name · course").
+     An entry with neither: the quote in large type and "name · course", as before v2026-11-20d.
      The photo of a card is the one uploaded in the site manager, else the file named in content.js (see setPhotos).
-     A card with an id carries data-vis="learner:<id>", so the site manager can switch it off like any other block. */
+     A card with an id carries data-vis="learner:<id>", so the site manager can switch it off like any other block.
+     starts: "hidden" turns that around: the card stays off until the site manager switches it on (see setHidden). */
   const text = (v) => (typeof v === 'string' ? v.trim() : '');
   const LEARNER_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
   const PHOTO_PATH = /^learners\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:jpg|png|webp)$/;
   const PHOTO_AT = /^(?:100|\d{1,2})% (?:100|\d{1,2})%$/;
   const cards = [];   /* one entry per card that can carry a photo: { figure, slot, alt, file, fileAt, img, want } */
-  const quotes = (content.testimonials || []).filter((q) => q && text(q.quote) && text(q.name));
+  const quotes = (content.testimonials || []).filter((q) => q && text(q.quote) && text(q.name))
+    .filter((q) => q.starts !== 'hidden' || LEARNER_ID.test(text(q.id)));   /* a card that starts hidden and has no id could never be switched on */
   const quoteSection = $('#quotes');
   const quoteGrid = $('#quote-grid');
   if (quotes.length && quoteSection && quoteGrid) {
     for (const q of quotes) {
       const headline = text(q.headline);
-      const figure = make('figure', headline ? 'quote has-hl' : 'quote');
-      if (LEARNER_ID.test(text(q.id))) figure.dataset.vis = 'learner:' + text(q.id);
-      if (headline) {
+      const id = LEARNER_ID.test(text(q.id)) ? text(q.id) : '';
+      const laidOut = !!(headline || id);
+      const figure = make('figure', laidOut ? 'quote has-hl' + (headline ? '' : ' no-head') : 'quote');
+      if (id) figure.dataset.vis = 'learner:' + id;
+      if (id && q.starts === 'hidden') figure.dataset.starts = 'hidden';
+      if (laidOut) {
         cards.push({
           figure,
-          slot: LEARNER_ID.test(text(q.id)) ? 'learner:' + text(q.id) : '',
+          slot: id ? 'learner:' + id : '',
           alt: text(q.photoAlt) || 'Photo of ' + text(q.name),
           file: /^assets\/[\w./-]+\.(?:jpe?g|png|webp|avif)$/i.test(text(q.photo)) ? text(q.photo) : '',
           fileAt: PHOTO_AT.test(text(q.photoAt)) ? text(q.photoAt) : '50% 50%',
           img: null,
           want: null
         });
-        figure.append(make('h3', 'quote-hl', headline));
+        if (headline) figure.append(make('h3', 'quote-hl', headline));
       }
-      const who = text(q.name) + (headline && text(q.position) ? ', ' + text(q.position) : '');
-      const by = make('figcaption', '', [who, headline ? text(q.company) : text(q.course) || text(q.role)].filter(Boolean).join(' · '));
+      const who = text(q.name) + (laidOut && text(q.position) ? ', ' + text(q.position) : '');
+      const second = headline ? text(q.company) : (laidOut && text(q.company)) || text(q.course) || text(q.role);
+      const by = make('figcaption', '', [who, second].filter(Boolean).join(' · '));
       if (text(q.note)) by.append(make('span', 'quote-note', text(q.note)));
       figure.append(make('blockquote', '', '“' + text(q.quote) + '”'), by);
       quoteGrid.append(figure);
     }
-    quoteGrid.classList.toggle('has-hl', quotes.some((q) => text(q.headline)));
+    quoteGrid.classList.toggle('has-hl', quotes.some((q) => text(q.headline) || LEARNER_ID.test(text(q.id))));
     quoteSection.hidden = false;
   }
 
@@ -310,10 +317,14 @@
 
   /* hidden blocks. Every switchable block carries data-vis="key" in index.html; the keys that are switched off
      become one style rule (the line in the head of the page writes the same rule from the last visit).
-     Links that point at a hidden block go with it. */
+     Links that point at a hidden block go with it.
+     The list from the site manager names what differs from the page as written: "key" for a block that is switched
+     off, and "shown:<id>" for a learner card that starts hidden and was switched on. */
   const KEY = /^[a-z0-9]+(?::[a-z0-9-]+)?$/;
   const setHidden = (list) => {
-    const off = new Set((Array.isArray(list) ? list : []).filter((key) => typeof key === 'string' && KEY.test(key)));
+    const given = (Array.isArray(list) ? list : []).filter((key) => typeof key === 'string' && KEY.test(key));
+    const on = new Set(given.filter((key) => key.startsWith('shown:')));
+    const off = new Set(given.filter((key) => !key.startsWith('shown:')));
     const courses = [...document.querySelectorAll('.course[data-vis]')];
     for (const course of courses) {
       /* a course with no level left to show goes too, and so does the whole block when no course is left */
@@ -323,12 +334,16 @@
     if (courses.length && courses.every((course) => off.has(course.dataset.vis))) off.add('courses');
     /* the same for the learner cards: with every card switched off, the block and its menu link go too */
     const people = [...document.querySelectorAll('#quote-grid > .quote')];
+    for (const person of people) {
+      if (person.dataset.starts === 'hidden' && !on.has('shown:' + person.dataset.vis.slice(8))) off.add(person.dataset.vis);
+    }
     if (people.length && people.every((person) => person.dataset.vis && off.has(person.dataset.vis))) off.add('quotes');
     const keys = [...off].sort();
+    const record = keys.concat([...on].sort()).join(' ');   /* what the next visit starts from: the same list gives the same page */
     let rule = document.getElementById('vis');
     if (!keys.length) {
       if (rule) rule.remove();
-      return '';
+      return record;
     }
     if (!rule) {
       rule = document.createElement('style');
@@ -337,7 +352,7 @@
     }
     const text = keys.map((key) => '[data-vis="' + key + '"],a[href="#' + key + '"]').join(',') + '{display:none!important}';
     if (rule.textContent !== text) rule.textContent = text;
-    return keys.join(' ');
+    return record;
   };
 
   /* training dates: the classes on the CoffeeNutz calendar that are open or confirmed and have not started */

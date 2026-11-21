@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-20a
+/* omeraydin.coffee v2026-11-21a
    Fonts: Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see assets/fonts/fonts-license.txt */
 
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
@@ -153,6 +153,7 @@ button.pill:disabled{opacity:.55;cursor:default}
   .quote.has-hl>.quote-ph{grid-row:1}
   .quote.has-hl>.quote-hl{grid-row:2}
   .quote.has-hl>blockquote{grid-row:3}
+  .quote.has-hl.no-head>blockquote{grid-row:2/span 2}   /* a card without a headline: its quote starts where the headlines of its row start */
   .quote.has-hl>figcaption{grid-row:4;margin-top:0}
 }
 .quote-src{font-size:1rem}
