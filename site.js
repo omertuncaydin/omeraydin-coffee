@@ -1,7 +1,7 @@
-/* omeraydin.coffee v2026-11-21a
+/* omeraydin.coffee v2026-11-21c
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
-   Asks the store behind the site manager which blocks are switched off, which classes are on the calendar and
-   which photos were uploaded for the learner cards, and sends the message form there.
+   Asks the store behind the site manager which blocks are switched off, which classes are on the calendar,
+   which photos were uploaded for the learner cards and which texts were written there, and sends the message form there.
    Keeps the glass menu readable: sets data-tone on the header from what is under its labels. */
 (() => {
   'use strict';
@@ -163,46 +163,167 @@
      An entry with neither: the quote in large type and "name · course", as before v2026-11-20d.
      The photo of a card is the one uploaded in the site manager, else the file named in content.js (see setPhotos).
      A card with an id carries data-vis="learner:<id>", so the site manager can switch it off like any other block.
-     starts: "hidden" turns that around: the card stays off until the site manager switches it on (see setHidden). */
+     starts: "hidden" turns that around: the card stays off until the site manager switches it on (see setHidden).
+     For a card with an id the site manager can also write another headline, name, title, company or quote, and
+     another order for the cards (see setCards): what it wrote is laid over what content.js says. */
   const text = (v) => (typeof v === 'string' ? v.trim() : '');
   const LEARNER_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
   const PHOTO_PATH = /^learners\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:jpg|png|webp)$/;
   const PHOTO_AT = /^(?:100|\d{1,2})% (?:100|\d{1,2})%$/;
-  const cards = [];   /* one entry per card that can carry a photo: { figure, slot, alt, file, fileAt, img, want } */
+  const CARD_TEXT = { headline: 200, name: 80, position: 80, company: 120, quote: 1500 };   /* what can be written for a card, and how long it may be */
+  const cards = [];    /* one entry per card that can carry a photo: { figure, slot, alt, file, fileAt, img, want } */
+  const people = [];   /* one entry per card: { id, q (its entry in content.js), figure, laid, card, drawn } */
   const quotes = (content.testimonials || []).filter((q) => q && text(q.quote) && text(q.name))
     .filter((q) => q.starts !== 'hidden' || LEARNER_ID.test(text(q.id)));   /* a card that starts hidden and has no id could never be switched on */
   const quoteSection = $('#quotes');
   const quoteGrid = $('#quote-grid');
+  /* the words of one card: what the site manager wrote for it (texts), else what content.js says. Only the words
+     are put in again; the photo stays where it is. */
+  const drawCard = (person, texts) => {
+    const q = person.q;
+    const said = (field) => {
+      const over = person.id && texts ? texts['learner:' + person.id + ':' + field] : null;
+      if (typeof over !== 'string' || over.length > CARD_TEXT[field]) return text(q[field]);
+      const clean = over.replace(/\s+/g, ' ').trim();
+      return clean || (field === 'name' || field === 'quote' ? text(q[field]) : '');   /* a card always has a name and a quote */
+    };
+    const headline = said('headline'), name = said('name'), position = said('position'), company = said('company'), quote = said('quote');
+    const print = JSON.stringify([headline, name, position, company, quote]);
+    if (person.drawn === print) return;
+    person.drawn = print;
+    const figure = person.figure;
+    figure.className = person.laid ? 'quote has-hl' + (headline ? '' : ' no-head') : 'quote';
+    for (const part of [...figure.children]) if (!part.classList.contains('quote-ph')) part.remove();
+    if (person.laid && headline) figure.append(make('h3', 'quote-hl', headline));
+    const who = name + (person.laid && position ? ', ' + position : '');
+    const second = headline ? company : (person.laid && company) || text(q.course) || text(q.role);
+    const by = make('figcaption', '', [who, second].filter(Boolean).join(' · '));
+    if (text(q.note)) by.append(make('span', 'quote-note', text(q.note)));
+    figure.append(make('blockquote', '', '“' + quote + '”'), by);
+    if (person.card) {
+      person.card.alt = text(q.photoAlt) || 'Photo of ' + name;
+      if (person.card.img) person.card.img.alt = person.card.alt;
+    }
+  };
   if (quotes.length && quoteSection && quoteGrid) {
     for (const q of quotes) {
-      const headline = text(q.headline);
       const id = LEARNER_ID.test(text(q.id)) ? text(q.id) : '';
-      const laidOut = !!(headline || id);
-      const figure = make('figure', laidOut ? 'quote has-hl' + (headline ? '' : ' no-head') : 'quote');
+      const figure = make('figure', 'quote');
       if (id) figure.dataset.vis = 'learner:' + id;
       if (id && q.starts === 'hidden') figure.dataset.starts = 'hidden';
-      if (laidOut) {
-        cards.push({
+      const person = { id, q, figure, laid: !!(text(q.headline) || id), card: null, drawn: null };
+      if (person.laid) {
+        person.card = {
           figure,
           slot: id ? 'learner:' + id : '',
-          alt: text(q.photoAlt) || 'Photo of ' + text(q.name),
+          alt: '',
           file: /^assets\/[\w./-]+\.(?:jpe?g|png|webp|avif)$/i.test(text(q.photo)) ? text(q.photo) : '',
           fileAt: PHOTO_AT.test(text(q.photoAt)) ? text(q.photoAt) : '50% 50%',
           img: null,
           want: null
-        });
-        if (headline) figure.append(make('h3', 'quote-hl', headline));
+        };
+        cards.push(person.card);
       }
-      const who = text(q.name) + (laidOut && text(q.position) ? ', ' + text(q.position) : '');
-      const second = headline ? text(q.company) : (laidOut && text(q.company)) || text(q.course) || text(q.role);
-      const by = make('figcaption', '', [who, second].filter(Boolean).join(' · '));
-      if (text(q.note)) by.append(make('span', 'quote-note', text(q.note)));
-      figure.append(make('blockquote', '', '“' + text(q.quote) + '”'), by);
+      people.push(person);
+      drawCard(person, null);
       quoteGrid.append(figure);
     }
-    quoteGrid.classList.toggle('has-hl', quotes.some((q) => text(q.headline) || LEARNER_ID.test(text(q.id))));
+    quoteGrid.classList.toggle('has-hl', people.some((person) => person.laid));
     quoteSection.hidden = false;
   }
+  /* what the site manager wrote for the cards: their words (see drawCard) and their order. "learners:order" names
+     card ids in the order wanted; a card it does not name follows after them, in the order of content.js. */
+  const setCards = (texts) => {
+    if (!quoteGrid || !people.length) return;
+    for (const person of people) drawCard(person, texts);
+    const named = typeof texts['learners:order'] === 'string' && texts['learners:order'].length <= 4000
+      ? texts['learners:order'].split(' ').filter((id) => LEARNER_ID.test(id)) : [];
+    const place = (person, n) => {
+      const at = person.id ? named.indexOf(person.id) : -1;
+      return at < 0 ? named.length + n : at;
+    };
+    const sorted = people.map((person, n) => ({ person, at: place(person, n) })).sort((a, b) => a.at - b.at).map((x) => x.person.figure);
+    const now = [...quoteGrid.children];
+    if (sorted.length === now.length && sorted.every((figure, n) => figure === now[n])) return;
+    quoteGrid.append(...sorted);
+  };
+
+  /* texts the site manager can replace. An element that carries data-edit="key" in index.html shows what the
+     store holds under that key, written in a small notation: **bold**, [words](https://address), a new line for a
+     line break, and in a list one line per entry. With nothing in the store the element stays as index.html has it.
+     An emptied text hides its element (not one marked data-edit-need), and a box (data-edit-box) whose texts are all
+     emptied goes with them. What comes from the store is put in as text and as these few elements, never as HTML. */
+  const EDIT_KEY = /^[a-z0-9]+:[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  const edits = [...document.querySelectorAll('[data-edit]')]
+    .map((el) => ({ el, key: el.getAttribute('data-edit'), list: el.tagName === 'UL' || el.tagName === 'OL', need: el.hasAttribute('data-edit-need'), first: [...el.childNodes].map((node) => node.cloneNode(true)), now: null }))
+    .filter((edit) => EDIT_KEY.test(edit.key));
+  const inline = (line) => {
+    const out = [];
+    const marks = /\*\*([^*]+)\*\*|\[([^\]]+)\]\((https:\/\/[^\s()"'<>\\]+)\)/g;
+    let at = 0;
+    for (let found = marks.exec(line); found; found = marks.exec(line)) {
+      if (found.index > at) out.push(line.slice(at, found.index));
+      if (found[1] != null) out.push(make('b', '', found[1]));
+      else {
+        const link = make('a', 'u', found[2]);
+        link.href = found[3];
+        out.push(link);
+      }
+      at = marks.lastIndex;
+    }
+    if (at < line.length) out.push(line.slice(at));
+    return out;
+  };
+  const setTexts = (texts) => {
+    let changed = false;
+    for (const edit of edits) {
+      let value = typeof texts[edit.key] === 'string' && texts[edit.key].length <= 4000 ? texts[edit.key].replace(/\r\n?/g, '\n').trim() : null;
+      if (value === '' && edit.need) value = null;
+      if (value === edit.now) continue;
+      edit.now = value;
+      changed = true;
+      if (value === null) {
+        edit.el.replaceChildren(...edit.first.map((node) => node.cloneNode(true)));
+        edit.el.hidden = false;
+        continue;
+      }
+      const lines = value.split('\n').map((line) => line.trim());
+      if (edit.list) {
+        edit.el.replaceChildren(...lines.filter(Boolean).map((line) => {
+          const item = make('li');
+          item.append(...inline(line));
+          return item;
+        }));
+      } else {
+        const parts = [];
+        lines.forEach((line, n) => {
+          if (n) parts.push(make('br'));
+          parts.push(...inline(line));
+        });
+        edit.el.replaceChildren(...parts);
+      }
+      edit.el.hidden = !value;
+    }
+    if (!changed) return;
+    for (const box of document.querySelectorAll('[data-edit-box]')) {
+      const inside = edits.filter((edit) => box.contains(edit.el));
+      box.hidden = inside.length > 0 && inside.every((edit) => edit.el.hidden);
+    }
+  };
+  /* what the store (or this browser's memory) says about texts: keys and words only, nothing oversized */
+  const cleanTexts = (given) => {
+    const clean = {};
+    if (!given || typeof given !== 'object' || Array.isArray(given)) return clean;
+    let room = 60000;
+    for (const key of Object.keys(given)) {
+      const value = given[key];
+      if (!/^[a-z0-9]+(?::[a-z0-9]+(?:-[a-z0-9]+)*){1,2}$/.test(key) || typeof value !== 'string' || value.length > 4000) continue;
+      room -= key.length + value.length;
+      if (room < 0) break;
+      clean[key] = value;
+    }
+    return clean;
+  };
 
   /* ---------- what the site manager controls: hidden blocks, training dates, the message form ---------- */
 
@@ -333,11 +454,11 @@
     }
     if (courses.length && courses.every((course) => off.has(course.dataset.vis))) off.add('courses');
     /* the same for the learner cards: with every card switched off, the block and its menu link go too */
-    const people = [...document.querySelectorAll('#quote-grid > .quote')];
-    for (const person of people) {
-      if (person.dataset.starts === 'hidden' && !on.has('shown:' + person.dataset.vis.slice(8))) off.add(person.dataset.vis);
+    const figures = [...document.querySelectorAll('#quote-grid > .quote')];
+    for (const figure of figures) {
+      if (figure.dataset.starts === 'hidden' && !on.has('shown:' + figure.dataset.vis.slice(8))) off.add(figure.dataset.vis);
     }
-    if (people.length && people.every((person) => person.dataset.vis && off.has(person.dataset.vis))) off.add('quotes');
+    if (figures.length && figures.every((figure) => figure.dataset.vis && off.has(figure.dataset.vis))) off.add('quotes');
     const keys = [...off].sort();
     const record = keys.concat([...on].sort()).join(' ');   /* what the next visit starts from: the same list gives the same page */
     let rule = document.getElementById('vis');
@@ -491,9 +612,12 @@
   }
 
   /* first what this browser remembers, then what the store says now */
-  let state = { hide: '', trainings: null, form: false };
+  let state = { hide: '', trainings: null, form: false, texts: {} };
   const show = (next) => steady(() => {
-    state = { hide: setHidden(next.hidden), trainings: Array.isArray(next.trainings) ? next.trainings : null, form: !!next.form };
+    const texts = next.texts === undefined ? state.texts : cleanTexts(next.texts);   /* a call that says nothing about texts leaves them */
+    setCards(texts);
+    setTexts(texts);
+    state = { hide: setHidden(next.hidden), trainings: Array.isArray(next.trainings) ? next.trainings : null, form: !!next.form, texts };
     drawDates(state.trainings);
     showForm(state.form, state.hide);
     retone();
@@ -502,7 +626,7 @@
   if (!storeOn) {
     /* no store: every block shows, hand-written dates if any, no form */
     remember(null);
-    show({ hidden: [], trainings: null, form: false });
+    show({ hidden: [], trainings: null, form: false, texts: null });
     setPhotos(null);
     settled();
     return;
@@ -512,13 +636,13 @@
   let photos = null;   /* which uploaded photos the store holds; null until this browser has heard from the store */
   if (kept && typeof kept.hide === 'string') {
     const recent = typeof kept.at === 'number' && Date.now() - kept.at < week;
-    show({ hidden: kept.hide.split(' '), trainings: recent ? kept.trainings : null, form: recent && kept.form === true });
+    show({ hidden: kept.hide.split(' '), trainings: recent ? kept.trainings : null, form: recent && kept.form === true, texts: kept.texts || null });
     photos = cleanPhotos(kept.photos);
     setPhotos(photos);
   } else {
-    show({ hidden: [], trainings: null, form: false });   /* first visit: the photos wait for the store's answer */
+    show({ hidden: [], trainings: null, form: false, texts: null });   /* first visit: the photos wait for the store's answer */
   }
-  const keep = () => remember({ hide: state.hide, trainings: state.trainings, form: state.form, photos: photos || {}, at: Date.now() });
+  const keep = () => remember({ hide: state.hide, trainings: state.trainings, form: state.form, photos: photos || {}, texts: state.texts, at: Date.now() });
   (async () => {
     let now;
     try {
@@ -530,7 +654,7 @@
       if (!photos) setPhotos(null);   /* no answer and nothing remembered: the files named in content.js */
       return settled();
     }
-    show({ hidden: now.hidden, trainings: Array.isArray(now.trainings) ? now.trainings : state.trainings, form: now.form === true });
+    show({ hidden: now.hidden, trainings: Array.isArray(now.trainings) ? now.trainings : state.trainings, form: now.form === true, texts: now.texts || null });
     photos = cleanPhotos(now.photos);
     setPhotos(photos);
     settled();

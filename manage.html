@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Site manager · omeraydin.coffee</title>
 <meta name="robots" content="noindex,nofollow">
-<meta name="version" content="v2026-11-21b">
+<meta name="version" content="v2026-11-21c">
 <meta name="theme-color" content="#F4F1E0">
 <link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
 <link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
 <style>
-/* omeraydin.coffee site manager v2026-11-21b. Same colours and fonts as the site it manages. */
+/* omeraydin.coffee site manager v2026-11-21c. Same colours and fonts as the site it manages. */
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-ext-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -25,10 +25,10 @@ h1,h2,h3,p,ul{margin:0}
 ul{padding:0;list-style:none}
 svg{display:block}
 a{color:inherit;text-underline-offset:.2em;text-decoration-thickness:1px}
-button,input{font:inherit;letter-spacing:inherit;color:inherit}
+button,input,textarea{font:inherit;letter-spacing:inherit;color:inherit}
 button{cursor:pointer}
 button:disabled{cursor:default}
-a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 [hidden]{display:none!important}
 .app{max-width:920px;margin:0 auto;padding:0 clamp(16px,3vw,32px) 120px}
 
@@ -131,6 +131,27 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 .learner.under .eye{opacity:.45}
 .learner.pub{box-shadow:inset 4px 0 0 var(--verm),inset 0 0 0 1px var(--line)}
 .learner.changed.pub{box-shadow:inset 4px 0 0 var(--verm),inset 0 0 0 2px var(--verm-ink)}
+.move{flex:none;display:flex;margin:-6px 0 0}
+.move button{display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:transparent;transition:background-color .15s ease}
+.move button:hover:not(:disabled){background:rgba(29,29,29,.08)}
+.move button:disabled{opacity:.28}
+.move svg{width:22px;height:22px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field>span{font-size:.9375rem;color:var(--soft)}
+.field input,.field textarea{display:block;width:100%;margin:0;padding:11px 16px;border:0;border-radius:14px;background:var(--cream);box-shadow:inset 0 0 0 1px var(--line-strong);line-height:1.35}
+.field textarea{resize:vertical}
+.field input:disabled,.field textarea:disabled{opacity:.6}
+.field .hint{font-size:.875rem;color:var(--soft);text-wrap:pretty}
+.field .hint button{padding:0;border:0;background:transparent;text-decoration:underline;text-underline-offset:.2em;color:var(--ink)}
+.words{grid-column:1/-1;display:flex;flex-direction:column;gap:14px;padding-top:18px;border-top:1px solid var(--line)}
+.words-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px}
+.words .learner-acts{margin-top:2px}
+.source{font-size:.9375rem;color:var(--soft)}
+.source summary{cursor:pointer;width:max-content;max-width:100%}
+.source p{margin-top:8px;color:var(--ink);text-wrap:pretty}
+.source p b{display:block;font-weight:400;color:var(--soft)}
+.pop{display:flex;flex-direction:column;gap:18px;padding:22px;border-radius:20px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.pop .field.changed>span:first-child::after{content:" · changed here";color:var(--verm-ink)}
 .foot{margin-top:34px;font-size:.875rem;color:var(--soft)}
 
 @media (max-width:560px){
@@ -138,11 +159,13 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
   .row[data-depth="1"]{padding-left:30px}
   .row[data-depth="2"]{padding-left:46px}
   .state{display:none}
-  .tabs{width:100%}
-  .tab{flex:1 1 0;justify-content:center;padding:6px 10px}
+  .tabs{width:100%;flex-wrap:wrap;border-radius:26px}
+  .tab{flex:1 1 40%;justify-content:center;padding:6px 10px}
   .learner{grid-template-columns:minmax(0,1fr)}
+  .words-two{grid-template-columns:minmax(0,1fr)}
+  .pop{padding:18px 16px}
 }
-@media (prefers-reduced-motion:reduce){.pill,.eye{transition:none}}
+@media (prefers-reduced-motion:reduce){.pill,.eye,.move button{transition:none}}
 </style>
 </head>
 <body>
@@ -177,6 +200,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     <button class="tab" id="tab-vis" type="button" role="tab" aria-selected="true" aria-controls="pane-vis">Visibility</button>
     <button class="tab" id="tab-inbox" type="button" role="tab" aria-selected="false" aria-controls="pane-inbox">Messages <span class="count" id="new-count"></span></button>
     <button class="tab" id="tab-learn" type="button" role="tab" aria-selected="false" aria-controls="pane-learn">Learners</button>
+    <button class="tab" id="tab-pop" type="button" role="tab" aria-selected="false" aria-controls="pane-pop">Pop-up</button>
   </div>
 
   <section id="pane-vis" role="tabpanel" aria-labelledby="tab-vis">
@@ -197,7 +221,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
   </section>
 
   <section id="pane-learn" role="tabpanel" aria-labelledby="tab-learn" hidden>
-    <p class="lead">The learner cards, in their order on the page. Every public course review on coffeenutz.net has a card here; a card you have not chosen yet is hidden. The eye shows or hides a card; like on the Visibility tab, that reaches the site when you press Publish. For the photo: choose a picture from your computer, drag it inside the frame until the crop is right, then save. The picture is made smaller before it is sent. Download saves the picture of a card to your computer.</p>
+    <p class="lead">The learner cards, in their order on the page. Every public course review on coffeenutz.net has a card here; a card you have not chosen yet is hidden. The eye shows or hides a card and, like on the Visibility tab, waits for Publish. Edit text opens the headline, name, title, company and quote of a card; the arrows move a card up or down. Text and order are saved at once. For the photo: choose a picture, drag it inside the frame until the crop is right, then save; it is made smaller before it is sent. Download saves the picture of a card to your computer.</p>
     <div class="inbox-top" id="learn-top">
       <button class="pill pill-sm" id="le-all" type="button" aria-pressed="true">All</button>
       <button class="pill pill-sm" id="le-on" type="button" aria-pressed="false">On the site</button>
@@ -208,7 +232,18 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     <div id="learners"></div>
   </section>
 
-  <p class="foot">Site manager v2026-11-21b · <a href="./">Open omeraydin.coffee</a></p>
+  <section id="pane-pop" role="tabpanel" aria-labelledby="tab-pop" hidden>
+    <p class="lead">The texts of the pop-up that “More about Ömer Aydın” opens. Change a text and press Save; visitors see it the next time they open the site. A link is written as [words](https://address), bold as **words**. In the list every line is one entry. A text you empty is left out of the pop-up.</p>
+    <p class="say" id="pop-off" role="status" aria-live="polite"></p>
+    <div class="pop" id="pop"></div>
+    <div class="learner-acts" id="pop-acts">
+      <button class="pill pill-sm pill-solid" id="pop-save" type="button">Save</button>
+      <button class="pill pill-sm" id="pop-undo" type="button">Undo changes</button>
+    </div>
+    <p class="say" id="pop-say" role="status" aria-live="polite"></p>
+  </section>
+
+  <p class="foot">Site manager v2026-11-21c · <a href="./">Open omeraydin.coffee</a></p>
 </main>
 
 <div class="publish" id="publish" hidden>
@@ -223,15 +258,16 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 <script src="content.js?v=2026-11-21b"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* omeraydin.coffee site manager v2026-11-21b
+/* omeraydin.coffee site manager v2026-11-21c
    Signs in with the CoffeeNutz admin account and edits what the store holds for the site:
-   which blocks are hidden (table site_settings), the messages visitors sent (table site_messages) and the photos
-   of the learner cards (table site_photos, files in the photo store "site").
-   The list of blocks is read from the live page itself: every element there that carries data-vis is one row here.
-   The list of learners is read from content.js. */
+   which blocks are hidden (table site_settings), the messages visitors sent (table site_messages), the photos
+   of the learner cards (table site_photos, files in the photo store "site") and the texts written here in place
+   of a text of the site (table site_texts): the words and the order of the learner cards, the texts of the pop-up.
+   The list of blocks is read from the live page itself: every element there that carries data-vis is one row here,
+   and every element that carries data-edit is a text that can be replaced. The list of learners is read from content.js. */
 (() => {
   'use strict';
-  const VERSION = 'v2026-11-21b';
+  const VERSION = 'v2026-11-21c';
   const content = window.siteContent || {};
   const $ = (id) => document.getElementById(id);
   const make = (tag, cls, text) => {
@@ -255,6 +291,8 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
   };
   const EYE = ['M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z', 'M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z'];
   const EYE_SHUT = ['M4 4l16 16', 'M9.6 6A9.6 9.6 0 0 1 12 5.5C18 5.5 21.5 12 21.5 12a17.6 17.6 0 0 1-2.9 3.7', 'M15.4 17.8A9 9 0 0 1 12 18.5C6 18.5 2.5 12 2.5 12a17 17 0 0 1 3.9-4.4', 'M10 10.1a3.2 3.2 0 0 0 4.2 4.3'];
+  const UP = ['M6 14.5l6-6 6 6'];
+  const DOWN = ['M6 9.5l6 6 6-6'];
   const when = (iso) => {
     const d = new Date(iso);
     if (isNaN(d)) return '';
@@ -309,6 +347,21 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
   let feed = null;            // { count, fetched_at, tried_at, error } from the store
   let listed = null;          // how many classes the site lists right now
   const TONES = { 'panel-black': '#1D1D1D', 'panel-blue': '#2B6CA6', 'panel-yellow': '#F6CD45', 'panel-verm': '#EB5027' };
+  /* the text of an element of the page in the notation of the fields here (the site turns it back, see setTexts in
+     site.js): **bold**, [words](https://address), a new line for a line break, in a list one line per entry */
+  const noted = (el) => {
+    const walk = (node) => [...node.childNodes].map((n) => {
+      if (n.nodeType === 3) return n.nodeValue.replace(/\s+/g, ' ');
+      if (n.nodeType !== 1) return '';
+      if (n.tagName === 'BR') return '\n';
+      if (n.tagName === 'B' || n.tagName === 'STRONG') return '**' + walk(n) + '**';
+      if (n.tagName === 'A' && /^https:\/\/[^\s()"'<>\\]+$/.test(n.getAttribute('href') || '')) return '[' + walk(n) + '](' + n.getAttribute('href') + ')';
+      return walk(n);
+    }).join('');
+    const tidy = (value) => value.split('\n').map((line) => line.trim()).join('\n').trim();
+    if (el.tagName === 'UL' || el.tagName === 'OL') return [...el.children].map((item) => tidy(walk(item))).filter(Boolean).join('\n');
+    return tidy(walk(el));
+  };
   const readPage = async () => {
     const response = await fetch('./?manage=' + Date.now(), { cache: 'no-store' });
     if (!response.ok) throw new Error('page ' + response.status);
@@ -331,6 +384,19 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
       });
     }
     if (!found.length) throw new Error('no blocks');
+    const editable = [];
+    for (const el of doc.querySelectorAll('[data-edit]')) {
+      const key = el.getAttribute('data-edit');
+      if (!/^[a-z0-9]+:[a-z0-9]+(?:-[a-z0-9]+)*$/.test(key) || editable.some((f) => f.key === key)) continue;
+      editable.push({
+        key,
+        name: (el.getAttribute('data-edit-name') || key).replace(/\s+/g, ' ').trim().slice(0, 80),
+        list: el.tagName === 'UL' || el.tagName === 'OL',
+        need: el.hasAttribute('data-edit-need'),
+        first: noted(el)
+      });
+    }
+    fields = editable;
     return found;
   };
   const under = (block, set) => {
@@ -613,20 +679,120 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
   const LEARNER_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
   const PHOTO_PATH = /^learners\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:jpg|png|webp)$/;
   const PHOTO_AT = /^(100|\d{1,2})% (100|\d{1,2})%$/;
+  /* the words of a card that can be written here: [field in content.js, its name here, longest text]. The site (drawCard in site.js) knows the same list. */
+  const CARD_FIELDS = [['headline', 'Headline', 200], ['name', 'Name', 80], ['position', 'Title', 80], ['company', 'Company', 120], ['quote', 'Quote', 1500]];
   const learners = (Array.isArray(content.testimonials) ? content.testimonials : [])
     .filter((q) => q && text(q.quote) && text(q.name))
     .filter((q) => q.starts !== 'hidden' || LEARNER_ID.test(text(q.id)))
-    .map((q) => ({
-      id: LEARNER_ID.test(text(q.id)) ? text(q.id) : '',
-      name: text(q.name),
-      company: text(q.company),
-      course: text(q.course),
-      quote: text(q.quote),
-      startsOff: q.starts === 'hidden',
-      headline: text(q.headline),
-      file: /^assets\/[\w./-]+\.(?:jpe?g|png|webp|avif)$/i.test(text(q.photo)) ? text(q.photo) : '',
-      fileAt: PHOTO_AT.test(text(q.photoAt)) ? text(q.photoAt) : '50% 50%'
-    }));
+    .map((q, at) => {
+      const base = { headline: text(q.headline), name: text(q.name), position: text(q.position), company: text(q.company), quote: text(q.quote) };
+      return Object.assign({
+        id: LEARNER_ID.test(text(q.id)) ? text(q.id) : '',
+        at,                               // its place in content.js
+        base,                             // its words in content.js
+        course: text(q.course),
+        original: text(q.original),       // the review as it was written, when content.js keeps it
+        startsOff: q.starts === 'hidden',
+        file: /^assets\/[\w./-]+\.(?:jpe?g|png|webp|avif)$/i.test(text(q.photo)) ? text(q.photo) : '',
+        fileAt: PHOTO_AT.test(text(q.photoAt)) ? text(q.photoAt) : '50% 50%'
+      }, base);                           // headline, name, position, company, quote as shown: content.js until syncCards lays the store's texts over them
+    });
+  /* ---------- texts written here: the words of a card, the order of the cards, the pop-up ---------- */
+  let texts = {};             // key -> text, as the store holds it (table site_texts)
+  let textsOff = '';          // why texts cannot be read or saved
+  let fields = [];            // the texts of the page that can be replaced: { key, name, list, need, first }, read from the live page
+  let editing = null;         // { id, values, ask } while the words of one card are open here
+  let popDraft = {};          // key -> text typed in the Pop-up tab and not saved yet
+  let popSaid = '';
+  const oneLine = (value) => String(value).replace(/\s+/g, ' ').trim();
+  const fit = (area) => {   // a field as tall as its text; measured only while its tab is open
+    if (!area.offsetParent) return;
+    area.style.height = 'auto';
+    area.style.height = Math.min(1200, area.scrollHeight + 2) + 'px';
+  };
+  const wordsOf = (L, field) => {   // what the site shows: the text written here, else content.js (the rule of drawCard in site.js)
+    const over = L.id ? texts['learner:' + L.id + ':' + field] : null;
+    if (typeof over !== 'string' || over.length > CARD_FIELDS.find((f) => f[0] === field)[2]) return L.base[field];
+    const clean = oneLine(over);
+    return clean || (field === 'name' || field === 'quote' ? L.base[field] : '');
+  };
+  const wordsHere = (L) => !!L.id && CARD_FIELDS.some(([field]) => ('learner:' + L.id + ':' + field) in texts);
+  const wordsDirty = () => {
+    const L = editing ? learners.find((x) => x.id === editing.id) : null;
+    return !!L && CARD_FIELDS.some(([field]) => oneLine(editing.values[field]) !== L[field]);
+  };
+  /* after the texts changed: the words shown on each card, the order of the cards, and their rows in the list of blocks */
+  const syncCards = () => {
+    for (const L of learners) for (const [field] of CARD_FIELDS) L[field] = wordsOf(L, field);
+    const named = typeof texts['learners:order'] === 'string' ? texts['learners:order'].split(' ').filter((id) => LEARNER_ID.test(id)) : [];
+    const place = (L) => {
+      const at = L.id ? named.indexOf(L.id) : -1;
+      return at < 0 ? named.length + L.at : at;
+    };
+    learners.sort((a, b) => place(a) - place(b));
+    if (blocks.length) blocks = withLearners(blocks.filter((b) => !b.card));
+  };
+  const missingTable = (error) => error.code === '42P01' || error.code === 'PGRST205' || /does not exist|could not find the table/i.test(error.message || '');
+  const loadTexts = async () => {
+    const { data, error } = await SB.from('site_texts').select('key,value');
+    texts = {};
+    if (error) {
+      textsOff = missingTable(error) ? 'Texts and the order of the cards cannot be saved yet. Run the newest omeraydin-site.sql once in the Supabase SQL editor, then load this page again.' : 'The texts could not be read: ' + (error.message || 'no answer') + '.';
+      return;
+    }
+    textsOff = '';
+    for (const row of data || []) if (row && typeof row.key === 'string' && typeof row.value === 'string') texts[row.key] = row.value;
+  };
+  /* writes rows and takes rows away in the table of texts; answers '' when it worked, else the reason */
+  const writeTexts = async (rows, gone) => {
+    if (rows.length) {
+      const { error } = await SB.from('site_texts').upsert(rows, { onConflict: 'key' }).select('key');
+      if (error) return error.message || 'the store did not keep it';
+      for (const row of rows) texts[row.key] = row.value;
+    }
+    if (gone.length) {
+      const { error } = await SB.from('site_texts').delete().in('key', gone).select('key');
+      if (error) return error.message || 'the store did not take it away';
+      for (const key of gone) delete texts[key];
+    }
+    return '';
+  };
+  /* the order of the cards is saved at once; presses that come while a save is on its way are sent after it, the last one wins */
+  let orderWant = null;
+  let orderBusy = false;
+  let orderWho = '';          // the card that was moved last: the line about the save is shown on it
+  const saveOrder = async (ids, id) => {
+    orderWant = ids.join(' ');
+    orderWho = id;
+    texts['learners:order'] = orderWant;
+    if (orderBusy) return;
+    orderBusy = true;
+    let failed = '';
+    while (orderWant !== null) {
+      const value = orderWant;
+      orderWant = null;
+      const { error } = await SB.from('site_texts').upsert({ key: 'learners:order', value }, { onConflict: 'key' }).select('key');
+      failed = error ? (error.message || 'the store did not keep it') : '';
+      if (failed) break;
+    }
+    orderBusy = false;
+    orderWant = null;
+    if (failed) {
+      await loadTexts();
+      syncCards();
+      drawTree();
+    }
+    said[orderWho] = failed ? 'The order was not saved: ' + failed + '. The cards are back where the site has them.' : 'Moved. Visitors see the new order the next time they open the site.';
+    /* the list is drawn again to show that line: an arrow that holds the focus keeps it, so it can be pressed again */
+    const held = document.activeElement && document.activeElement.closest ? document.activeElement.closest('.move button') : null;
+    const mark = held && held.closest('.learner') ? { id: held.closest('.learner').dataset.id, way: held.className } : null;
+    drawLearners();
+    if (mark) {
+      const arrows = [...$('learners').querySelectorAll('.learner[data-id="' + mark.id + '"] .move button')].filter((b) => !b.disabled);
+      const again = arrows.find((b) => b.className === mark.way) || arrows[0];
+      if (again) again.focus();
+    }
+  };
   let photos = {};            // slot -> { path, at, updated_at } as the store holds it
   let photoStore = null;      // 'ready', or the reason the photo store is not set up
   let photosOff = '';         // why the list of photos could not be read
@@ -635,7 +801,10 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
   let dropping = null;        // learner id whose Remove was pressed once
   let learnShow = 'all';      // which cards the Learners tab lists: all, on (on the site), off (hidden)
   const publicUrl = (path) => url + '/storage/v1/object/public/site/' + path;
-  const unsaved = () => Object.keys(pending).length;
+  const popNow = (f) => (typeof texts[f.key] === 'string' ? texts[f.key] : f.first);   // what the site shows for a text of the pop-up
+  const popTidy = (value) => String(value).replace(/\r\n?/g, '\n').split('\n').map((line) => line.trim()).join('\n').trim();
+  const popChanges = () => fields.filter((f) => f.key in popDraft && popTidy(popDraft[f.key]) !== popTidy(popNow(f)));
+  const unsaved = () => Object.keys(pending).length + (wordsDirty() ? 1 : 0) + popChanges().length;
   /* the cards join the list of blocks right under "What learners say", so the eye, Undo and Publish treat them like any other block */
   const withLearners = (found) => {
     const at = found.findIndex((b) => b.key === 'quotes');
@@ -703,7 +872,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     const box = $('learners');
     box.replaceChildren();
     const top = $('learn-say');
-    top.textContent = photosOff || (photoStore && photoStore !== 'ready' ? 'Photos cannot be uploaded yet: ' + photoStore + '. Run the newest omeraydin-site.sql once in the Supabase SQL editor and send the result row if this stays.' : '');
+    top.textContent = photosOff || (photoStore && photoStore !== 'ready' ? 'Photos cannot be uploaded yet: ' + photoStore + '. Run the newest omeraydin-site.sql once in the Supabase SQL editor and send the result row if this stays.' : '') || textsOff;
     if (!learners.length) {
       $('learn-top').hidden = true;
       box.append(make('p', 'empty', 'content.js has no learner cards yet.'));
@@ -812,6 +981,35 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
       }
       const head = make('div', 'learner-top');
       head.append(who);
+      if (L.id) {
+        /* up and down among the cards listed here; a card that the filter leaves out is jumped over */
+        const seen = listed.filter((x) => x.id).map((x) => x.id);
+        const here = seen.indexOf(L.id);
+        const move = make('div', 'move');
+        for (const [dir, paths, word] of [[-1, UP, 'up'], [1, DOWN, 'down']]) {
+          const other = seen[here + dir];
+          const arrow = make('button', dir < 0 ? 'up' : 'down');
+          arrow.type = 'button';
+          arrow.disabled = !other || !!textsOff;
+          arrow.setAttribute('aria-label', 'Move the card of ' + L.name + ' ' + word);
+          arrow.title = 'Move ' + word;
+          arrow.append(icon(paths));
+          arrow.addEventListener('click', () => {
+            const rest = learners.filter((x) => x.id && x.id !== L.id).map((x) => x.id);
+            rest.splice(rest.indexOf(other) + (dir > 0 ? 1 : 0), 0, L.id);
+            for (const id of Object.keys(said)) if (/^Moved\./.test(said[id])) said[id] = '';
+            saveOrder(rest, L.id);
+            syncCards();
+            drawTree();
+            drawLearners();
+            const again = box.querySelector('.learner[data-id="' + L.id + '"] .move .' + (dir < 0 ? 'up' : 'down'));
+            if (again && !again.disabled) again.focus();
+            else { const turn = box.querySelector('.learner[data-id="' + L.id + '"] .move button:not(:disabled)'); if (turn) turn.focus(); }
+          });
+          move.append(arrow);
+        }
+        head.append(move);
+      }
       if (block) {
         const eye = make('button', 'eye');
         eye.type = 'button';
@@ -981,12 +1179,248 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
           });
           acts.append(remove);
         }
+        /* after the buttons of the photo: the words of the card */
+        if (!(editing && editing.id === L.id)) {
+          const edit = make('button', 'pill pill-sm', 'Edit text');
+          edit.type = 'button';
+          edit.disabled = !!textsOff;
+          edit.addEventListener('click', () => {
+            if (editing && editing.id !== L.id && wordsDirty()) {
+              said[L.id] = 'Save or cancel the text of the other card first.';
+              line.textContent = said[L.id];
+              return;
+            }
+            editing = { id: L.id, values: {}, ask: false };
+            for (const [field] of CARD_FIELDS) editing.values[field] = L[field];
+            said[L.id] = '';
+            drawLearners();
+            const first = box.querySelector('.learner[data-id="' + L.id + '"] .words textarea, .learner[data-id="' + L.id + '"] .words input');
+            if (first) first.focus();
+          });
+          acts.append(edit);
+        }
       }
       what.append(acts, line);
       card.append(frame, what);
+      if (editing && editing.id === L.id && L.id) card.append(wordsForm(L, box));
       box.append(card);
+      for (const area of card.querySelectorAll('.words textarea')) fit(area);
     }
   };
+  /* the words of one card, open for writing: headline, name, title, company, quote. Saved at once, without Publish. */
+  const wordsForm = (L, box) => {
+    const form = make('div', 'words');
+    const put = (field, label, max, hint) => {
+      const wrap = make('label', 'field');
+      wrap.append(make('span', '', label));
+      const input = make(field === 'quote' || field === 'headline' ? 'textarea' : 'input');
+      if (input.tagName === 'INPUT') input.type = 'text';
+      else input.rows = field === 'quote' ? 4 : 1;
+      input.maxLength = max;
+      input.value = editing.values[field];
+      input.dataset.field = field;
+      input.spellcheck = true;
+      input.addEventListener('input', () => {
+        editing.values[field] = input.value;
+        if (input.tagName === 'TEXTAREA') fit(input);
+      });
+      wrap.append(input);
+      if (hint) wrap.append(make('span', 'hint', hint));
+      return wrap;
+    };
+    const by = Object.fromEntries(CARD_FIELDS.map((f) => [f[0], f]));
+    const two = make('div', 'words-two');
+    two.append(put('position', by.position[1], by.position[2], 'For example: head roaster'), put('company', by.company[1], by.company[2], ''));
+    form.append(
+      put('headline', by.headline[1], by.headline[2], 'The red line above the quote. Left empty, the card shows without one.'),
+      put('name', by.name[1], by.name[2], ''),
+      two,
+      put('quote', by.quote[1], by.quote[2], 'The quote marks are added by the site.'));
+    /* what the site files say, to copy from or to go back to */
+    const changed = CARD_FIELDS.filter(([field]) => L[field] !== L.base[field]);
+    if (changed.length || L.original) {
+      const source = make('details', 'source');
+      source.append(make('summary', '', 'What the site files say'));
+      for (const [field, label] of CARD_FIELDS) {
+        if (field !== 'quote' && L[field] === L.base[field]) continue;
+        const row = make('p');
+        row.append(make('b', '', label), L.base[field] || '(empty)');
+        source.append(row);
+      }
+      if (L.original) {
+        const row = make('p');
+        row.append(make('b', '', 'The review as it was written'), L.original);
+        source.append(row);
+      }
+      form.append(source);
+    }
+    const acts = make('div', 'learner-acts');
+    const line = make('p', 'say');
+    line.setAttribute('role', 'status');
+    const close = () => { editing = null; drawTree(); drawLearners(); };
+    if (editing.ask) {
+      /* second press: the texts written here for this card are taken away */
+      const yes = make('button', 'pill pill-sm pill-solid', 'Put it back');
+      yes.type = 'button';
+      const no = make('button', 'pill pill-sm', 'Keep');
+      no.type = 'button';
+      no.addEventListener('click', () => { editing.ask = false; drawLearners(); });
+      yes.addEventListener('click', async () => {
+        yes.disabled = true;
+        no.disabled = true;
+        const failed = await writeTexts([], CARD_FIELDS.map(([field]) => 'learner:' + L.id + ':' + field).filter((key) => key in texts));
+        syncCards();
+        if (failed) {
+          editing.ask = false;
+          said[L.id] = 'That was not changed: ' + failed + '.';
+          return drawLearners();
+        }
+        said[L.id] = 'The card shows the text of the site files again.';
+        close();
+      });
+      acts.append(make('span', 'ask', 'Take away what was written here for this card and show the text of the site files again?'), yes, no);
+    } else {
+      const save = make('button', 'pill pill-sm pill-solid', 'Save text');
+      save.type = 'button';
+      const cancel = make('button', 'pill pill-sm', 'Cancel');
+      cancel.type = 'button';
+      cancel.addEventListener('click', () => { said[L.id] = ''; close(); });
+      save.addEventListener('click', async () => {
+        const values = {};
+        for (const [field] of CARD_FIELDS) values[field] = oneLine(editing.values[field]);
+        if (!values.name || !values.quote) {
+          line.textContent = !values.name ? 'A card needs a name.' : 'A card needs a quote.';
+          return;
+        }
+        const rows = [], gone = [];
+        for (const [field] of CARD_FIELDS) {
+          const key = 'learner:' + L.id + ':' + field;
+          if (values[field] === L.base[field]) { if (key in texts) gone.push(key); }
+          else if (texts[key] !== values[field]) rows.push({ key, value: values[field] });
+        }
+        if (!rows.length && !gone.length) {
+          said[L.id] = 'Nothing was changed.';
+          return close();
+        }
+        save.disabled = true;
+        cancel.disabled = true;
+        line.textContent = 'Saving…';
+        const failed = await writeTexts(rows, gone);
+        syncCards();
+        if (failed) {
+          line.textContent = 'That was not saved: ' + failed + '. Nothing changed on the site.';
+          save.disabled = false;
+          cancel.disabled = false;
+          return;
+        }
+        said[L.id] = 'Saved. Visitors see it the next time they open the site.';
+        close();
+      });
+      acts.append(save, cancel);
+      if (wordsHere(L)) {
+        const back = make('button', 'pill pill-sm', 'Back to the text of the site files');
+        back.type = 'button';
+        back.addEventListener('click', () => {
+          editing.ask = true;
+          drawLearners();
+          const yes = box.querySelector('.learner[data-id="' + L.id + '"] .words .ask + button');
+          if (yes) yes.focus();
+        });
+        acts.append(back);
+      }
+    }
+    form.append(acts, line);
+    return form;
+  };
+
+  /* ---------- the pop-up: its texts, one field each ---------- */
+  const drawPop = () => {
+    const box = $('pop');
+    box.replaceChildren();
+    const mine = fields.filter((f) => f.key.startsWith('bg:'));
+    $('pop-off').textContent = textsOff;
+    $('pop-say').textContent = popSaid;
+    box.hidden = !mine.length;
+    $('pop-acts').hidden = !mine.length;
+    if (!mine.length) {
+      $('pop-off').textContent = textsOff || 'The page has no text that can be changed here yet. Load this page again after the newest files are on the site.';
+      return;
+    }
+    for (const f of mine) {
+      const wrap = make('label', 'field' + (typeof texts[f.key] === 'string' ? ' changed' : ''));
+      wrap.append(make('span', '', f.name));
+      const area = make('textarea');
+      const value = f.key in popDraft ? popDraft[f.key] : popNow(f);
+      area.value = value;
+      area.rows = f.list ? 3 : 1;
+      area.maxLength = 4000;
+      area.dataset.key = f.key;
+      area.disabled = !!textsOff;
+      area.spellcheck = true;
+      area.addEventListener('input', () => {
+        popDraft[f.key] = area.value;
+        popSaid = '';
+        $('pop-say').textContent = '';
+        fit(area);
+        markPop();
+      });
+      wrap.append(area);
+      if (popTidy(value) !== f.first) {
+        /* one press writes the text of the site files into the field; Save then makes it so */
+        const hint = make('span', 'hint');
+        const back = make('button', '', 'Put the text of the site files into this field');
+        back.type = 'button';
+        back.disabled = !!textsOff;
+        back.addEventListener('click', (event) => {
+          event.preventDefault();
+          popDraft[f.key] = f.first;
+          popSaid = '';
+          drawPop();
+          const again = box.querySelector('textarea[data-key="' + f.key + '"]');
+          if (again) again.focus();
+        });
+        hint.append(back);
+        wrap.append(hint);
+      }
+      box.append(wrap);
+      fit(area);
+    }
+    markPop();
+  };
+  const markPop = () => {
+    const n = popChanges().length;
+    $('pop-save').disabled = !n || !!textsOff;
+    $('pop-undo').disabled = !Object.keys(popDraft).length;
+  };
+  $('pop-undo').addEventListener('click', () => {
+    popDraft = {};
+    popSaid = '';
+    drawPop();
+  });
+  $('pop-save').addEventListener('click', async () => {
+    const rows = [], gone = [];
+    for (const f of popChanges()) {
+      const value = popTidy(popDraft[f.key]);
+      if (!value && f.need) {
+        popSaid = '“' + f.name + '” cannot be empty.';
+        $('pop-say').textContent = popSaid;
+        return;
+      }
+      if (value === f.first) gone.push(f.key);
+      else rows.push({ key: f.key, value });
+    }
+    if (!rows.length && !gone.length) return;
+    $('pop-save').disabled = true;
+    $('pop-undo').disabled = true;
+    $('pop-say').textContent = 'Saving…';
+    const failed = await writeTexts(rows, gone.filter((key) => key in texts));
+    if (failed) popSaid = 'That was not saved: ' + failed + '. Nothing changed on the site.';
+    else {
+      popDraft = {};
+      popSaid = 'Saved. Visitors see it the next time they open the site.';
+    }
+    drawPop();
+  });
   const loadPhotos = async () => {
     const { data, error } = await SB.from('site_photos').select('slot,path,at,updated_at');
     if (error) {
@@ -1007,7 +1441,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 
   /* ---------- tabs ---------- */
   const tab = (name) => {
-    for (const t of ['vis', 'inbox', 'learn']) {
+    for (const t of ['vis', 'inbox', 'learn', 'pop']) {
       $('tab-' + t).setAttribute('aria-selected', t === name ? 'true' : 'false');
       $('pane-' + t).hidden = t !== name;
     }
@@ -1015,10 +1449,12 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     showBar();
     if (name === 'inbox') loadMails();
     if (name === 'learn') { if (!unsaved()) loadPhotos(); else drawLearners(); }
+    if (name === 'pop') drawPop();
   };
   $('tab-vis').addEventListener('click', () => tab('vis'));
   $('tab-inbox').addEventListener('click', () => tab('inbox'));
   $('tab-learn').addEventListener('click', () => tab('learn'));
+  $('tab-pop').addEventListener('click', () => tab('pop'));
 
   /* ---------- signing in and loading ---------- */
   const start = async () => {
@@ -1040,10 +1476,12 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     }
     if (!data) return note('This account cannot manage the site', 'You are signed in as ' + user.email + '. Only the CoffeeNutz admin account can change omeraydin.coffee. Sign out and sign in with that account.');
     try {
-      blocks = withLearners(await readPage());
+      blocks = await readPage();
     } catch (error) {
       return note('The page could not be read', 'The list of blocks comes from the live page, and that did not load. Load this page again.');
     }
+    await loadTexts();
+    syncCards();   /* the cards join the list of blocks with the words and in the order the site shows */
     const hidden = data.data && Array.isArray(data.data.hidden) ? data.data.hidden : [];
     live = fromStore(hidden);
     draft = new Set(live);
@@ -1096,6 +1534,10 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
     asking = null;
     photos = {};
     dropping = null;
+    texts = {};
+    editing = null;
+    popDraft = {};
+    popSaid = '';
     sayPub('');
     for (const id of Object.keys(pending)) forget(id);
     for (const id of Object.keys(said)) delete said[id];

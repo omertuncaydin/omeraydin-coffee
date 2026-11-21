@@ -1,21 +1,22 @@
 # omeraydin.coffee
 
-Static one-page site, version v2026-11-21b, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
+Static one-page site, version v2026-11-21c, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
 
 ## What changes without an upload
 
-Four things are read from the CoffeeNutz Supabase project (the "store") each time the page opens:
+Five things are read from the CoffeeNutz Supabase project (the "store") each time the page opens:
 
 - which blocks are switched off in the site manager, and which learner cards that start hidden are switched on,
 - the training dates, taken from the CoffeeNutz training calendar,
 - which photos were uploaded for the learner cards in the site manager,
+- which texts were written in the site manager: the words and the order of the learner cards, and the texts of the pop-up behind "More about Ömer Aydın",
 - whether the message form can be shown. The form sends its messages to the same store.
 
 The store's address and public key are in `content.js` (`storeUrl`, `storeKey`). The key is the public one that the other CoffeeNutz tools also carry in their pages. No secret belongs in this repository: everything in it is published as part of the site.
 
-If the store does not answer, the page shows itself as the visitor's browser last saw it. On a first visit that means every block, no dates and no form.
+If the store does not answer, the page shows itself as the visitor's browser last saw it. On a first visit that means every block, the texts and the order of the site files, no dates and no form.
 
-The database part is one SQL file, `omeraydin-site.sql`. It is kept outside this repository and is run in the Supabase SQL editor. A newer version of the file is run the same way on top of the old one; settings, messages and photos stay.
+The database part is one SQL file, `omeraydin-site.sql`. It is kept outside this repository and is run in the Supabase SQL editor. A newer version of the file is run the same way on top of the old one; settings, messages, photos and texts stay. Texts need the version of 21 November 2026 or later (table `site_texts`); until it has been run, the site manager says so and the site shows the texts of the site files.
 
 ## Site manager
 
@@ -23,9 +24,13 @@ The database part is one SQL file, `omeraydin-site.sql`. It is kept outside this
 
 - Visibility: one eye per block of the page, per course and level in "Explore the courses", and per learner card under "What learners say". Learner cards that are hidden and are not being changed are counted in one line there ("12 more cards are hidden"), which opens them under Learners. Changes reach the site when Publish is pressed. A course with no level left is dropped by the site, and so is the course list when no course is left; the same holds for "What learners say" when no card is left. Menu links and buttons that point at a hidden block disappear with it.
 - Messages: what visitors wrote, newest first, with read and unread marks. A message can be deleted with a second press; a deleted message cannot be brought back. Nothing can be edited.
-- Learners: the learner cards in their order on the page, with three filters: All, On the site, Hidden. Every public course review on coffeenutz.net has a card; the ones not chosen yet are hidden. The eye on a card shows or hides it; it is the same switch as in the Visibility list and goes live with Publish. A card whose eye was just pressed stays in the list until Publish or Undo. The photo of a card: choose a picture from the computer, drag it inside the frame to set the crop, save. The browser makes the picture smaller first (1600 px on its long side at most, as JPEG, without what a camera writes into a file) and puts it into the photo store of the Supabase project. "Remove uploaded photo" brings back the file named in `content.js`, or no picture. "Download" saves the picture a card shows to the computer: the uploaded one, else the file named in `content.js`.
+- Learners: the learner cards in their order on the page, with three filters: All, On the site, Hidden. "Edit text" opens the headline, name, title, company and quote of a card; what is saved there is shown in place of the text in `content.js`, and "Back to the text of the site files" takes it away again. The two arrows move a card up or down among the cards the filter lists. Text and order are saved at once, without Publish. Every public course review on coffeenutz.net has a card; the ones not chosen yet are hidden. The eye on a card shows or hides it; it is the same switch as in the Visibility list and goes live with Publish. A card whose eye was just pressed stays in the list until Publish or Undo. The photo of a card: choose a picture from the computer, drag it inside the frame to set the crop, save. The browser makes the picture smaller first (1600 px on its long side at most, as JPEG, without what a camera writes into a file) and puts it into the photo store of the Supabase project. "Remove uploaded photo" brings back the file named in `content.js`, or no picture. "Download" saves the picture a card shows to the computer: the uploaded one, else the file named in `content.js`.
+
+- Pop-up: the texts of the pop-up that "More about Ömer Aydın" opens, one field each. A link is written as `[words](https://address)`, bold as `**words**`, a new line is a line break, and in the list every line is one entry. An emptied text is left out of the pop-up; the title cannot be emptied. A field that holds the text of the site files again is no longer kept in the store.
 
 The manager reads its list of blocks from the live page: every element in `index.html` with a `data-vis="key"` attribute is one row, named by `data-vis-name` or by its own text. To make a new block switchable, give it a `data-vis` key (lower-case letters and digits, optionally `group:name`). Nothing else has to change. The learner cards are added to that list from `content.js`: a card with an `id` has the key `learner:<id>`.
+
+The texts that can be changed are read from the live page in the same way: an element with `data-edit="group:name"` is one field, named by `data-edit-name`. `data-edit-need` marks a text that cannot be emptied, and `data-edit-box` marks a box that disappears when every text inside it was emptied. A list (`ul`) takes one line per entry. To make another text of the page editable, give its element a `data-edit` key; the Pop-up tab lists the keys that start with `bg:`.
 
 The store keeps one list of what differs from the page as written: the key of every block that is switched off, and `shown:<id>` for every learner card that starts hidden and was switched on. A new entry with `starts: "hidden"` therefore stays off the site without anything being pressed.
 
@@ -41,6 +46,8 @@ With no upcoming class the block shows the "will be announced" sentence. The `da
 
 Edit `content.js`: the YouTube video ID, the portrait file path, the store, the place shown with the dates, and the learners (every entry is shown, in the order written, three to a row on a wide screen).
 
+What the site manager holds comes on top of `content.js`: a headline, name, title, company or quote written there replaces the one written here for that card, and an order set there replaces the order of the entries. A card the saved order does not name (a new entry, for example) follows after the named ones. So when a change in `content.js` does not show on the site, look at the card in the site manager first.
+
 - Each learner entry has two voices. `headline`, `position` and `company` are Ömer's own words about the learner, written as he gives them. `quote` is the learner's own words from a public review, in English. No remark about the source or the language is written on the card.
 - `starts: "hidden"` keeps a card off the site until its eye is opened in the site manager and Publish is pressed. Every public course review on coffeenutz.net has an entry; the ones not chosen yet carry this line. Taking the line out makes the card show by default. Such an entry needs an `id`.
 - `original` (the review as it was written) and `reviewed` (its date) are kept for the record and are never shown.
@@ -50,7 +57,7 @@ Edit `content.js`: the YouTube video ID, the portrait file path, the store, the 
 - The portrait is shown uncropped. Put a new picture in `assets/` and point `portrait` at it.
 - Without a valid video ID the film sticker and the film link are removed and the classroom photo stays as a picture.
 
-Written in `index.html`: course names, levels and their coffeenutz.net sales links (section `id="courses"`), and the background pop-up that the "More about Ömer Aydın" button under "Your instructor" opens (`<dialog id="bg">` near the end; the button is the link with `id="bg-open"`). Without scripts that button is a plain link to coffeenutz.net.
+Written in `index.html`: course names, levels and their coffeenutz.net sales links (section `id="courses"`), and the background pop-up that the "More about Ömer Aydın" button under "Your instructor" opens (`<dialog id="bg">` near the end; the button is the link with `id="bg-open"`). Its texts can be replaced in the site manager (Pop-up); what is written in `index.html` is what shows while nothing was saved there. Without scripts that button is a plain link to coffeenutz.net.
 
 ## Message form
 
@@ -66,7 +73,7 @@ The menu is a glass capsule that stays in view while the page scrolls. Its label
 
 - `index.html`: the page.
 - `style.css`: layout and colours. Desktop first. Date rows stack at 1000 px and below, the menu button appears at 760 px and below, the phone layout at 520 px and below. The glass of the menu is in the header section.
-- `site.js`: menu button, menu label colours, film player, background pop-up, the learner cards, and everything that comes from the store (hidden blocks, dates, message form).
+- `site.js`: menu button, menu label colours, film player, background pop-up, the learner cards, and everything that comes from the store (hidden blocks, dates, photos, texts and card order, message form). A text from the store is put into the page as text, never as HTML.
 - `content.js`: the values described above.
 - `manage.html`: the site manager, served at `/manage`. It loads the Supabase sign-in library from cdn.jsdelivr.net, as the other CoffeeNutz tools do.
 - `favicon.svg`, `favicon.ico`, `apple-touch-icon.png`: the ÖA mark for browser tabs and phone home screens.
