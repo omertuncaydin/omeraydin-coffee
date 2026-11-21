@@ -1,6 +1,6 @@
 # omeraydin.coffee
 
-Static one-page site, version v2026-11-21c, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
+Static one-page site, version v2026-11-21d, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
 
 ## What changes without an upload
 
@@ -9,7 +9,7 @@ Five things are read from the CoffeeNutz Supabase project (the "store") each tim
 - which blocks are switched off in the site manager, and which learner cards that start hidden are switched on,
 - the training dates, taken from the CoffeeNutz training calendar,
 - which photos were uploaded for the learner cards in the site manager,
-- which texts were written in the site manager: the words and the order of the learner cards, and the texts of the pop-up behind "More about Ömer Aydın",
+- which texts were written in the site manager: the words and the order of the learner cards, the logo of a card and whether it is switched on, and the texts of the pop-up behind "More about Ömer Aydın",
 - whether the message form can be shown. The form sends its messages to the same store.
 
 The store's address and public key are in `content.js` (`storeUrl`, `storeKey`). The key is the public one that the other CoffeeNutz tools also carry in their pages. No secret belongs in this repository: everything in it is published as part of the site.
@@ -24,7 +24,7 @@ The database part is one SQL file, `omeraydin-site.sql`. It is kept outside this
 
 - Visibility: one eye per block of the page, per course and level in "Explore the courses", and per learner card under "What learners say". Learner cards that are hidden and are not being changed are counted in one line there ("12 more cards are hidden"), which opens them under Learners. Changes reach the site when Publish is pressed. A course with no level left is dropped by the site, and so is the course list when no course is left; the same holds for "What learners say" when no card is left. Menu links and buttons that point at a hidden block disappear with it.
 - Messages: what visitors wrote, newest first, with read and unread marks. A message can be deleted with a second press; a deleted message cannot be brought back. Nothing can be edited.
-- Learners: the learner cards in their order on the page, with three filters: All, On the site, Hidden. "Edit text" opens the headline, name, title, company and quote of a card; what is saved there is shown in place of the text in `content.js`, and "Back to the text of the site files" takes it away again. The two arrows move a card up or down among the cards the filter lists. Text and order are saved at once, without Publish. Every public course review on coffeenutz.net has a card; the ones not chosen yet are hidden. The eye on a card shows or hides it; it is the same switch as in the Visibility list and goes live with Publish. A card whose eye was just pressed stays in the list until Publish or Undo. The photo of a card: choose a picture from the computer, drag it inside the frame to set the crop, save. The browser makes the picture smaller first (1600 px on its long side at most, as JPEG, without what a camera writes into a file) and puts it into the photo store of the Supabase project. "Remove uploaded photo" brings back the file named in `content.js`, or no picture. "Download" saves the picture a card shows to the computer: the uploaded one, else the file named in `content.js`.
+- Learners: the learner cards in their order on the page, with three filters: All, On the site, Hidden. "Edit text" opens the headline, name, title, company and quote of a card; what is saved there is shown in place of the text in `content.js`, and "Back to the text of the site files" takes it away again. The two arrows move a card up or down among the cards the filter lists. "Choose logo" takes a logo file from the computer for the card (PNG, SVG, WebP or JPEG); it is shown before the name, and "Logo on" / "Logo off" shows or hides it without taking the file away. "Remove logo" takes the file away after a second press. The browser cuts the empty edge off the logo, makes it 480 × 240 px at most and saves it as PNG in the photo store. A dark logo on a see-through or white ground works; a logo that is white all over is refused, because it would not show on the light page. Text, order and logo are saved at once, without Publish. Every public course review on coffeenutz.net has a card; the ones not chosen yet are hidden. The eye on a card shows or hides it; it is the same switch as in the Visibility list and goes live with Publish. A card whose eye was just pressed stays in the list until Publish or Undo. The photo of a card: choose a picture from the computer, drag it inside the frame to set the crop, save. The browser makes the picture smaller first (1600 px on its long side at most, as JPEG, without what a camera writes into a file) and puts it into the photo store of the Supabase project. "Remove uploaded photo" brings back the file named in `content.js`, or no picture. "Download" saves the picture a card shows to the computer: the uploaded one, else the file named in `content.js`.
 
 - Pop-up: the texts of the pop-up that "More about Ömer Aydın" opens, one field each. A link is written as `[words](https://address)`, bold as `**words**`, a new line is a line break, and in the list every line is one entry. An emptied text is left out of the pop-up; the title cannot be emptied. A field that holds the text of the site files again is no longer kept in the store.
 
@@ -33,6 +33,8 @@ The manager reads its list of blocks from the live page: every element in `index
 The texts that can be changed are read from the live page in the same way: an element with `data-edit="group:name"` is one field, named by `data-edit-name`. `data-edit-need` marks a text that cannot be emptied, and `data-edit-box` marks a box that disappears when every text inside it was emptied. A list (`ul`) takes one line per entry. To make another text of the page editable, give its element a `data-edit` key; the Pop-up tab lists the keys that start with `bg:`.
 
 The store keeps one list of what differs from the page as written: the key of every block that is switched off, and `shown:<id>` for every learner card that starts hidden and was switched on. A new entry with `starts: "hidden"` therefore stays off the site without anything being pressed.
+
+A logo needs no line in the database script: it is kept with the texts. `learner:<id>:logo` names the file in the photo store (`logos/<id>-<stamp>-<width>x<height>.png`), and `learner:<id>:logo-off` holds `1` while the logo is switched off. The site shows a logo no taller than 48 px and no wider than 96 px, a wide one a little lower, so that logos of different shapes weigh about the same.
 
 ## Training dates
 
@@ -46,13 +48,14 @@ With no upcoming class the block shows the "will be announced" sentence. The `da
 
 Edit `content.js`: the YouTube video ID, the portrait file path, the store, the place shown with the dates, and the learners (every entry is shown, in the order written, three to a row on a wide screen).
 
-What the site manager holds comes on top of `content.js`: a headline, name, title, company or quote written there replaces the one written here for that card, and an order set there replaces the order of the entries. A card the saved order does not name (a new entry, for example) follows after the named ones. So when a change in `content.js` does not show on the site, look at the card in the site manager first.
+What the site manager holds comes on top of `content.js`: a headline, name, title, company or quote written there replaces the one written here for that card, and an order set there replaces the order of the entries. Logos exist only in the site manager; `content.js` has no line for them. A card the saved order does not name (a new entry, for example) follows after the named ones. So when a change in `content.js` does not show on the site, look at the card in the site manager first.
 
 - Each learner entry has two voices. `headline`, `position` and `company` are Ömer's own words about the learner, written as he gives them. `quote` is the learner's own words from a public review, in English. No remark about the source or the language is written on the card.
 - `starts: "hidden"` keeps a card off the site until its eye is opened in the site manager and Publish is pressed. Every public course review on coffeenutz.net has an entry; the ones not chosen yet carry this line. Taking the line out makes the card show by default. Such an entry needs an `id`.
 - `original` (the review as it was written) and `reviewed` (its date) are kept for the record and are never shown.
 - `id` names the card for the site manager: a photo uploaded there under Learners is shown on the card with that id, and the eye there shows or hides it. Small letters, digits and hyphens; do not change an id once a photo was uploaded for it. To add a learner, add an entry with a new id; its photo can then be uploaded in the site manager, no file in the repository is needed.
 - `photo` is the picture used when none was uploaded: a file in `assets/learners/`, shown in a 4:3 box above the headline. `photoAt` moves the crop inside that box (`"50% 16%"` is centred, a little below the top edge). A photo wider than 800 px stays sharp on every screen. Save the photos into that folder yourself, straight from your own files, under the names written in `content.js`. A missing or empty file is simply left out: the card then shows without a picture. Names, employers and photos only with the learner's agreement.
+- On a card the quote shows three lines; a longer one gets "Read more", which opens it, and "Show less". The whole quote is in the page either way. Under the quote stands the name in bold, and below it the title and the company (`position` · `company`). A line that opens with the title starts with a capital on the page, whatever is written here.
 - A card without a `headline` shows its photo (if one was uploaded), the quote, and the name with `course` under it; its quote starts where the headlines of its row start. To finish such a card, write its `headline`, and `position` and `company` if wanted. An entry with neither `headline` nor `id` is shown the earlier way: the quote in large type with the name and `course` under it.
 - The portrait is shown uncropped. Put a new picture in `assets/` and point `portrait` at it.
 - Without a valid video ID the film sticker and the film link are removed and the classroom photo stays as a picture.
@@ -80,7 +83,7 @@ The menu is a glass capsule that stays in view while the page scrolls. Its label
 - `assets/learners/`: the photos of the learner cards.
 - `assets/`: photos and the two typefaces in `assets/fonts/` (Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see `assets/fonts/fonts-license.txt`).
 
-When the page loads it asks the store one question (two when the stored calendar copy is older than ten minutes). A learner photo uploaded in the site manager is fetched from the store when the visitor comes near that block. Nothing else is requested from another host. The film loads from YouTube's privacy-enhanced player only after a visitor presses play.
+When the page loads it asks the store one question (two when the stored calendar copy is older than ten minutes). A learner photo or a logo uploaded in the site manager is fetched from the store when the visitor comes near that block. Nothing else is requested from another host. The film loads from YouTube's privacy-enhanced player only after a visitor presses play.
 
 ## After changing style.css, site.js or content.js
 

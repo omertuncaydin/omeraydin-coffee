@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-21c
+/* omeraydin.coffee v2026-11-21d
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar,
    which photos were uploaded for the learner cards and which texts were written there, and sends the message form there.
@@ -158,8 +158,9 @@
   }
 
   /* learners: every entry with a quote and a name, three to a row on a wide screen.
-     A card with a headline or an id: photo (if any), headline (if any), the quote in small type, then
-     "name, position · company" (without a headline: "name · course").
+     A card with a headline or an id: photo (if any), headline (if any), the quote in small type (three lines, the
+     rest behind "Read more", see fitQuotes), then the name in bold with "position · company" under it (without
+     a headline: the course), and before them the logo of the card when the site manager holds one that is switched on.
      An entry with neither: the quote in large type and "name · course", as before v2026-11-20d.
      The photo of a card is the one uploaded in the site manager, else the file named in content.js (see setPhotos).
      A card with an id carries data-vis="learner:<id>", so the site manager can switch it off like any other block.
@@ -171,6 +172,14 @@
   const PHOTO_PATH = /^learners\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:jpg|png|webp)$/;
   const PHOTO_AT = /^(?:100|\d{1,2})% (?:100|\d{1,2})%$/;
   const CARD_TEXT = { headline: 200, name: 80, position: 80, company: 120, quote: 1500 };   /* what can be written for a card, and how long it may be */
+  const LOGO_PATH = /^logos\/[a-z0-9]+(?:-[a-z0-9]+)*-([1-9]\d{0,3})x([1-9]\d{0,3})\.(?:png|webp)$/;   /* a logo uploaded in the site manager; its size in pixels is part of its name */
+  /* how large a logo stands next to its name: never taller than 48 px or wider than 96 px, and a wide one a little
+     lower, so that a wide logo and a tall one weigh about the same */
+  const logoSize = (w, h) => {
+    const shape = w / h;
+    const high = Math.min(48, 96 / shape, Math.sqrt(2400 / shape));
+    return [Math.max(1, Math.round(high * shape)), Math.max(1, Math.round(high))];
+  };
   const cards = [];    /* one entry per card that can carry a photo: { figure, slot, alt, file, fileAt, img, want } */
   const people = [];   /* one entry per card: { id, q (its entry in content.js), figure, laid, card, drawn } */
   const quotes = (content.testimonials || []).filter((q) => q && text(q.quote) && text(q.name))
@@ -188,18 +197,60 @@
       return clean || (field === 'name' || field === 'quote' ? text(q[field]) : '');   /* a card always has a name and a quote */
     };
     const headline = said('headline'), name = said('name'), position = said('position'), company = said('company'), quote = said('quote');
-    const print = JSON.stringify([headline, name, position, company, quote]);
+    /* the logo: the file the site manager uploaded for this card, unless it is switched off there */
+    const logoPath = person.id && texts && typeof texts['learner:' + person.id + ':logo'] === 'string' && texts['learner:' + person.id + ':logo-off'] !== '1' ? texts['learner:' + person.id + ':logo'] : '';
+    const logo = person.laid && logoPath.length <= 120 ? logoPath.match(LOGO_PATH) : null;
+    const print = JSON.stringify([headline, name, position, company, quote, logo ? logo[0] : '']);
     if (person.drawn === print) return;
     person.drawn = print;
     const figure = person.figure;
     figure.className = person.laid ? 'quote has-hl' + (headline ? '' : ' no-head') : 'quote';
     for (const part of [...figure.children]) if (!part.classList.contains('quote-ph')) part.remove();
-    if (person.laid && headline) figure.append(make('h3', 'quote-hl', headline));
-    const who = name + (person.laid && position ? ', ' + position : '');
     const second = headline ? company : (person.laid && company) || text(q.course) || text(q.role);
-    const by = make('figcaption', '', [who, second].filter(Boolean).join(' · '));
-    if (text(q.note)) by.append(make('span', 'quote-note', text(q.note)));
-    figure.append(make('blockquote', '', '“' + quote + '”'), by);
+    const words = make('blockquote', '', '“' + quote + '”');
+    const by = make('figcaption');
+    if (!person.laid) {
+      by.textContent = [name, second].filter(Boolean).join(' · ');
+      if (text(q.note)) by.append(make('span', 'quote-note', text(q.note)));
+      figure.append(words, by);
+    } else {
+      if (headline) figure.append(make('h3', 'quote-hl', headline));
+      /* the quote and, for a quote longer than three lines, the button that opens and closes it */
+      const say = make('div', 'quote-say');
+      const more = make('button', 'quote-more', 'Read more');
+      more.type = 'button';
+      more.setAttribute('aria-expanded', 'false');
+      more.addEventListener('click', () => {
+        const open = !figure.classList.contains('is-open');
+        figure.classList.toggle('is-open', open);
+        more.setAttribute('aria-expanded', open ? 'true' : 'false');
+        more.textContent = open ? 'Show less' : 'Read more';
+        if (!open && more.getBoundingClientRect().top < 96) more.scrollIntoView({ block: 'center' });   /* closed from below: the button went up behind the menu */
+      });
+      say.append(words, more);
+      /* the name in bold, title and company under it */
+      const who = make('span', 'quote-id');
+      who.append(make('b', '', name));
+      const under = [position, second].filter(Boolean).join(' · ');
+      if (under) who.append(' ', make('span', position ? 'quote-role' : '', under));   /* a line that opens with the title starts with a capital (style.css); the space keeps name and title apart for whoever reads the page as plain text */
+      if (text(q.note)) who.append(make('span', 'quote-note', text(q.note)));
+      if (logo) {
+        const mark = make('img', 'quote-logo');
+        mark.alt = company ? 'Logo of ' + company : '';
+        [mark.width, mark.height] = logoSize(+logo[1], +logo[2]);
+        mark.loading = 'lazy';
+        mark.decoding = 'async';
+        mark.addEventListener('error', () => {   /* the file is gone: the name line stands without it */
+          mark.remove();
+          by.classList.remove('has-logo');
+        }, { once: true });
+        mark.src = storeFile(logo[0]);
+        by.className = 'has-logo';
+        by.append(mark);
+      }
+      by.append(who);
+      figure.append(say, by);
+    }
     if (person.card) {
       person.card.alt = text(q.photoAlt) || 'Photo of ' + name;
       if (person.card.img) person.card.img.alt = person.card.alt;
@@ -246,6 +297,26 @@
     const now = [...quoteGrid.children];
     if (sorted.length === now.length && sorted.every((figure, n) => figure === now[n])) return;
     quoteGrid.append(...sorted);
+  };
+  /* a quote shows three lines; a longer one gets "Read more". Each quote is measured at its full length, so this
+     is done again whenever the width of the cards or their words may have changed. */
+  const fitQuotes = () => {
+    const shown = people.filter((person) => person.laid && person.figure.getClientRects().length);
+    for (const person of shown) person.figure.classList.remove('can-open');   /* every quote at its full length */
+    const long = shown.map((person) => {
+      const words = person.figure.querySelector('.quote-say > blockquote');
+      const line = words ? parseFloat(getComputedStyle(words).lineHeight) : 0;
+      return line > 0 && Math.round(words.getBoundingClientRect().height / line) > 3;
+    });
+    shown.forEach((person, n) => {
+      const figure = person.figure;
+      figure.classList.toggle('can-open', long[n]);
+      if (long[n] || !figure.classList.contains('is-open')) return;
+      const more = figure.querySelector('.quote-more');   /* it was open and now fits in three lines */
+      figure.classList.remove('is-open');
+      more.setAttribute('aria-expanded', 'false');
+      more.textContent = 'Read more';
+    });
   };
 
   /* texts the site manager can replace. An element that carries data-edit="key" in index.html shows what the
@@ -332,6 +403,7 @@
     key: typeof content.storeKey === 'string' ? content.storeKey.trim() : ''
   };
   const storeOn = !!(store.url && store.key);
+  const storeFile = (path) => store.url + '/storage/v1/object/public/site/' + path;
   const ask = async (name, args) => {
     const options = {
       method: 'POST',
@@ -426,7 +498,7 @@
   const setPhotos = (over) => {
     for (const card of cards) {
       const pick = over && card.slot && over[card.slot] ? over[card.slot] : null;
-      const src = pick ? store.url + '/storage/v1/object/public/site/' + pick.path : card.file;
+      const src = pick ? storeFile(pick.path) : card.file;
       const at = pick ? pick.at : card.fileAt;
       const want = src ? src + '|' + at : '';
       if (card.want === want) continue;
@@ -618,11 +690,24 @@
     setCards(texts);
     setTexts(texts);
     state = { hide: setHidden(next.hidden), trainings: Array.isArray(next.trainings) ? next.trainings : null, form: !!next.form, texts };
+    fitQuotes();
     drawDates(state.trainings);
     showForm(state.form, state.hide);
     retone();
   });
   const settled = () => root.classList.remove('fresh');   /* the menu links stop waiting (see the head of the page) */
+  /* the cards get wider and narrower with the window, and the web fonts change how the words run: measure the quotes again */
+  let fitQueued = false;
+  const queueFit = () => {
+    if (fitQueued) return;
+    fitQueued = true;
+    requestAnimationFrame(() => {
+      fitQueued = false;
+      steady(fitQuotes);
+    });
+  };
+  window.addEventListener('resize', queueFit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(queueFit);
   if (!storeOn) {
     /* no store: every block shows, hand-written dates if any, no form */
     remember(null);

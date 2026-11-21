@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Site manager · omeraydin.coffee</title>
 <meta name="robots" content="noindex,nofollow">
-<meta name="version" content="v2026-11-21c">
+<meta name="version" content="v2026-11-21d">
 <meta name="theme-color" content="#F4F1E0">
 <link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
 <link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
 <style>
-/* omeraydin.coffee site manager v2026-11-21c. Same colours and fonts as the site it manages. */
+/* omeraydin.coffee site manager v2026-11-21d. Same colours and fonts as the site it manages. */
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-ext-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -136,6 +136,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .move button:hover:not(:disabled){background:rgba(29,29,29,.08)}
 .move button:disabled{opacity:.28}
 .move svg{width:22px;height:22px}
+.logo-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+.logo-row .ask{flex:1 1 100%;font-weight:700}
+.logo-box{flex:none;display:grid;place-items:center;width:112px;height:60px;padding:6px 8px;border-radius:12px;background:var(--cream);box-shadow:inset 0 0 0 1px var(--line);color:var(--soft);font-size:.8125rem;text-align:center}
+.logo-box img{display:block;object-fit:contain;mix-blend-mode:multiply}
+.logo-box.off img{opacity:.3}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .field>span{font-size:.9375rem;color:var(--soft)}
 .field input,.field textarea{display:block;width:100%;margin:0;padding:11px 16px;border:0;border-radius:14px;background:var(--cream);box-shadow:inset 0 0 0 1px var(--line-strong);line-height:1.35}
@@ -221,7 +226,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
   </section>
 
   <section id="pane-learn" role="tabpanel" aria-labelledby="tab-learn" hidden>
-    <p class="lead">The learner cards, in their order on the page. Every public course review on coffeenutz.net has a card here; a card you have not chosen yet is hidden. The eye shows or hides a card and, like on the Visibility tab, waits for Publish. Edit text opens the headline, name, title, company and quote of a card; the arrows move a card up or down. Text and order are saved at once. For the photo: choose a picture, drag it inside the frame until the crop is right, then save; it is made smaller before it is sent. Download saves the picture of a card to your computer.</p>
+    <p class="lead">The learner cards, in their order on the page. Every public course review on coffeenutz.net has a card here; a card you have not chosen yet is hidden. The eye shows or hides a card and, like on the Visibility tab, waits for Publish. Edit text opens the headline, name, title, company and quote of a card; the arrows move a card up or down. A logo you choose is shown next to the name, and Logo on / Logo off shows or hides it. Text, order and logo are saved at once. For the photo: choose a picture, drag it inside the frame until the crop is right, then save; it is made smaller before it is sent. Download saves the picture of a card to your computer.</p>
     <div class="inbox-top" id="learn-top">
       <button class="pill pill-sm" id="le-all" type="button" aria-pressed="true">All</button>
       <button class="pill pill-sm" id="le-on" type="button" aria-pressed="false">On the site</button>
@@ -243,7 +248,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     <p class="say" id="pop-say" role="status" aria-live="polite"></p>
   </section>
 
-  <p class="foot">Site manager v2026-11-21c · <a href="./">Open omeraydin.coffee</a></p>
+  <p class="foot">Site manager v2026-11-21d · <a href="./">Open omeraydin.coffee</a></p>
 </main>
 
 <div class="publish" id="publish" hidden>
@@ -258,7 +263,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 <script src="content.js?v=2026-11-21b"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* omeraydin.coffee site manager v2026-11-21c
+/* omeraydin.coffee site manager v2026-11-21d
    Signs in with the CoffeeNutz admin account and edits what the store holds for the site:
    which blocks are hidden (table site_settings), the messages visitors sent (table site_messages), the photos
    of the learner cards (table site_photos, files in the photo store "site") and the texts written here in place
@@ -267,7 +272,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
    and every element that carries data-edit is a text that can be replaced. The list of learners is read from content.js. */
 (() => {
   'use strict';
-  const VERSION = 'v2026-11-21c';
+  const VERSION = 'v2026-11-21d';
   const content = window.siteContent || {};
   const $ = (id) => document.getElementById(id);
   const make = (tag, cls, text) => {
@@ -717,6 +722,20 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     return clean || (field === 'name' || field === 'quote' ? L.base[field] : '');
   };
   const wordsHere = (L) => !!L.id && CARD_FIELDS.some(([field]) => ('learner:' + L.id + ':' + field) in texts);
+  /* the logo of a card: a file in the photo store, named in the texts under "learner:<id>:logo"; "learner:<id>:logo-off"
+     holds "1" while it is switched off. The site (drawCard in site.js) reads the same two texts. */
+  const LOGO_PATH = /^logos\/[a-z0-9]+(?:-[a-z0-9]+)*-([1-9]\d{0,3})x([1-9]\d{0,3})\.(?:png|webp)$/;
+  const logoOf = (L) => {
+    const path = L.id ? texts['learner:' + L.id + ':logo'] : null;
+    return typeof path === 'string' && path.length <= 120 && LOGO_PATH.test(path) ? path : '';
+  };
+  const logoOn = (L) => !!logoOf(L) && texts['learner:' + L.id + ':logo-off'] !== '1';
+  const logoSize = (w, h) => {   // how large the site shows it (the rule of logoSize in site.js)
+    const shape = w / h;
+    const high = Math.min(48, 96 / shape, Math.sqrt(2400 / shape));
+    return [Math.max(1, Math.round(high * shape)), Math.max(1, Math.round(high))];
+  };
+  let logoAsk = null;         // learner id whose Remove logo was pressed once
   const wordsDirty = () => {
     const L = editing ? learners.find((x) => x.id === editing.id) : null;
     return !!L && CARD_FIELDS.some(([field]) => oneLine(editing.values[field]) !== L[field]);
@@ -867,6 +886,78 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     if (!blob) throw new Error('unreadable');
     if (blob.size > 2800000) throw new Error('large');
     return { blob, w, h, fullW, fullH };
+  };
+  /* a logo from the computer: kept see-through, its empty edge cut off, made at most 480 × 240 px, saved as PNG.
+     Empty means see-through or white: the page shows neither (the logo is laid over the page like ink on paper).
+     A drawn logo (SVG) may be made larger than it says it is; a picture is never blown up. */
+  const shrinkLogo = async (file) => {
+    const drawn = /svg/i.test(file.type || '') || /\.svg$/i.test(file.name || '');
+    let source = null;
+    if (drawn) {
+      /* a drawn logo that does not say how large it is: its drawing area (viewBox) is taken as its size, so that every browser can draw it */
+      try {
+        const sheet = new DOMParser().parseFromString(await file.text(), 'image/svg+xml');
+        const root = sheet.documentElement;
+        const area = root && root.nodeName.toLowerCase() === 'svg' ? (root.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number) : [];
+        const sized = (side) => /^\s*\d*\.?\d+\s*(?:px)?\s*$/.test(root.getAttribute(side) || '');
+        if (area.length === 4 && area[2] > 0 && area[3] > 0 && !(sized('width') && sized('height'))) {
+          root.setAttribute('width', String(area[2]));
+          root.setAttribute('height', String(area[3]));
+          file = new Blob([new XMLSerializer().serializeToString(sheet)], { type: 'image/svg+xml' });
+        }
+      } catch (error) { /* drawn as it is */ }
+    } else {
+      try { source = await createImageBitmap(file); } catch (error) { source = null; }
+    }
+    if (!source) {
+      source = await new Promise((resolve, reject) => {
+        const img = new Image();
+        const blobUrl = URL.createObjectURL(file);
+        img.onload = () => { URL.revokeObjectURL(blobUrl); resolve(img); };
+        img.onerror = () => { URL.revokeObjectURL(blobUrl); reject(new Error('unreadable')); };
+        img.src = blobUrl;
+      });
+    }
+    const fullW = source.width || source.naturalWidth;
+    const fullH = source.height || source.naturalHeight;
+    if (!fullW || !fullH) throw new Error('unreadable');
+    /* first on a working sheet of at most 1600 px a side */
+    const k0 = Math.min(1600 / fullW, 1600 / fullH, drawn ? 8 : 1);
+    const w0 = Math.max(1, Math.round(fullW * k0));
+    const h0 = Math.max(1, Math.round(fullH * k0));
+    const sheet = document.createElement('canvas');
+    sheet.width = w0;
+    sheet.height = h0;
+    const pen = sheet.getContext('2d', { willReadFrequently: true });
+    pen.drawImage(source, 0, 0, w0, h0);
+    if (source.close) source.close();
+    const dots = pen.getImageData(0, 0, w0, h0).data;
+    let left = w0, top = h0, right = -1, bottom = -1;
+    for (let y = 0; y < h0; y++) {
+      for (let x = 0; x < w0; x++) {
+        const i = (y * w0 + x) * 4;
+        if (dots[i + 3] > 8 && (dots[i] < 245 || dots[i + 1] < 245 || dots[i + 2] < 245)) {
+          if (x < left) left = x;
+          if (x > right) right = x;
+          if (y < top) top = y;
+          if (y > bottom) bottom = y;
+        }
+      }
+    }
+    if (right < 0) throw new Error('blank');   /* white or see-through all over: nothing of it would show */
+    const cutW = right - left + 1;
+    const cutH = bottom - top + 1;
+    const k = Math.min(480 / cutW, 240 / cutH, 1);
+    const w = Math.max(1, Math.round(cutW * k));
+    const h = Math.max(1, Math.round(cutH * k));
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext('2d').drawImage(sheet, left, top, cutW, cutH, 0, 0, w, h);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+    if (!blob) throw new Error('unreadable');
+    if (blob.size > 2800000) throw new Error('large');
+    return { blob, w, h };
   };
   const drawLearners = () => {
     const box = $('learners');
@@ -1200,12 +1291,127 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
           acts.append(edit);
         }
       }
-      what.append(acts, line);
+      what.append(acts);
+      if (L.id) what.append(logoRow(L, line));
+      what.append(line);
       card.append(frame, what);
       if (editing && editing.id === L.id && L.id) card.append(wordsForm(L, box));
       box.append(card);
       for (const area of card.querySelectorAll('.words textarea')) fit(area);
     }
+  };
+  /* the logo of one card: a small preview, a file from the computer, on and off, away. Saved at once, without Publish. */
+  const logoRow = (L, line) => {
+    const row = make('div', 'logo-row');
+    const path = logoOf(L);
+    const on = logoOn(L);
+    const ready = !textsOff && !photosOff && photoStore === 'ready';
+    const say = (text) => { said[L.id] = text; line.textContent = text; };
+    const boxed = make('span', 'logo-box' + (path && !on ? ' off' : ''));
+    if (path) {
+      const img = make('img');
+      const size = path.match(LOGO_PATH);
+      [img.width, img.height] = logoSize(+size[1], +size[2]);   /* as large as on the site */
+      img.alt = 'Logo on the card of ' + L.name;
+      img.addEventListener('error', () => { img.remove(); boxed.append('This logo did not load.'); });
+      img.src = publicUrl(path);
+      boxed.append(img);
+    } else {
+      boxed.append('No logo');
+    }
+    row.append(boxed);
+    if (logoAsk === L.id && path) {
+      /* second press: the logo file is taken away */
+      const yes = make('button', 'pill pill-sm pill-solid', 'Remove it');
+      yes.type = 'button';
+      const no = make('button', 'pill pill-sm', 'Keep');
+      no.type = 'button';
+      no.addEventListener('click', () => { logoAsk = null; drawLearners(); });
+      yes.addEventListener('click', async () => {
+        yes.disabled = true;
+        no.disabled = true;
+        const failed = await writeTexts([], ['learner:' + L.id + ':logo', 'learner:' + L.id + ':logo-off'].filter((key) => key in texts));
+        logoAsk = null;
+        if (failed) said[L.id] = 'The logo was not removed: ' + failed + '.';
+        else {
+          try { await SB.storage.from('site').remove([path]); } catch (ignored) { /* the file stays in the store, unused */ }
+          said[L.id] = 'Logo removed. The card shows the name line without it.';
+        }
+        drawLearners();
+      });
+      row.append(make('span', 'ask', 'Remove the logo from this card?'), yes, no);
+      return row;
+    }
+    const input = make('input');
+    input.type = 'file';
+    input.accept = 'image/png,image/webp,image/jpeg,image/svg+xml';
+    input.hidden = true;
+    input.setAttribute('aria-label', 'Logo file for ' + L.name);
+    const choose = make('button', 'pill pill-sm', path ? 'Choose another logo' : 'Choose logo');
+    choose.type = 'button';
+    choose.disabled = !ready;
+    choose.addEventListener('click', () => input.click());
+    input.addEventListener('change', async () => {
+      const file = input.files && input.files[0];
+      input.value = '';
+      if (!file) return;
+      choose.disabled = true;
+      say('Saving the logo…');
+      let made = null;
+      try {
+        made = await shrinkLogo(file);
+      } catch (error) {
+        say(error && error.message === 'large' ? 'This logo file is too large. Please try a smaller one.'
+          : error && error.message === 'blank' ? 'This logo is white or see-through all over, so it would not show on the light page. Please choose the dark version of it.'
+          : 'This file could not be read as a picture. PNG with a see-through background works best; SVG, WebP and JPEG work too.');
+        choose.disabled = false;
+        return;
+      }
+      const next = 'logos/' + L.id + '-' + Date.now().toString(36) + '-' + made.w + 'x' + made.h + '.png';
+      const sent = await SB.storage.from('site').upload(next, made.blob, { contentType: 'image/png', cacheControl: '31536000', upsert: false });
+      if (sent.error) {
+        said[L.id] = 'That was not saved: ' + (sent.error.message || 'the photo store refused it') + '. Nothing changed on the site.';
+        return drawLearners();
+      }
+      const failed = await writeTexts([{ key: 'learner:' + L.id + ':logo', value: next }], ['learner:' + L.id + ':logo-off'].filter((key) => key in texts));
+      if (failed) {
+        try { await SB.storage.from('site').remove([next]); } catch (ignored) { /* an unused file is harmless */ }
+        said[L.id] = 'That was not saved: ' + failed + '. Nothing changed on the site.';
+        return drawLearners();
+      }
+      if (path && path !== next) { try { await SB.storage.from('site').remove([path]); } catch (ignored) { /* the old file stays, unused */ } }
+      said[L.id] = 'Logo saved and switched on (' + made.w + ' × ' + made.h + ' px). Visitors see it the next time they open the site.';
+      drawLearners();
+    });
+    const flip = make('button', 'pill pill-sm' + (on ? ' pill-solid' : ''), on ? 'Logo on' : 'Logo off');
+    flip.type = 'button';
+    flip.className += ' logo-flip';
+    flip.disabled = !path || !!textsOff;
+    flip.setAttribute('aria-pressed', on ? 'true' : 'false');
+    flip.title = !path ? 'No logo on this card yet.' : on ? 'The logo shows on the site. Press to hide it.' : 'The logo is hidden on the site. Press to show it.';
+    flip.addEventListener('click', async () => {
+      flip.disabled = true;
+      const key = 'learner:' + L.id + ':logo-off';
+      const failed = on ? await writeTexts([{ key, value: '1' }], []) : await writeTexts([], [key].filter((k) => k in texts));
+      said[L.id] = failed ? 'That was not saved: ' + failed + '. Nothing changed on the site.' : on ? 'Logo switched off. The file stays here for later.' : 'Logo switched on. Visitors see it the next time they open the site.';
+      drawLearners();
+      const again = $('learners').querySelector('.learner[data-id="' + L.id + '"] .logo-flip');
+      if (again && !again.disabled) again.focus();
+    });
+    row.append(input, choose, flip);
+    if (path) {
+      const remove = make('button', 'pill pill-sm', 'Remove logo');
+      remove.type = 'button';
+      remove.disabled = !!textsOff;
+      remove.addEventListener('click', () => {
+        logoAsk = L.id;
+        drawLearners();
+        const yes = $('learners').querySelector('.learner[data-id="' + L.id + '"] .logo-row .ask + button');
+        if (yes) yes.focus();
+      });
+      row.append(remove);
+    }
+    return row;
   };
   /* the words of one card, open for writing: headline, name, title, company, quote. Saved at once, without Publish. */
   const wordsForm = (L, box) => {
@@ -1536,6 +1742,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     dropping = null;
     texts = {};
     editing = null;
+    logoAsk = null;
     popDraft = {};
     popSaid = '';
     sayPub('');

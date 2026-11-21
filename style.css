@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-21a
+/* omeraydin.coffee v2026-11-21d
    Fonts: Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see assets/fonts/fonts-license.txt */
 
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
@@ -8,8 +8,8 @@
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 
 :root{
-  --cream:#F4F1E0;--ink:#1D1D1D;--verm:#EB5027;--verm-ink:#C23B1A;--blue:#2B6CA6;--yellow:#F6CD45;--muted:#CFCCBD;
-  --line-cream:rgba(244,241,224,.4);--line-ink:rgba(29,29,29,.5);
+  --cream:#F4F1E0;--ink:#1D1D1D;--coal:#383734;--verm:#EB5027;--verm-ink:#C23B1A;--blue:#2B6CA6;--yellow:#F6CD45;--muted:#CFCCBD;
+  --line-cream:rgba(244,241,224,.4);--line-ink:rgba(29,29,29,.5);--rule:rgba(29,29,29,.22);
   --serif:"Averia Serif Libre",Georgia,"Times New Roman",serif;
   --sans:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif;
   --g:clamp(20px,3vw,52px);     /* page gutter */
@@ -143,17 +143,34 @@ button.pill:disabled{opacity:.55;cursor:default}
 /* a learner with a headline: photo, what Ömer says about the learner, then the learner's own words in small type */
 .quote.has-hl{gap:20px;padding-top:0;border-top:0}
 .quote-ph{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;border-radius:20px;background:rgba(29,29,29,.08)}
-.quote-hl{font-weight:700;font-size:clamp(1.375rem,1.9vw,1.6875rem);line-height:1.14;letter-spacing:-0.04em;text-wrap:balance}
-.quote.has-hl blockquote{font-size:1.0625rem;line-height:1.36;letter-spacing:inherit}
-.quote.has-hl figcaption{margin-top:auto;padding-top:16px;border-top:1px solid var(--verm-ink)}
+.quote-hl{font-weight:700;font-size:clamp(1.2375rem,1.71vw,1.51875rem);line-height:1.14;letter-spacing:-0.04em;text-wrap:balance}
+.quote.has-hl blockquote{font-size:1.125rem;line-height:1.36;letter-spacing:inherit;color:var(--coal)}
+.quote.has-hl figcaption{margin-top:auto;padding-top:16px;border-top:1px solid var(--rule);color:var(--ink)}
+/* the quote of a card: three lines, the rest behind "Read more" (site.js marks a card whose quote is longer: can-open) */
+.quote-say{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.quote.can-open:not(.is-open) .quote-say blockquote{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
+.quote-more{display:none;margin:0 0 -8px;padding:8px 0;border:0;background:transparent;color:var(--verm-ink);font:inherit;font-size:1rem;letter-spacing:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em;cursor:pointer}
+.quote.can-open .quote-more{display:inline-block}
+.quote-more:hover{color:var(--ink)}
+/* under the rule: the name in bold with title and company below it, and the logo of the card before them when one is switched on */
+.quote-id{display:flex;flex-direction:column;gap:2px;min-width:0}
+.quote-id b{font-weight:700}
+.quote-role{display:block}
+.quote-role::first-letter{text-transform:uppercase}   /* a line that opens with the title starts with a capital; the words stay as they were written */
+.quote.has-hl figcaption.has-logo{display:flex;align-items:flex-start;gap:16px}
+/* the logo: as wide as site.js says (logoSize), in a box 48 px high that is centred on the two lines beside it and
+   takes no more room than they do, so a name stands at the same height with a logo and without one.
+   A white ground disappears into the page. */
+.quote-logo{flex:none;height:48px;margin:calc((2.6rem + 2px - 48px)/2) 0;object-fit:contain;mix-blend-mode:multiply}
+.has-logo .quote-id{padding-left:16px;border-left:1px solid var(--rule)}
 @supports (grid-template-rows:subgrid){   /* cards in one row share their four lines: photo, headline, quote, name */
   .quote-grid.has-hl>.quote{grid-row:span 4}
   .quote-grid.has-hl>.quote.has-hl{display:grid;grid-template-rows:subgrid;row-gap:20px}
   .quote.has-hl>*{min-width:0}
   .quote.has-hl>.quote-ph{grid-row:1}
   .quote.has-hl>.quote-hl{grid-row:2}
-  .quote.has-hl>blockquote{grid-row:3}
-  .quote.has-hl.no-head>blockquote{grid-row:2/span 2}   /* a card without a headline: its quote starts where the headlines of its row start */
+  .quote.has-hl>.quote-say{grid-row:3}
+  .quote.has-hl.no-head>.quote-say{grid-row:2/span 2}   /* a card without a headline: its quote starts where the headlines of its row start */
   .quote.has-hl>figcaption{grid-row:4;margin-top:0}
 }
 .quote-src{font-size:1rem}
@@ -289,7 +306,7 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
   .course-name{font-size:2.1875rem}
   .quotes{padding:28px 0 14px;gap:36px}
   .quote.has-hl,.quote-grid.has-hl>.quote.has-hl{gap:16px}
-  .quote-hl{font-size:1.4375rem}
+  .quote-hl{font-size:1.29375rem}
   .about{flex-direction:column;flex-wrap:nowrap;gap:30px}
   .about-text,.about-body{display:contents}
   .about .label{order:1}
