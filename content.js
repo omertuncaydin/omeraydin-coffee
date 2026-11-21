@@ -45,11 +45,13 @@ window.siteContent = {
       quote: "I took roasting training from Ömer and left 100% satisfied. His knowledge and the way he conveys it were truly incredible. A professional extremely well versed in his field, who blends his passion for coffee with science and combines a scientist’s rigour with a coffee lover’s excitement…",
       name: "Yakup Çankır", position: "head roaster", company: "kahve.com", course: "Roasting" },
     // The other public course reviews on coffeenutz.net, newest first. Hidden until switched on in the site manager.
-    // Names are as the review shows them. No headline yet: such a card shows its photo (if one was uploaded), the
-    // quote and "name · course".
+    // Names are as the review shows them, until Ömer gives the full name, the position and the company of a learner;
+    // the card then gets its headline as well (kemal-a, ferhat-m). A card without a headline shows its photo (if one
+    // was uploaded), the quote and "name · course".
     { id: "kemal-a", starts: "hidden",
+      headline: "Owner and roaster of Shady Coffee Works chose Ömer for SCA Roasting Professional.",
       quote: "The trainings were packed with both knowledge and practice, and a thoroughly enjoyable time as well. Thanks to Ömer’s kind and generous approach, it was a training in which we felt at ease, found answers to our questions and got something out of every moment. I thank him for sharing his knowledge and experience so sincerely and for making learning this enjoyable.",
-      name: "Kemal A.", course: "Roasting · Professional", reviewed: "2026-11-06",
+      name: "Kemal Akdaş", position: "owner and roaster", company: "Shady Coffee Works", course: "Roasting · Professional", reviewed: "2026-11-06",
       original: "Eğitimler hem bilgi ve uygulama açısından dolu dolu hem de oldukça keyifli bir süreçti. Ömer Hoca’nın nazik, ve paylaşımcı yaklaşımı sayesinde kendimizi rahat hissettiğimiz, sorularımıza karşılık bulabildiğimiz ve her anından verim aldığımız bir eğitim oldu. Bilgi ve deneyimlerini içtenlikle paylaştığı, öğrenmeyi bu kadar keyifli hâle getirdiği için kendisine teşekkür ederim." },
     { id: "emin-g", starts: "hidden",
       quote: "I was truly very pleased with the Roasting training I took from Ömer Aydın. Besides his depth of knowledge, he is an extremely kind, patient and sincere instructor. Above all, his ability to look at topics from different perspectives and explain them again with different teaching methods makes learning far more productive. This training did not just improve my roasting knowledge, it also changed the way I look at coffee. The experience and valuable advice he shared with my goal of becoming a Q Grader in mind were especially precious to me. Thank you very much for everything.",
@@ -60,8 +62,9 @@ window.siteContent = {
       name: "Tuğba S.", course: "Roasting · Foundation + Intermediate", reviewed: "2026-07-17",
       original: "Dolu dolu geçen ve çok fazla şey öğrenilen bir eğitimdi her şey için Ömer hocaya teşekkür ederim." },
     { id: "ferhat-m", starts: "hidden",
+      headline: "Head roaster of Can Kardeşler chose Ömer for SCA Roasting.",
       quote: "Taking part in this training was a very valuable experience for me. I gained technical knowledge about coffee roasting and also had the chance to benefit from years of experience. Most importantly, it made my passion for coffee grow even further. It was a sincere, professional and instructive training. I thank Ömer for his work and recommend it to everyone who wants to lay a solid foundation for their coffee journey.",
-      name: "Ferhat M.", course: "Roasting · Foundation + Intermediate", reviewed: "2026-06-14",
+      name: "Ferhat Mete", position: "head roaster", company: "Can Kardeşler", course: "Roasting · Foundation + Intermediate", reviewed: "2026-06-14",
       original: "Bu eğitime katılmak benim için çok değerli bir deneyimdi. Kahve kavurma konusunda hem teknik bilgiler edindim hem de yılların deneyiminden faydalanma fırsatı buldum. En önemlisi, kahveye olan tutkumun daha da artmasını sağladı. Samimi, profesyonel ve öğretici bir eğitim süreciydi. Emeği geçen Ömer hocama teşekkür ediyor, kahve yolculuğuna sağlam bir temel atmak isteyen herkese tavsiye ediyorum." },
     { id: "saggezza", starts: "hidden",
       quote: "During the Q Grader training, the way CoffeeNutz, that is Ömer, passed on knowledge was truly very valuable. Running a training this technical and this demanding in a way that is both disciplined and clear takes serious competence. Ömer’s command of the subject, the calm confidence in his approach and the importance he gives to detail made the process far more productive. I thank CoffeeNutz, that is Ömer, for this strong training experience.",
