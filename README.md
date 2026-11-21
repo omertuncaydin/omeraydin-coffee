@@ -1,6 +1,6 @@
 # omeraydin.coffee
 
-Static one-page site, version v2026-11-21d, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
+Static one-page site, version v2026-11-21e, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
 
 ## What changes without an upload
 

@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-21d
+/* omeraydin.coffee v2026-11-21e
    Fonts: Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see assets/fonts/fonts-license.txt */
 
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
@@ -145,7 +145,7 @@ button.pill:disabled{opacity:.55;cursor:default}
 .quote-ph{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;border-radius:20px;background:rgba(29,29,29,.08)}
 .quote-hl{font-weight:700;font-size:clamp(1.2375rem,1.71vw,1.51875rem);line-height:1.14;letter-spacing:-0.04em;text-wrap:balance}
 .quote.has-hl blockquote{font-size:1.125rem;line-height:1.36;letter-spacing:inherit;color:var(--coal)}
-.quote.has-hl figcaption{margin-top:auto;padding-top:16px;border-top:1px solid var(--rule);color:var(--ink)}
+.quote.has-hl figcaption{margin-top:auto;padding-top:16px;border-top:1px solid var(--rule)}   /* name and title in the red of the block, under a quiet neutral rule */
 /* the quote of a card: three lines, the rest behind "Read more" (site.js marks a card whose quote is longer: can-open) */
 .quote-say{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
 .quote.can-open:not(.is-open) .quote-say blockquote{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
