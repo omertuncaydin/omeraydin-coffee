@@ -3,6 +3,11 @@ window.siteContent = {
   youtubeId: "eTAqLuLb1LA", // e.g. the ID after v= in your YouTube URL
   portrait: "assets/portrait.jpg", // e.g. assets/portrait.jpg
 
+  // The recording that "Hear a roast" plays in the block "Original Research & Methodology": a file in assets/sounds
+  // (mp3, m4a or wav; small letters, digits and hyphens in its name). A recording chosen in the site manager
+  // (Research) is played in its place. Empty: the button shows only while the site manager holds a recording.
+  roastSound: "assets/sounds/first-crack.mp3",
+
   // The store behind the site manager (omeraydin.coffee/manage): which blocks are shown, the training dates
   // read from the CoffeeNutz calendar, and the messages sent with the form. This key is the public one, the same
   // the other CoffeeNutz tools carry in their pages. Empty address: everything shows, no dates, no form.

@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-21f
+/* omeraydin.coffee v2026-11-22a
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar,
    which photos were uploaded for the learner cards and which texts were written there, and sends the message form there.
@@ -93,7 +93,7 @@
     setTone();
   }
 
-  let hush = () => {};   /* stops the recording of "Hear the roast" (set further down) */
+  let hush = () => {};   /* stops the recording of the research block (set further down) */
 
   /* film: nothing loads from YouTube until the visitor presses play */
   const film = $('#film');
@@ -419,13 +419,17 @@
     if (!response.ok) throw new Error(name + ' ' + response.status);
     return response.json();
   };
-  /* "Hear the roast" in the research block: the recording uploaded in the site manager (the text "rm:sound" names
-     its file in the store). The button shows only while there is one, and nothing is fetched before it is pressed. */
+  /* The play button of the research block. It plays the recording chosen in the site manager (the text "rm:sound"
+     names its file in the store), else the recording that comes with the site files (roastSound in content.js).
+     The button shows only while there is one of the two, and nothing is fetched before it is pressed. */
   const SOUND_PATH = /^sounds\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mp3|m4a|wav)$/;
+  const SOUND_FILE = /^assets\/sounds\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mp3|m4a|wav)$/;
+  const ownSound = typeof content.roastSound === 'string' && SOUND_FILE.test(content.roastSound.trim()) ? content.roastSound.trim() : '';
   const hear = $('#hear');
   const acts = hear ? hear.parentElement : null;
   let sound = null;
-  let soundPath = '';
+  let soundFrom = '';   /* "store:<path>" for an uploaded recording, "file:<path>" for the one of the site files */
+  let lost = '';        /* an uploaded recording that could not be fetched on this visit */
   let hostOff = false;
   /* the row of the two buttons leaves no gap when neither shows: no recording, and "Host a course" switched off */
   const setActs = (hide) => {
@@ -442,18 +446,19 @@
     if (!hear) return;
     const named = texts && typeof texts['rm:sound'] === 'string' ? texts['rm:sound'] : '';
     const path = named.length <= 120 && SOUND_PATH.test(named) ? named : '';
-    if (path === soundPath) return;
-    soundPath = path;
+    const from = path && path !== lost ? 'store:' + path : ownSound ? 'file:' + ownSound : '';
+    if (from === soundFrom) return;
+    soundFrom = from;
     if (sound) {
       sound.pause();
       sound = null;
     }
     quiet();
-    hear.hidden = !path;
+    hear.hidden = !from;
   };
   if (hear) {
     hear.addEventListener('click', () => {
-      if (!soundPath) return;
+      if (!soundFrom) return;
       if (!sound) {
         const player = new Audio();
         player.preload = 'auto';
@@ -468,14 +473,23 @@
           player.currentTime = 0;
           quiet();
         });
-        player.addEventListener('error', () => {   /* the file is gone: the button goes with it */
+        player.addEventListener('error', () => {
           if (sound !== player) return;
           sound = null;
           quiet();
-          hear.hidden = true;
+          if (soundFrom.startsWith('store:')) {
+            lost = soundFrom.slice(6);
+            if (ownSound) {
+              /* the uploaded file is gone or the store is away: the recording of the site files takes its place */
+              soundFrom = 'file:' + ownSound;
+              hear.click();
+              return;
+            }
+          }
+          hear.hidden = true;   /* nothing to play: the button goes */
           setActs();
         });
-        player.src = storeFile(soundPath);
+        player.src = soundFrom.startsWith('store:') ? storeFile(soundFrom.slice(6)) : soundFrom.slice(5);
         sound = player;
       }
       if (sound.paused) {
