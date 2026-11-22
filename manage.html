@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Site manager · omeraydin.coffee</title>
 <meta name="robots" content="noindex,nofollow">
-<meta name="version" content="v2026-11-21d">
+<meta name="version" content="v2026-11-21f">
 <meta name="theme-color" content="#F4F1E0">
 <link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
 <link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
 <style>
-/* omeraydin.coffee site manager v2026-11-21d. Same colours and fonts as the site it manages. */
+/* omeraydin.coffee site manager v2026-11-21f. Same colours and fonts as the site it manages. */
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-ext-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -157,6 +157,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .source p b{display:block;font-weight:400;color:var(--soft)}
 .pop{display:flex;flex-direction:column;gap:18px;padding:22px;border-radius:20px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
 .pop .field.changed>span:first-child::after{content:" · changed here";color:var(--verm-ink)}
+.sound{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:22px;padding:22px;border-radius:20px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.sound h2{font-size:1.0625rem;font-weight:700}
+.sound audio{display:block;width:min(100%,420px);margin-top:4px}
+.sound .learner-acts{margin-top:4px}
 .foot{margin-top:34px;font-size:.875rem;color:var(--soft)}
 
 @media (max-width:560px){
@@ -206,6 +210,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     <button class="tab" id="tab-inbox" type="button" role="tab" aria-selected="false" aria-controls="pane-inbox">Messages <span class="count" id="new-count"></span></button>
     <button class="tab" id="tab-learn" type="button" role="tab" aria-selected="false" aria-controls="pane-learn">Learners</button>
     <button class="tab" id="tab-pop" type="button" role="tab" aria-selected="false" aria-controls="pane-pop">Pop-up</button>
+    <button class="tab" id="tab-res" type="button" role="tab" aria-selected="false" aria-controls="pane-res">Research</button>
   </div>
 
   <section id="pane-vis" role="tabpanel" aria-labelledby="tab-vis">
@@ -248,7 +253,19 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     <p class="say" id="pop-say" role="status" aria-live="polite"></p>
   </section>
 
-  <p class="foot">Site manager v2026-11-21d · <a href="./">Open omeraydin.coffee</a></p>
+  <section id="pane-res" role="tabpanel" aria-labelledby="tab-res" hidden>
+    <p class="lead">The block “Original Research &amp; Methodology” on the site: its texts, and the recording behind “Hear the roast”. Change a text and press Save; visitors see it the next time they open the site. Bold is written as **words**, a link as [words](https://address). In the steps every line is one step. A text you empty is left out of the block; the label, the title and the two buttons cannot be empty. The eye for the whole block is on the Visibility tab.</p>
+    <p class="say" id="res-off" role="status" aria-live="polite"></p>
+    <div class="pop" id="res"></div>
+    <div class="learner-acts" id="res-acts">
+      <button class="pill pill-sm pill-solid" id="res-save" type="button">Save</button>
+      <button class="pill pill-sm" id="res-undo" type="button">Undo changes</button>
+    </div>
+    <p class="say" id="res-say" role="status" aria-live="polite"></p>
+    <div class="sound" id="sound"></div>
+  </section>
+
+  <p class="foot">Site manager v2026-11-21f · <a href="./">Open omeraydin.coffee</a></p>
 </main>
 
 <div class="publish" id="publish" hidden>
@@ -263,16 +280,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 <script src="content.js?v=2026-11-21b"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* omeraydin.coffee site manager v2026-11-21d
+/* omeraydin.coffee site manager v2026-11-21f
    Signs in with the CoffeeNutz admin account and edits what the store holds for the site:
    which blocks are hidden (table site_settings), the messages visitors sent (table site_messages), the photos
    of the learner cards (table site_photos, files in the photo store "site") and the texts written here in place
-   of a text of the site (table site_texts): the words and the order of the learner cards, the texts of the pop-up.
+   of a text of the site (table site_texts): the words and the order of the learner cards, the texts of the pop-up,
+   the texts of the research block and the recording its button plays (a file in the same store).
    The list of blocks is read from the live page itself: every element there that carries data-vis is one row here,
    and every element that carries data-edit is a text that can be replaced. The list of learners is read from content.js. */
 (() => {
   'use strict';
-  const VERSION = 'v2026-11-21d';
+  const VERSION = 'v2026-11-21f';
   const content = window.siteContent || {};
   const $ = (id) => document.getElementById(id);
   const make = (tag, cls, text) => {
@@ -707,8 +725,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
   let textsOff = '';          // why texts cannot be read or saved
   let fields = [];            // the texts of the page that can be replaced: { key, name, list, need, first }, read from the live page
   let editing = null;         // { id, values, ask } while the words of one card are open here
-  let popDraft = {};          // key -> text typed in the Pop-up tab and not saved yet
-  let popSaid = '';
+  let popDraft = {};          // key -> text typed in the Pop-up or the Research tab and not saved yet
+  const SHEETS = { pop: 'bg:', res: 'rm:' };   // the two tabs of texts, each with the start of its keys
+  const sheetSaid = { pop: '', res: '' };
+  let soundStore = null;      // 'ready' once the store takes recordings (database script v2026-11-21f or newer), else the reason
+  let soundAsk = false;       // Remove recording was pressed once
+  let soundBusy = false;      // a recording is on its way to the store
+  let soundSaid = '';
   const oneLine = (value) => String(value).replace(/\s+/g, ' ').trim();
   const fit = (area) => {   // a field as tall as its text; measured only while its tab is open
     if (!area.offsetParent) return;
@@ -1539,17 +1562,19 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     return form;
   };
 
-  /* ---------- the pop-up: its texts, one field each ---------- */
-  const drawPop = () => {
-    const box = $('pop');
+  /* ---------- texts of the page, one field each: the pop-up (keys "bg:…") and the research block (keys "rm:…") ---------- */
+  const sheetChanges = (name) => popChanges().filter((f) => f.key.startsWith(SHEETS[name]));
+  const drawSheet = (name) => {
+    const box = $(name);
     box.replaceChildren();
-    const mine = fields.filter((f) => f.key.startsWith('bg:'));
-    $('pop-off').textContent = textsOff;
-    $('pop-say').textContent = popSaid;
+    const mine = fields.filter((f) => f.key.startsWith(SHEETS[name]));
+    $(name + '-off').textContent = textsOff;
+    $(name + '-say').textContent = sheetSaid[name];
     box.hidden = !mine.length;
-    $('pop-acts').hidden = !mine.length;
+    $(name + '-acts').hidden = !mine.length;
+    if (name === 'res') drawSound();
     if (!mine.length) {
-      $('pop-off').textContent = textsOff || 'The page has no text that can be changed here yet. Load this page again after the newest files are on the site.';
+      $(name + '-off').textContent = textsOff || 'The page has no text that can be changed here yet. Load this page again after the newest files are on the site.';
       return;
     }
     for (const f of mine) {
@@ -1565,10 +1590,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
       area.spellcheck = true;
       area.addEventListener('input', () => {
         popDraft[f.key] = area.value;
-        popSaid = '';
-        $('pop-say').textContent = '';
+        sheetSaid[name] = '';
+        $(name + '-say').textContent = '';
         fit(area);
-        markPop();
+        markSheet(name);
       });
       wrap.append(area);
       if (popTidy(value) !== f.first) {
@@ -1580,8 +1605,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
         back.addEventListener('click', (event) => {
           event.preventDefault();
           popDraft[f.key] = f.first;
-          popSaid = '';
-          drawPop();
+          sheetSaid[name] = '';
+          drawSheet(name);
           const again = box.querySelector('textarea[data-key="' + f.key + '"]');
           if (again) again.focus();
         });
@@ -1591,42 +1616,198 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
       box.append(wrap);
       fit(area);
     }
-    markPop();
+    markSheet(name);
   };
-  const markPop = () => {
-    const n = popChanges().length;
-    $('pop-save').disabled = !n || !!textsOff;
-    $('pop-undo').disabled = !Object.keys(popDraft).length;
+  const markSheet = (name) => {
+    const n = sheetChanges(name).length;
+    $(name + '-save').disabled = !n || !!textsOff;
+    $(name + '-undo').disabled = !Object.keys(popDraft).some((key) => key.startsWith(SHEETS[name]));
   };
-  $('pop-undo').addEventListener('click', () => {
-    popDraft = {};
-    popSaid = '';
-    drawPop();
-  });
-  $('pop-save').addEventListener('click', async () => {
-    const rows = [], gone = [];
-    for (const f of popChanges()) {
-      const value = popTidy(popDraft[f.key]);
-      if (!value && f.need) {
-        popSaid = '“' + f.name + '” cannot be empty.';
-        $('pop-say').textContent = popSaid;
-        return;
+  const drawPop = () => drawSheet('pop');
+  /* a window that changes its width (a phone turned on its side) breaks the lines differently: the fields follow */
+  window.addEventListener('resize', () => { for (const area of document.querySelectorAll('.pop textarea')) fit(area); });
+  for (const name of Object.keys(SHEETS)) {
+    $(name + '-undo').addEventListener('click', () => {
+      for (const key of Object.keys(popDraft)) if (key.startsWith(SHEETS[name])) delete popDraft[key];
+      sheetSaid[name] = '';
+      drawSheet(name);
+    });
+    $(name + '-save').addEventListener('click', async () => {
+      const rows = [], gone = [];
+      for (const f of sheetChanges(name)) {
+        const value = popTidy(popDraft[f.key]);
+        if (!value && f.need) {
+          sheetSaid[name] = '“' + f.name + '” cannot be empty.';
+          $(name + '-say').textContent = sheetSaid[name];
+          return;
+        }
+        if (value === f.first) gone.push(f.key);
+        else rows.push({ key: f.key, value });
       }
-      if (value === f.first) gone.push(f.key);
-      else rows.push({ key: f.key, value });
-    }
-    if (!rows.length && !gone.length) return;
-    $('pop-save').disabled = true;
-    $('pop-undo').disabled = true;
-    $('pop-say').textContent = 'Saving…';
-    const failed = await writeTexts(rows, gone.filter((key) => key in texts));
-    if (failed) popSaid = 'That was not saved: ' + failed + '. Nothing changed on the site.';
-    else {
-      popDraft = {};
-      popSaid = 'Saved. Visitors see it the next time they open the site.';
-    }
-    drawPop();
+      if (!rows.length && !gone.length) return;
+      $(name + '-save').disabled = true;
+      $(name + '-undo').disabled = true;
+      $(name + '-say').textContent = 'Saving…';
+      const failed = await writeTexts(rows, gone.filter((key) => key in texts));
+      if (failed) sheetSaid[name] = 'That was not saved: ' + failed + '. Nothing changed on the site.';
+      else {
+        for (const key of Object.keys(popDraft)) if (key.startsWith(SHEETS[name])) delete popDraft[key];
+        sheetSaid[name] = 'Saved. Visitors see it the next time they open the site.';
+      }
+      drawSheet(name);
+    });
+  }
+
+  /* ---------- the recording behind "Hear the roast": a file in the photo store, named in the texts under "rm:sound".
+     Saved at once, without Publish. The site shows the button only while there is a recording. ---------- */
+  const SOUND_PATH = /^sounds\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mp3|m4a|wav)$/;
+  const SOUND_KINDS = { mp3: 'audio/mpeg', m4a: 'audio/mp4', wav: 'audio/wav' };
+  const SOUND_MAX = 6000000;
+  const soundOf = () => {
+    const path = texts['rm:sound'];
+    return typeof path === 'string' && path.length <= 120 && SOUND_PATH.test(path) ? path : '';
+  };
+  const soundKind = (file) => {
+    const name = String(file.name || '').toLowerCase();
+    const type = String(file.type || '').toLowerCase();
+    if (/\.mp3$/.test(name) || type === 'audio/mpeg' || type === 'audio/mp3') return 'mp3';
+    if (/\.m4a$/.test(name) || type === 'audio/mp4' || type === 'audio/x-m4a' || type === 'audio/m4a') return 'm4a';
+    if (/\.wav$/.test(name) || type === 'audio/wav' || type === 'audio/x-wav' || type === 'audio/wave' || type === 'audio/vnd.wave') return 'wav';
+    return '';
+  };
+  /* how long a chosen file plays, in seconds; 0 when this browser cannot play it */
+  const soundLength = (file) => new Promise((resolve) => {
+    const probe = new Audio();
+    const blobUrl = URL.createObjectURL(file);
+    let done = false;
+    const end = (seconds) => {
+      if (done) return;
+      done = true;
+      URL.revokeObjectURL(blobUrl);
+      resolve(seconds);
+    };
+    probe.preload = 'metadata';
+    probe.addEventListener('loadedmetadata', () => end(isFinite(probe.duration) && probe.duration > 0 ? probe.duration : 0.001));
+    probe.addEventListener('error', () => end(0));
+    setTimeout(() => end(0), 8000);
+    probe.src = blobUrl;
   });
+  const clock = (seconds) => Math.floor(seconds / 60) + ':' + String(Math.floor(seconds % 60)).padStart(2, '0');
+  const megabytes = (bytes) => (bytes / 1000000).toFixed(bytes < 100000 ? 2 : 1) + ' MB';
+  const drawSound = () => {
+    const box = $('sound');
+    box.replaceChildren();
+    const path = soundOf();
+    const ready = !textsOff && !photosOff && photoStore === 'ready' && soundStore === 'ready';
+    box.append(make('h2', '', 'Recording for “Hear the roast”'));
+    box.append(make('p', 'sub', path
+      ? 'This recording plays when a visitor presses the button.'
+      : 'No recording yet, so the button is not shown on the site. MP3, M4A or WAV, 6 MB at most; half a minute of first crack is plenty.'));
+    if (path) {
+      const player = make('audio');
+      player.controls = true;
+      player.preload = 'metadata';   /* enough to show how long it is */
+      player.src = publicUrl(path);
+      box.append(player);
+    }
+    const acts = make('div', 'learner-acts');
+    const line = make('p', 'say', soundSaid);
+    line.setAttribute('role', 'status');
+    const say = (text) => { soundSaid = text; line.textContent = text; };
+    if (soundAsk && path) {
+      /* second press: the recording is taken away, and the button leaves the site */
+      const yes = make('button', 'pill pill-sm pill-solid', 'Remove it');
+      yes.type = 'button';
+      const no = make('button', 'pill pill-sm', 'Keep');
+      no.type = 'button';
+      no.addEventListener('click', () => { soundAsk = false; drawSound(); });
+      yes.addEventListener('click', async () => {
+        yes.disabled = true;
+        no.disabled = true;
+        const failed = await writeTexts([], ['rm:sound'].filter((key) => key in texts));
+        soundAsk = false;
+        if (failed) soundSaid = 'The recording was not removed: ' + failed + '.';
+        else {
+          try { await SB.storage.from('site').remove([path]); } catch (ignored) { /* the file stays in the store, unused */ }
+          soundSaid = 'Recording removed. The button “Hear the roast” is no longer shown on the site.';
+        }
+        drawSound();
+      });
+      acts.append(make('span', 'ask', 'Remove the recording? The button “Hear the roast” leaves the site with it.'), yes, no);
+      box.append(acts, line);
+      return;
+    }
+    const input = make('input');
+    input.type = 'file';
+    input.accept = '.mp3,.m4a,.wav,audio/mpeg,audio/mp4,audio/x-m4a,audio/wav,audio/x-wav';
+    input.hidden = true;
+    input.setAttribute('aria-label', 'Recording file for Hear the roast');
+    const choose = make('button', 'pill pill-sm', path ? 'Choose another recording' : 'Choose recording');
+    choose.type = 'button';
+    choose.disabled = !ready || soundBusy;
+    choose.addEventListener('click', () => input.click());
+    input.addEventListener('change', async () => {
+      const file = input.files && input.files[0];
+      input.value = '';
+      if (!file || soundBusy) return;
+      const kind = soundKind(file);
+      if (!kind) return say('This file is not an MP3, M4A or WAV recording.');
+      if (file.size > SOUND_MAX) return say('This recording is ' + megabytes(file.size) + '. 6 MB is the most: a shorter cut, or the same cut saved as MP3 or M4A, will fit.');
+      soundBusy = true;
+      choose.disabled = true;
+      say('Saving the recording…');
+      const seconds = await soundLength(file);
+      if (!seconds) {
+        soundBusy = false;
+        soundSaid = 'This file could not be played here, so it was not taken. MP3, M4A and WAV work in every browser.';
+        return drawSound();
+      }
+      const next = 'sounds/roast-' + Date.now().toString(36) + '.' + kind;
+      /* the file goes up under the one name of its kind, whatever this computer calls it (audio/x-m4a, audio/x-wav, ...) */
+      const sent = await SB.storage.from('site').upload(next, file.slice(0, file.size, SOUND_KINDS[kind]), { contentType: SOUND_KINDS[kind], cacheControl: '31536000', upsert: false });
+      if (sent.error) {
+        const why = sent.error.message || 'the store refused it';
+        soundBusy = false;
+        soundSaid = /mime|not supported|maximum allowed size|too large/i.test(why)
+          ? 'The store did not take this recording. Run the newest omeraydin-site.sql once in the Supabase SQL editor, then choose the file again.'
+          : 'That was not saved: ' + why + '. Nothing changed on the site.';
+        return drawSound();
+      }
+      const failed = await writeTexts([{ key: 'rm:sound', value: next }], []);
+      soundBusy = false;
+      if (failed) {
+        try { await SB.storage.from('site').remove([next]); } catch (ignored) { /* an unused file is harmless */ }
+        soundSaid = 'That was not saved: ' + failed + '. Nothing changed on the site.';
+        return drawSound();
+      }
+      if (path && path !== next) { try { await SB.storage.from('site').remove([path]); } catch (ignored) { /* the old file stays, unused */ } }
+      soundSaid = 'Recording saved (' + (seconds >= 1 ? clock(seconds) + ', ' : '') + megabytes(file.size) + '). The button “Hear the roast” shows on the site the next time a visitor opens it.';
+      drawSound();
+    });
+    acts.append(input, choose);
+    if (path) {
+      const remove = make('button', 'pill pill-sm', 'Remove recording');
+      remove.type = 'button';
+      remove.disabled = !!textsOff || soundBusy;
+      remove.addEventListener('click', () => {
+        soundAsk = true;
+        drawSound();
+        const yes = $('sound').querySelector('.ask + button');
+        if (yes) yes.focus();
+      });
+      acts.append(remove);
+    }
+    box.append(acts, line);
+    /* why no recording can be chosen: said here, and gone by itself once the store is ready */
+    const again = ' Run the newest omeraydin-site.sql once in the Supabase SQL editor, then load this page again.';
+    const why = textsOff ? ''
+      : photosOff ? photosOff
+      : photoStore && photoStore !== 'ready' ? 'Recordings cannot be saved yet: ' + photoStore + '.' + again
+      : soundStore && soundStore !== 'ready' ? 'Recordings cannot be saved yet' + (soundStore === 'old' ? '.' : ': ' + soundStore + '.') + again
+      : '';
+    if (soundBusy) line.textContent = 'Saving the recording…';
+    else if (why) line.textContent = why;
+  };
   const loadPhotos = async () => {
     const { data, error } = await SB.from('site_photos').select('slot,path,at,updated_at');
     if (error) {
@@ -1639,6 +1820,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
       for (const row of data || []) if (row && typeof row.slot === 'string') photos[row.slot] = row;
     }
     drawLearners();
+    if (tabNow === 'res') drawSound();
   };
 
   for (const [id, name] of [['le-all', 'all'], ['le-on', 'on'], ['le-off', 'off']]) {
@@ -1647,20 +1829,26 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 
   /* ---------- tabs ---------- */
   const tab = (name) => {
-    for (const t of ['vis', 'inbox', 'learn', 'pop']) {
+    for (const t of ['vis', 'inbox', 'learn', 'pop', 'res']) {
       $('tab-' + t).setAttribute('aria-selected', t === name ? 'true' : 'false');
       $('pane-' + t).hidden = t !== name;
     }
     tabNow = name;
+    if (name !== 'res') {   /* a recording that is playing in the Research tab stops when the tab is left */
+      const playing = $('sound').querySelector('audio');
+      if (playing) playing.pause();
+    }
     showBar();
     if (name === 'inbox') loadMails();
     if (name === 'learn') { if (!unsaved()) loadPhotos(); else drawLearners(); }
     if (name === 'pop') drawPop();
+    if (name === 'res') drawSheet('res');
   };
   $('tab-vis').addEventListener('click', () => tab('vis'));
   $('tab-inbox').addEventListener('click', () => tab('inbox'));
   $('tab-learn').addEventListener('click', () => tab('learn'));
   $('tab-pop').addEventListener('click', () => tab('pop'));
+  $('tab-res').addEventListener('click', () => tab('res'));
 
   /* ---------- signing in and loading ---------- */
   const start = async () => {
@@ -1698,7 +1886,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     SB.rpc('site_feed_status').then(async (answer) => {
       feed = (answer && answer.data) || { count: null, fetched_at: null, tried_at: null, error: null };
       photoStore = typeof feed.photo_store === 'string' ? feed.photo_store : 'the photo store is not set up';
+      soundStore = typeof feed.sound_store === 'string' ? feed.sound_store : 'old';   /* an earlier database script says nothing about recordings */
       drawLearners();
+      if (tabNow === 'res') drawSound();
       await countListed();
       drawTree();
     });
@@ -1744,7 +1934,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     editing = null;
     logoAsk = null;
     popDraft = {};
-    popSaid = '';
+    sheetSaid.pop = '';
+    sheetSaid.res = '';
+    soundStore = null;
+    soundAsk = false;
+    soundBusy = false;
+    soundSaid = '';
     sayPub('');
     for (const id of Object.keys(pending)) forget(id);
     for (const id of Object.keys(said)) delete said[id];

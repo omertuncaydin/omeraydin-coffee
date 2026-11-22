@@ -1,6 +1,6 @@
 # omeraydin.coffee
 
-Static one-page site, version v2026-11-21e, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
+Static one-page site, version v2026-11-21f, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
 
 ## What changes without an upload
 
@@ -9,14 +9,14 @@ Five things are read from the CoffeeNutz Supabase project (the "store") each tim
 - which blocks are switched off in the site manager, and which learner cards that start hidden are switched on,
 - the training dates, taken from the CoffeeNutz training calendar,
 - which photos were uploaded for the learner cards in the site manager,
-- which texts were written in the site manager: the words and the order of the learner cards, the logo of a card and whether it is switched on, and the texts of the pop-up behind "More about Ömer Aydın",
+- which texts were written in the site manager: the words and the order of the learner cards, the logo of a card and whether it is switched on, the texts of the pop-up behind "More about Ömer Aydın", and the texts of the block "Original Research & Methodology" with the recording behind its button "Hear the roast",
 - whether the message form can be shown. The form sends its messages to the same store.
 
 The store's address and public key are in `content.js` (`storeUrl`, `storeKey`). The key is the public one that the other CoffeeNutz tools also carry in their pages. No secret belongs in this repository: everything in it is published as part of the site.
 
 If the store does not answer, the page shows itself as the visitor's browser last saw it. On a first visit that means every block, the texts and the order of the site files, no dates and no form.
 
-The database part is one SQL file, `omeraydin-site.sql`. It is kept outside this repository and is run in the Supabase SQL editor. A newer version of the file is run the same way on top of the old one; settings, messages, photos and texts stay. Texts need the version of 21 November 2026 or later (table `site_texts`); until it has been run, the site manager says so and the site shows the texts of the site files.
+The database part is one SQL file, `omeraydin-site.sql`. It is kept outside this repository and is run in the Supabase SQL editor. A newer version of the file is run the same way on top of the old one; settings, messages, photos and texts stay. Texts need the version of 21 November 2026 or later (table `site_texts`); until it has been run, the site manager says so and the site shows the texts of the site files. A recording needs v2026-11-21f or later, which lets the photo store take sound files (MP3, M4A, WAV, 6 MB at most); until it has been run, the Research tab says so and everything else works.
 
 ## Site manager
 
@@ -27,14 +27,25 @@ The database part is one SQL file, `omeraydin-site.sql`. It is kept outside this
 - Learners: the learner cards in their order on the page, with three filters: All, On the site, Hidden. "Edit text" opens the headline, name, title, company and quote of a card; what is saved there is shown in place of the text in `content.js`, and "Back to the text of the site files" takes it away again. The two arrows move a card up or down among the cards the filter lists. "Choose logo" takes a logo file from the computer for the card (PNG, SVG, WebP or JPEG); it is shown before the name, and "Logo on" / "Logo off" shows or hides it without taking the file away. "Remove logo" takes the file away after a second press. The browser cuts the empty edge off the logo, makes it 480 × 240 px at most and saves it as PNG in the photo store. A dark logo on a see-through or white ground works; a logo that is white all over is refused, because it would not show on the light page. Text, order and logo are saved at once, without Publish. Every public course review on coffeenutz.net has a card; the ones not chosen yet are hidden. The eye on a card shows or hides it; it is the same switch as in the Visibility list and goes live with Publish. A card whose eye was just pressed stays in the list until Publish or Undo. The photo of a card: choose a picture from the computer, drag it inside the frame to set the crop, save. The browser makes the picture smaller first (1600 px on its long side at most, as JPEG, without what a camera writes into a file) and puts it into the photo store of the Supabase project. "Remove uploaded photo" brings back the file named in `content.js`, or no picture. "Download" saves the picture a card shows to the computer: the uploaded one, else the file named in `content.js`.
 
 - Pop-up: the texts of the pop-up that "More about Ömer Aydın" opens, one field each. A link is written as `[words](https://address)`, bold as `**words**`, a new line is a line break, and in the list every line is one entry. An emptied text is left out of the pop-up; the title cannot be emptied. A field that holds the text of the site files again is no longer kept in the store.
+- Research: the texts of the block "Original Research & Methodology", one field each, written the same way as in the Pop-up tab; in the steps every line is one step. The line under the title, the paragraph and the steps can be emptied and are then left out; the label, the title and the texts of the two buttons cannot. Under the fields: the recording that "Hear the roast" plays. "Choose recording" takes an MP3, M4A or WAV file of 6 MB at most from the computer and saves it at once, as it is; it can be listened to there, replaced, or removed after a second press. The eye of the whole block is in the Visibility list.
 
 The manager reads its list of blocks from the live page: every element in `index.html` with a `data-vis="key"` attribute is one row, named by `data-vis-name` or by its own text. To make a new block switchable, give it a `data-vis` key (lower-case letters and digits, optionally `group:name`). Nothing else has to change. The learner cards are added to that list from `content.js`: a card with an `id` has the key `learner:<id>`.
 
-The texts that can be changed are read from the live page in the same way: an element with `data-edit="group:name"` is one field, named by `data-edit-name`. `data-edit-need` marks a text that cannot be emptied, and `data-edit-box` marks a box that disappears when every text inside it was emptied. A list (`ul`) takes one line per entry. To make another text of the page editable, give its element a `data-edit` key; the Pop-up tab lists the keys that start with `bg:`.
+The texts that can be changed are read from the live page in the same way: an element with `data-edit="group:name"` is one field, named by `data-edit-name`. `data-edit-need` marks a text that cannot be emptied, and `data-edit-box` marks a box that disappears when every text inside it was emptied. A list (`ul` or `ol`) takes one line per entry. To make another text of the page editable, give its element a `data-edit` key; the Pop-up tab lists the keys that start with `bg:`, the Research tab those that start with `rm:`.
 
 The store keeps one list of what differs from the page as written: the key of every block that is switched off, and `shown:<id>` for every learner card that starts hidden and was switched on. A new entry with `starts: "hidden"` therefore stays off the site without anything being pressed.
 
 A logo needs no line in the database script: it is kept with the texts. `learner:<id>:logo` names the file in the photo store (`logos/<id>-<stamp>-<width>x<height>.png`), and `learner:<id>:logo-off` holds `1` while the logo is switched off. The site shows a logo no taller than 48 px and no wider than 96 px, a wide one a little lower, so that logos of different shapes weigh about the same.
+
+The recording is kept the same way: the text `rm:sound` names its file in the photo store (`sounds/roast-<stamp>.mp3`, `.m4a` or `.wav`). Removing it in the site manager takes the text and the file away.
+
+## Original Research & Methodology
+
+The black panel after "Your instructor" (`<section id="research">` in `index.html`, so `omeraydin.coffee/#research` opens the page there). On the left: the label, the title, a line under it, a paragraph and two buttons. On the right: a numbered list of steps. The words written in `index.html` show while nothing was saved in the site manager (Research).
+
+- "Hear the roast" plays the recording chosen in the site manager, and pauses it when pressed again. The button is shown only while there is a recording, so a site without one shows a single button. Nothing is fetched before a visitor presses it; pressing play on the film pauses it.
+- "Host a workshop" jumps to "Host a course" in the closing panel and disappears with that block when it is switched off.
+- The steps are numbered by the style sheet: one line in the site manager is one step, however many there are.
 
 ## Training dates
 
@@ -76,14 +87,14 @@ The menu is a glass capsule that stays in view while the page scrolls. Its label
 
 - `index.html`: the page.
 - `style.css`: layout and colours. Desktop first. Date rows stack at 1000 px and below, the menu button appears at 760 px and below, the phone layout at 520 px and below. The glass of the menu is in the header section.
-- `site.js`: menu button, menu label colours, film player, background pop-up, the learner cards, and everything that comes from the store (hidden blocks, dates, photos, texts and card order, message form). A text from the store is put into the page as text, never as HTML.
+- `site.js`: menu button, menu label colours, film player, background pop-up, the learner cards, the button that plays the recording, and everything that comes from the store (hidden blocks, dates, photos, texts and card order, message form). A text from the store is put into the page as text, never as HTML.
 - `content.js`: the values described above.
 - `manage.html`: the site manager, served at `/manage`. It loads the Supabase sign-in library from cdn.jsdelivr.net, as the other CoffeeNutz tools do.
 - `favicon.svg`, `favicon.ico`, `apple-touch-icon.png`: the ÖA mark for browser tabs and phone home screens.
 - `assets/learners/`: the photos of the learner cards.
 - `assets/`: photos and the two typefaces in `assets/fonts/` (Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see `assets/fonts/fonts-license.txt`).
 
-When the page loads it asks the store one question (two when the stored calendar copy is older than ten minutes). A learner photo or a logo uploaded in the site manager is fetched from the store when the visitor comes near that block. Nothing else is requested from another host. The film loads from YouTube's privacy-enhanced player only after a visitor presses play.
+When the page loads it asks the store one question (two when the stored calendar copy is older than ten minutes). A learner photo or a logo uploaded in the site manager is fetched from the store when the visitor comes near that block, and the recording only after "Hear the roast" was pressed. Nothing else is requested from another host. The film loads from YouTube's privacy-enhanced player only after a visitor presses play.
 
 ## After changing style.css, site.js or content.js
 

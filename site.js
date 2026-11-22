@@ -1,7 +1,8 @@
-/* omeraydin.coffee v2026-11-21d
+/* omeraydin.coffee v2026-11-21f
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar,
    which photos were uploaded for the learner cards and which texts were written there, and sends the message form there.
+   Plays the recording of the research block when its button is pressed.
    Keeps the glass menu readable: sets data-tone on the header from what is under its labels. */
 (() => {
   'use strict';
@@ -92,6 +93,8 @@
     setTone();
   }
 
+  let hush = () => {};   /* stops the recording of "Hear the roast" (set further down) */
+
   /* film: nothing loads from YouTube until the visitor presses play */
   const film = $('#film');
   const videoId = /^[\w-]{11}$/.test(content.youtubeId || '') ? content.youtubeId : '';
@@ -103,6 +106,7 @@
     film.addEventListener('click', (event) => {
       if (!plainClick(event)) return;
       event.preventDefault();
+      hush();
       const player = document.createElement('iframe');
       player.src = 'https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&rel=0';
       player.title = 'Film: coffee education with Ömer Aydın';
@@ -415,6 +419,72 @@
     if (!response.ok) throw new Error(name + ' ' + response.status);
     return response.json();
   };
+  /* "Hear the roast" in the research block: the recording uploaded in the site manager (the text "rm:sound" names
+     its file in the store). The button shows only while there is one, and nothing is fetched before it is pressed. */
+  const SOUND_PATH = /^sounds\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mp3|m4a|wav)$/;
+  const hear = $('#hear');
+  const acts = hear ? hear.parentElement : null;
+  let sound = null;
+  let soundPath = '';
+  let hostOff = false;
+  /* the row of the two buttons leaves no gap when neither shows: no recording, and "Host a course" switched off */
+  const setActs = (hide) => {
+    if (typeof hide === 'string') hostOff = (' ' + hide + ' ').includes(' host ');
+    if (acts) acts.hidden = hear.hidden && hostOff;
+  };
+  const quiet = () => {
+    if (!hear) return;
+    hear.classList.remove('is-playing');
+    hear.setAttribute('aria-pressed', 'false');
+  };
+  hush = () => { if (sound && !sound.paused) sound.pause(); };
+  const setSound = (texts) => {
+    if (!hear) return;
+    const named = texts && typeof texts['rm:sound'] === 'string' ? texts['rm:sound'] : '';
+    const path = named.length <= 120 && SOUND_PATH.test(named) ? named : '';
+    if (path === soundPath) return;
+    soundPath = path;
+    if (sound) {
+      sound.pause();
+      sound = null;
+    }
+    quiet();
+    hear.hidden = !path;
+  };
+  if (hear) {
+    hear.addEventListener('click', () => {
+      if (!soundPath) return;
+      if (!sound) {
+        const player = new Audio();
+        player.preload = 'auto';
+        player.addEventListener('playing', () => {
+          if (sound !== player) return;
+          hear.classList.add('is-playing');
+          hear.setAttribute('aria-pressed', 'true');
+        });
+        player.addEventListener('pause', () => { if (sound === player) quiet(); });
+        player.addEventListener('ended', () => {
+          if (sound !== player) return;
+          player.currentTime = 0;
+          quiet();
+        });
+        player.addEventListener('error', () => {   /* the file is gone: the button goes with it */
+          if (sound !== player) return;
+          sound = null;
+          quiet();
+          hear.hidden = true;
+          setActs();
+        });
+        player.src = storeFile(soundPath);
+        sound = player;
+      }
+      if (sound.paused) {
+        const started = sound.play();
+        if (started && started.catch) started.catch(() => {});
+      } else sound.pause();
+    });
+  }
+
   /* what this browser saw last time: applied at once, so nothing jumps while the store answers */
   const MEMORY = 'oa-site';
   const recall = () => {
@@ -689,7 +759,9 @@
     const texts = next.texts === undefined ? state.texts : cleanTexts(next.texts);   /* a call that says nothing about texts leaves them */
     setCards(texts);
     setTexts(texts);
+    setSound(texts);
     state = { hide: setHidden(next.hidden), trainings: Array.isArray(next.trainings) ? next.trainings : null, form: !!next.form, texts };
+    setActs(state.hide);
     fitQuotes();
     drawDates(state.trainings);
     showForm(state.form, state.hide);
