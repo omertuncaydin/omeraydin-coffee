@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-23c
+/* omeraydin.coffee v2026-11-23e
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar,
    which photos were uploaded for the learner cards and which texts were written there, and sends the message form there.
@@ -94,6 +94,7 @@
   }
 
   let hush = () => {};   /* stops the recording of the research block (set further down) */
+  let refit = () => {};  /* fits the open sheet of the research block to its size again (set further down) */
 
   /* film: nothing loads from YouTube until the visitor presses play */
   const film = $('#film');
@@ -478,6 +479,7 @@
       soundFig.hidden = !on;
       soundFig.classList.toggle('no-wave', !wave || soundFrom !== 'file:' + wave.dataset.for);
       paint();
+      refit();
     }
   };
   hush = () => { if (sound && !sound.paused) sound.pause(); };
@@ -564,8 +566,9 @@
      for it in the site manager, "pictures/<name>-<width>x<height>.jpg" in the store. Without one the figure shows the
      picture that comes with the site files, if it names one (data-photo-file="assets/<name>-<width>x<height>.jpg");
      the text "none" leaves the figure out. A chosen file that cannot be fetched gives way to the picture of the site
-     files; with neither the figure is left out. The picture is shown whole. Nothing is fetched before the figure is
-     on the screen. */
+     files; with neither the figure is left out. The picture is shown whole: the size in the name of the file goes to
+     the figure as --pw, --ph and --pr (width, height, width over height), and the style sheet sets the width of the
+     picture from them. Nothing is fetched before the figure is on the screen. */
   const PICTURE_PATH = /^pictures\/[a-z0-9]+(?:-[a-z0-9]+)*-([1-9]\d{0,3})x([1-9]\d{0,3})\.(?:jpg|png|webp)$/;
   const PICTURE_FILE = /^assets\/[a-z0-9]+(?:[\/-][a-z0-9]+)*-([1-9]\d{0,3})x([1-9]\d{0,3})\.(?:jpg|png|webp)$/;
   const pictureFigs = [...document.querySelectorAll('figure[data-photo]')];
@@ -589,21 +592,27 @@
           img = make('img');
           img.loading = 'lazy';
           img.decoding = 'async';
-          /* whole and in its own shape: as wide as the figure, never larger than the file, never higher than most of the window */
+          /* whole and in its own shape; how wide it is shown is written in the style sheet */
           img.style.aspectRatio = size[1] + ' / ' + size[2];
-          img.style.width = 'min(100%, ' + size[1] + 'px, calc(min(64vh, 560px) * ' + (size[1] / size[2]).toFixed(4) + '))';
+          fig.style.setProperty('--pw', size[1]);
+          fig.style.setProperty('--ph', size[2]);
+          fig.style.setProperty('--pr', (size[1] / size[2]).toFixed(4));
           fig.classList.toggle('tall', +size[2] > size[1] * 1.15);   /* an upright picture stands beside the line that belongs under it */
           img.addEventListener('error', () => {
             if (fig.dataset.from !== from) return;
             pictureLost.add(from);   /* the file is gone or the store is away: the picture of the site files takes its place, or the figure goes */
             setPictures(pictureTexts);
+            refit();
           });
           img.src = chosen ? storeFile(chosen) : own;
           fig.prepend(img);
         }
       }
       fig.hidden = !from;
-      if (!from) fig.classList.remove('tall');
+      if (!from) {
+        fig.classList.remove('tall');
+        for (const name of ['--pw', '--ph', '--pr', '--fit']) fig.style.removeProperty(name);
+      }
       const said = fig.querySelector('.photo-alt');
       if (img) img.alt = said && !said.hidden ? said.textContent.replace(/\s+/g, ' ').trim() : '';
     }
@@ -651,7 +660,13 @@
     if (!W) return true;   /* not on the screen yet: drawn when its sheet opens */
     const small = W < 420;
     const size = small ? 14 : 17;
-    const high = Math.round(Math.max(110, Math.min(210, W * 0.34)));
+    /* how high the bell stands for its width, and at most: 0.34 and 210 px unless the style sheet says otherwise
+       (--bell-rise, --bell-cap); smaller by the factor its sheet was fitted with (--fit, see fitSheet) */
+    const look = getComputedStyle(box);
+    const rise = parseFloat(look.getPropertyValue('--bell-rise')) || 0.34;
+    const cap = parseFloat(look.getPropertyValue('--bell-cap')) || 210;
+    const fit = parseFloat(look.getPropertyValue('--fit')) || 1;
+    const high = Math.max(90, Math.round(Math.max(110, Math.min(cap, W * rise)) * fit));
     const base = 12 + high;
     const x0 = W * 0.04, x1 = W * 0.96, peak = x0 + (x1 - x0) * 0.45;
     const y = (x) => base - (high - 6) * Math.exp(-1.55 * Math.pow((x - peak) / (x < peak ? (peak - x0) * 0.41 : (x1 - peak) * 0.5), 2));
@@ -773,6 +788,85 @@
   const further = $('#further');
   const canMore = canSheet && !!entry && !!further;
   let moreOpen = false;
+
+  /* One size for the sheets: the style sheet gives every sheet of the block the same width and height (not on
+     phones), and what a sheet holds has to keep to it. A sheet that is too high for its size gets its figures a little
+     smaller (--fit on a figure: its picture, the outline of the recording, the bell): first all by one factor, never
+     below the floor the style sheet names for that width of window (--fit-floor; none on a phone, where nothing is
+     fitted), then each one as large again as the sheet still has room for, the first figure first. Where words and
+     figure stand side by side and that is not enough, the words get the wider of the two columns (the mark
+     "words-wide" on the sheet) and the same is tried again. A sheet that holds more than that scrolls as a whole at
+     full size; its first picture is then made just small enough (not below 0.6) to stand whole, with the lines under
+     it, in what shows when the sheet opens. Nothing is laid over the content and no picture is cut. Factors are
+     counted in thousandths. */
+  const FIRST_VIEW_ROOM = 18;     /* px left free between that picture's figure and the bottom edge of the sheet */
+  const FIRST_VIEW_FLOOR = 600;
+  const fitSheet = (sheet) => {
+    if (!sheet || !sheet.open) return;
+    const inner = sheet.firstElementChild;
+    if (!inner) return;
+    const figs = [...inner.children].filter((node) => node.tagName === 'FIGURE');
+    const set = (fig, k) => {
+      if (k >= 1000) fig.style.removeProperty('--fit');
+      else fig.style.setProperty('--fit', (k / 1000).toFixed(3));
+      if (fig.id === 'fig-bell') drawBell();   /* the bell is drawn, not scaled: again at its new height */
+    };
+    sheet.classList.remove('words-wide');
+    for (const fig of figs) set(fig, 1000);
+    const floor = Math.round(parseFloat(getComputedStyle(sheet).getPropertyValue('--fit-floor')) * 1000);
+    if (!(floor >= 100 && floor < 1000)) return;
+    const shown = figs.filter((fig) => !fig.hidden);
+    const fits = () => sheet.scrollHeight <= sheet.clientHeight && inner.getBoundingClientRect().height - sheet.clientHeight < 0.05;
+    /* the largest factor from "low" (which passes) up to "high" (which does not) that passes, for these figures */
+    const largest = (group, low, high, passes) => {
+      while (high - low > 1) {
+        const mid = (low + high) >> 1;
+        for (const fig of group) set(fig, mid);
+        if (passes()) low = mid;
+        else high = mid;
+      }
+      for (const fig of group) set(fig, low);
+      return low;
+    };
+    /* true when the sheet keeps its size: as it is, or with its figures made smaller */
+    const keeps = () => {
+      if (fits()) return true;
+      for (const fig of shown) set(fig, floor);
+      if (!fits()) {
+        for (const fig of shown) set(fig, 1000);
+        return false;
+      }
+      const all = largest(shown, floor, 1000, fits);
+      for (const fig of shown) {   /* one figure may have room to be larger again while another holds the sheet to its size */
+        set(fig, 1000);
+        if (!fits()) largest([fig], all, 1000, fits);
+      }
+      return true;
+    };
+    if (keeps()) return;
+    if (shown.length && getComputedStyle(inner).display === 'grid') {
+      /* two columns side by side, and the sheet is too high: the words get the wider column (style sheet) */
+      sheet.classList.add('words-wide');
+      if (shown.some((fig) => fig.id === 'fig-bell')) drawBell();
+      if (keeps()) return;
+      sheet.classList.remove('words-wide');
+      if (shown.some((fig) => fig.id === 'fig-bell')) drawBell();
+    }
+    for (const fig of shown) set(fig, 1000);   /* it holds much more than its size: it scrolls, at full size */
+    const first = shown.find((fig) => fig.hasAttribute('data-photo'));
+    if (!first) return;
+    const whole = () => first.getBoundingClientRect().bottom - sheet.getBoundingClientRect().top + sheet.scrollTop <= sheet.clientHeight - FIRST_VIEW_ROOM;
+    if (whole()) return;
+    set(first, FIRST_VIEW_FLOOR);
+    if (!whole()) return set(first, 1000);   /* it cannot stand in the first view at any size worth showing: full size */
+    largest([first], FIRST_VIEW_FLOOR, 1000, whole);
+  };
+  const fitOpen = () => {
+    if (!canSheet) return;
+    const sheet = stepOpen >= 0 ? sheets[stepOpen] : moreOpen ? further : null;
+    if (sheet) fitSheet(sheet);
+  };
+  refit = fitOpen;
   const moreAddress = () => {
     const name = slug(entry.querySelector('.more-label').textContent);
     return name && !document.getElementById(name) && !openable.some((n) => addressOf(n) === name) ? name : 'further';
@@ -837,6 +931,7 @@
     });
     if (stepOpen >= 0 && !openable.includes(stepOpen) && sheets[stepOpen].open) sheets[stepOpen].close();
     setMore();
+    fitOpen();   /* words or figures of the open sheet may have changed */
   };
   const setAddress = (n) => {   /* the number of a step, the address of the entry under the steps, or -1 for none */
     try {
@@ -860,6 +955,7 @@
     drawBell();
     drawRoasts();
     paint();
+    fitSheet(sheets[n]);
     setAddress(n);
   };
   const openMore = () => {
@@ -874,6 +970,7 @@
     const name = further.querySelector('.step-kicker');
     if (name && document.activeElement !== name) name.focus({ preventScroll: true });
     further.scrollTop = 0;
+    fitSheet(further);
     setAddress(moreAddress());
   };
   if (canMore) {
@@ -940,11 +1037,13 @@
     });
     window.addEventListener('hashchange', () => { hashSeen = ''; tryHash(); });
     let drawQueued = false;
-    window.addEventListener('resize', () => {
-      if (stepOpen < 0 || drawQueued) return;
+    const drawOpen = () => {
+      if ((stepOpen < 0 && !moreOpen) || drawQueued) return;
       drawQueued = true;
-      requestAnimationFrame(() => { drawQueued = false; drawBell(); drawRoasts(); });
-    });
+      requestAnimationFrame(() => { drawQueued = false; drawBell(); drawRoasts(); fitOpen(); });
+    };
+    window.addEventListener('resize', drawOpen);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawOpen);   /* the web fonts change how the words of an open sheet run */
   }
 
   /* what this browser saw last time: applied at once, so nothing jumps while the store answers */

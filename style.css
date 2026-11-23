@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-23c
+/* omeraydin.coffee v2026-11-23e
    Fonts: Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see assets/fonts/fonts-license.txt */
 
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
@@ -301,7 +301,7 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
 .figbox.dark{background:var(--ink);color:var(--cream);box-shadow:none}
 .figbox figcaption{font-size:.9375rem;line-height:1.34;text-wrap:pretty}
 /* 01: the recording as a picture. The line runs along it while it plays, and a press on it plays from that place. */
-.wave{position:relative;height:clamp(92px,16vw,112px);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wave{position:relative;height:calc(var(--fit,1) * clamp(92px,16vw,112px));cursor:pointer;-webkit-tap-highlight-color:transparent}
 .wave svg{position:absolute;left:0;top:0;width:100%;height:calc(100% - 16px);fill:none;stroke:currentColor;stroke-width:1;color:var(--muted);transition:opacity .2s ease}
 .wave path{vector-effect:non-scaling-stroke}
 .wave .wave-done{color:var(--cream);opacity:0;clip-path:inset(0 calc(100% - var(--at,0) * 100%) 0 0)}
@@ -349,8 +349,12 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
 .roasts-axis{position:relative;height:18px;margin-top:6px;font-size:.75rem;line-height:1;font-variant-numeric:tabular-nums;color:rgba(29,29,29,.7)}
 .roasts-axis span{position:absolute;top:6px;transform:translateX(-50%);white-space:nowrap}
 .roasts-unit{margin-top:-6px;text-align:center;font-size:.75rem;line-height:1.2;color:rgba(29,29,29,.7)}
-/* a photograph chosen in the site manager: shown whole, in its own shape (site.js sets its width from the file's size);
-   an upright one stands at the left with the line that belongs to it beside it */
+/* a picture of a figure: shown whole, in its own shape. site.js reads its size from the name of the file (--pw and
+   --ph in px, --pr its width over its height): as wide as the figure, never larger than the file, never higher than
+   most of the window (--pic-high where a sheet names another limit). --fit is 1 unless site.js made the figures of a
+   sheet smaller so that the sheet keeps its size. */
+figure[data-photo] img{width:calc(var(--fit,1) * min(100%,var(--pw,9999) * 1px,var(--pic-high,min(64vh,560px)) * var(--pr,1)))}
+/* a photograph: an upright one stands at the left with the line that belongs to it beside it */
 .fig-photo{padding:0;border-radius:0;background:none;box-shadow:none}
 .fig-photo img{display:block;max-width:100%;height:auto;border-radius:16px;background:rgba(29,29,29,.06)}
 .fig-photo.tall{flex-direction:row;align-items:flex-end;justify-content:center;gap:18px}
@@ -368,6 +372,51 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
 .step-dots{display:flex;gap:7px;margin-left:auto}
 .step-dots i{width:8px;height:8px;border-radius:50%;background:var(--rule)}
 .step-dots i.on{background:var(--verm-ink)}
+
+/* One size for the sheets, whatever each holds (not on phones, where a sheet is as high as its content and most fill
+   the window). A sheet with little in it keeps its buttons at its bottom edge. One that holds a little too much gets
+   its figures a little smaller: site.js sets --fit on each figure, never below --fit-floor (see fitSheet there). One
+   that holds much more scrolls as a whole, and site.js makes its first picture just small enough to stand in what
+   shows when the sheet opens, with the lines under it. Nothing is laid over the content of a sheet, nothing in it
+   stays in place while it scrolls, and no picture is cut. */
+@media (min-width:521px){
+  .bg.step{--fit-floor:.8;height:min(800px,calc(100vh - 32px));height:min(800px,calc(100dvh - 32px))}
+  .bg.step .bg-in{min-height:100%}
+  .bg.step .step-nav{margin-top:auto;padding-top:4px}
+  /* a picture in a dark box: the box keeps close to its picture, also when the picture is made smaller, and each of
+     the two lines for its ends takes the width of its words. Around an upright picture the box stays wide enough for
+     those two lines to stand side by side. */
+  .bg.step .fig-shot{align-self:center;justify-self:center;width:calc(var(--fit,1) * min(100% - 44px,var(--pw,9999) * 1px,var(--pic-high,min(64vh,560px)) * var(--pr,1)) + 44px);max-width:100%}
+  .bg.step .fig-shot img{width:100%}
+  .bg.step .fig-shot.tall{min-width:min(100%,440px)}
+  .bg.step .fig-shot.tall img{width:min(100%,calc(var(--fit,1) * min(var(--pw,9999) * 1px,var(--pic-high,min(64vh,560px)) * var(--pr,1))))}
+  .bg.step .shot-ends li{flex:0 1 auto}
+}
+/* A wide window: the sheet is wide, with its words at the left and its figure at the right, so all of it shows at
+   once and the buttons stand at the same place in every sheet. The rows: name, headline, text, the recording (when a
+   photograph has the right column), free room, buttons. A sheet without a figure has its words across, at a width
+   that reads well. An upright photograph takes a column as wide as itself, with its line under it. No picture is
+   higher than 396 px here: what the sheet has room for between its name and its buttons. */
+@media (min-width:1100px){
+  @supports selector(:has(a)){
+    .bg.step{--fit-floor:.75;--pic-high:min(64vh,396px);width:min(1120px,calc(100vw - 32px));height:min(680px,calc(100vh - 32px));height:min(680px,calc(100dvh - 32px))}
+    .bg.step .bg-in{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);grid-template-rows:auto auto auto auto 1fr auto;gap:0 48px}
+    .bg.step .bg-head{grid-area:1 / 1 / 2 / -1}
+    .bg.step .statement{grid-area:2 / 1 / 3 / 2}
+    .bg.step .step-text{grid-area:3 / 1 / 4 / 2}
+    .bg.step .bg-in>figure{grid-area:2 / 2 / 6 / 3;align-self:start}
+    .bg.step .statement,.bg.step .step-text,.bg.step .bg-in>figure{margin-top:26px}
+    .bg.step .step-nav{grid-area:6 / 1 / 7 / -1;align-self:end;margin-top:26px}
+    .bg.step:not(:has(.bg-in>figure:not([hidden]))) .statement,.bg.step:not(:has(.bg-in>figure:not([hidden]))) .step-text{grid-column:1 / -1;max-width:680px}
+    .bg.step:has(.bg-in>.fig-photo:not([hidden])) .bg-in>.fig-sound{grid-area:4 / 1 / 5 / 2}
+    .bg.step.words-wide .bg-in{grid-template-columns:minmax(0,6fr) minmax(0,5fr)}   /* set by site.js when the words need the wider column for the sheet to keep its size */
+    .bg.step:has(.bg-in>.fig-photo.tall:not([hidden])) .bg-in{grid-template-columns:minmax(0,1fr) auto}
+    .bg.step .bg-in>.fig-photo.tall{flex-direction:column;align-items:flex-start;gap:10px;width:min-content}
+    .bg.step .fig-photo.tall>img{max-width:none;width:auto;height:calc(var(--fit,1) * min(var(--pic-high),var(--ph,9999) * 1px))}
+    .bg.step .fig-photo.tall>figcaption{flex:none;font-size:.875rem}
+    .bg.step .fig-bell{--bell-rise:.52;--bell-cap:270}   /* the bell may stand higher in its column (site.js draws it) */
+  }
+}
 
 /* narrower than a desktop window the three columns of a date row do not fit side by side: the row stacks, as on phones */
 @media (max-width:1000px){
