@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ömer Aydın | Coffee Education Worldwide</title>
 <meta name="description" content="International coffee education with Ömer Aydın, Authorized SCA Trainer and Q Instructor.">
-<meta name="version" content="v2026-11-23b">
+<meta name="version" content="v2026-11-23c">
 <meta name="theme-color" content="#F4F1E0">
 <link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
 <link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
@@ -25,7 +25,7 @@
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-ext-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://efjvfggwnhqkunjvoyjb.supabase.co" crossorigin>
-<link rel="stylesheet" href="style.css?v=2026-11-23b">
+<link rel="stylesheet" href="style.css?v=2026-11-23c">
 <script>
 (function (d) {
   var h = d.documentElement, known = false;
@@ -212,7 +212,8 @@
 
   <!-- what opens behind the first four steps: one sheet each. The words below are first drafts: each can be changed in
        the site manager (Research). A step opens while its sheet has a headline or a text. A figure with data-photo
-       shows a picture chosen in the site manager, and is left out while there is none. -->
+       shows the picture chosen for it in the site manager; without one it shows the picture of the site files that
+       data-photo-file names, and without either it is left out. -->
   <dialog class="bg step" id="sheet-1" data-vis="sheet:1" data-vis-name="Pop-up behind step 01" data-edit-group="Pop-up behind step 01" aria-labelledby="sheet-1-name">
     <div class="bg-in">
       <div class="bg-head">
@@ -223,8 +224,8 @@
       </div>
       <p class="statement" data-edit="rm:s1-head" data-edit-name="Headline">The sound comes from the beans themselves</p>
       <p class="step-text" data-edit="rm:s1-text" data-edit-name="Text">A temperature probe reads the hot air and the metal around the beans. First crack happens inside them: each pop is one bean releasing the pressure that has built up in it. I record this sound in my roasts and study how it develops from the first pop to the last.</p>
-      <figure class="figbox fig-photo" data-photo="rm:s1-photo" data-photo-name="Picture" hidden>
-        <span class="step-data photo-alt" data-edit="rm:s1-photo-alt" data-edit-name="What the picture shows" data-edit-hint="One sentence for visitors who cannot see the picture: a screen reader reads it out. It is not shown on the page."></span>
+      <figure class="figbox fig-photo" data-photo="rm:s1-photo" data-photo-name="Picture" data-photo-file="assets/research/bench-800x1000.jpg" hidden>
+        <span class="step-data photo-alt" data-edit="rm:s1-photo-alt" data-edit-name="What the picture shows" data-edit-hint="One sentence for visitors who cannot see the picture: a screen reader reads it out. It is not shown on the page.">A sound recorder on a stand next to a sample roaster and its cooling tray. Two screens stand behind them.</span>
         <figcaption data-edit="rm:s1-photo-note" data-edit-name="Line under the picture">How I record: a sound recorder at the sample roaster, the roast curve and the frequencies of the sound on screen.</figcaption>
       </figure>
       <figure class="figbox dark fig-sound" id="fig-sound" hidden>
@@ -342,8 +343,7 @@
        headline or a text; its words are first drafts and can be changed in the site manager (Research). -->
   <button class="research-more" id="more-open" type="button" aria-haspopup="dialog" data-vis="sheet:further" data-vis-name="Pop-up “Further research”" data-edit-group="Pop-up “Further research”" hidden>
     <span class="more-label" data-edit="rm:fr-label" data-edit-name="Name of the entry under the steps" data-edit-need>Further research</span>
-    <b class="more-name"></b>
-    <i class="more-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></i>
+    <span class="more-main"><b class="more-name"></b><i class="more-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 17.5l11-11M8 6.5h9.5V16"></path></svg></i></span>
   </button>
   <dialog class="bg step extra" id="further" data-vis="sheet:further" data-vis-name="Pop-up “Further research”" data-edit-group="Pop-up “Further research”" aria-labelledby="further-name">
     <div class="bg-in">
@@ -355,8 +355,8 @@
       </div>
       <p class="statement" data-edit="rm:fr-head" data-edit-name="Headline">One roast, many colours</p>
       <p class="step-text" data-edit="rm:fr-text" data-edit-name="Text">A colour meter gives a roast one number. Ground coffee shows a whole spectrum: in this sample the particles average 89.9, with a spread of 34.7. The spectrum changes with the roast. Fast and light roasts, for example, can give more varied and complex results. I am studying where this spread comes from and what it does in the cup. I have not found published research on it.</p>
-      <figure class="figbox dark fig-shot" data-photo="rm:fr-photo" data-photo-name="Picture" hidden>
-        <span class="step-data photo-alt" data-edit="rm:fr-photo-alt" data-edit-name="What the picture shows" data-edit-hint="One sentence for visitors who cannot see the picture: a screen reader reads it out. It is not shown on the page."></span>
+      <figure class="figbox dark fig-shot" data-photo="rm:fr-photo" data-photo-name="Picture" data-photo-file="assets/research/colour-spread-956x714.jpg" hidden>
+        <span class="step-data photo-alt" data-edit="rm:fr-photo-alt" data-edit-name="What the picture shows" data-edit-hint="One sentence for visitors who cannot see the picture: a screen reader reads it out. It is not shown on the page.">The screen of a colour meter: a chart of seven columns, the average 89.9 and the spread 34.7.</span>
         <ul class="shot-ends" data-edit="rm:fr-ends" data-edit-name="Under the picture: its left end, then its right end" data-edit-hint="Two lines: what the left end of the picture stands for, then the right end. An empty field leaves both out.">
           <li>darker particles: chocolate, caramel</li>
           <li>lighter particles: fruity, floral</li>
@@ -457,6 +457,6 @@
   </div>
 </dialog>
 <script src="content.js?v=2026-11-22a"></script>
-<script src="site.js?v=2026-11-23b"></script>
+<script src="site.js?v=2026-11-23c"></script>
 </body>
 </html>

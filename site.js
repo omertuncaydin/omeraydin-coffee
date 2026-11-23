@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-23b
+/* omeraydin.coffee v2026-11-23c
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar,
    which photos were uploaded for the learner cards and which texts were written there, and sends the message form there.
@@ -560,17 +560,26 @@
     });
   }
 
-  /* A picture chosen in the site manager for a figure of the page (a figure with data-photo="key"): the text under that
-     key names its file in the store, "pictures/<name>-<width>x<height>.jpg". The picture is shown whole. The figure
-     is left out while there is no picture or its file cannot be fetched. Nothing is fetched before the figure is on
-     the screen. */
+  /* A picture for a figure of the page (a figure with data-photo="key"). The text under that key names the file chosen
+     for it in the site manager, "pictures/<name>-<width>x<height>.jpg" in the store. Without one the figure shows the
+     picture that comes with the site files, if it names one (data-photo-file="assets/<name>-<width>x<height>.jpg");
+     the text "none" leaves the figure out. A chosen file that cannot be fetched gives way to the picture of the site
+     files; with neither the figure is left out. The picture is shown whole. Nothing is fetched before the figure is
+     on the screen. */
   const PICTURE_PATH = /^pictures\/[a-z0-9]+(?:-[a-z0-9]+)*-([1-9]\d{0,3})x([1-9]\d{0,3})\.(?:jpg|png|webp)$/;
+  const PICTURE_FILE = /^assets\/[a-z0-9]+(?:[\/-][a-z0-9]+)*-([1-9]\d{0,3})x([1-9]\d{0,3})\.(?:jpg|png|webp)$/;
   const pictureFigs = [...document.querySelectorAll('figure[data-photo]')];
+  const pictureLost = new Set();   /* files that could not be fetched */
+  let pictureTexts = null;
   const setPictures = (texts) => {
+    pictureTexts = texts;
     for (const fig of pictureFigs) {
       const named = texts && typeof texts[fig.dataset.photo] === 'string' ? texts[fig.dataset.photo] : '';
-      const size = storeOn && named.length <= 120 ? PICTURE_PATH.exec(named) : null;
-      const from = size ? named : '';
+      const file = fig.dataset.photoFile || '';
+      const chosen = storeOn && named.length <= 120 && PICTURE_PATH.test(named) && !pictureLost.has('store:' + named) ? named : '';
+      const own = !chosen && named !== 'none' && PICTURE_FILE.test(file) && !pictureLost.has('file:' + file) ? file : '';
+      const from = chosen ? 'store:' + chosen : own ? 'file:' + own : '';
+      const size = chosen ? PICTURE_PATH.exec(chosen) : own ? PICTURE_FILE.exec(own) : null;
       let img = fig.querySelector('img');
       if ((fig.dataset.from || '') !== from) {
         fig.dataset.from = from;
@@ -586,14 +595,15 @@
           fig.classList.toggle('tall', +size[2] > size[1] * 1.15);   /* an upright picture stands beside the line that belongs under it */
           img.addEventListener('error', () => {
             if (fig.dataset.from !== from) return;
-            fig.dataset.lost = from;   /* the file is gone or the store is away: the figure goes */
-            fig.hidden = true;
+            pictureLost.add(from);   /* the file is gone or the store is away: the picture of the site files takes its place, or the figure goes */
+            setPictures(pictureTexts);
           });
-          img.src = storeFile(from);
+          img.src = chosen ? storeFile(chosen) : own;
           fig.prepend(img);
         }
       }
-      fig.hidden = !from || fig.dataset.lost === from;
+      fig.hidden = !from;
+      if (!from) fig.classList.remove('tall');
       const said = fig.querySelector('.photo-alt');
       if (img) img.alt = said && !said.hidden ? said.textContent.replace(/\s+/g, ' ').trim() : '';
     }
@@ -773,7 +783,9 @@
     const said = [...further.querySelectorAll('.statement, .step-text')].some((part) => !part.hidden && part.textContent.trim());
     const on = said && !stepHide.includes(' research ') && !stepHide.includes(' sheet:further ');
     entry.hidden = !on;
-    entry.querySelector('.more-name').textContent = head && !head.hidden ? head.textContent.replace(/\s+/g, ' ').trim() : '';
+    const headline = head && !head.hidden ? head.textContent.replace(/\s+/g, ' ').trim() : '';
+    entry.querySelector('.more-name').textContent = headline;
+    entry.classList.toggle('bare', !headline);   /* its name alone: the arrow follows the name */
     further.querySelector('.step-name').textContent = entry.querySelector('.more-label').textContent.replace(/\s+/g, ' ').trim();
     if (!on && further.open) further.close();
   };

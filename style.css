@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-23b
+/* omeraydin.coffee v2026-11-23c
    Fonts: Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see assets/fonts/fonts-license.txt */
 
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
@@ -202,12 +202,14 @@ button.pill:disabled{opacity:.55;cursor:default}
 .research-steps{flex:1 1 320px;align-self:flex-end;display:flex;flex-direction:column;min-width:0;margin:0;padding:0;list-style:none;counter-reset:step;border-bottom:1px solid var(--line-cream)}
 .research-steps li{counter-increment:step;display:flex;align-items:baseline;gap:18px;padding:clamp(13px,1.4vw,20px) 0;border-top:1px solid var(--line-cream);font:700 clamp(1.5rem,2.55vw,2.375rem)/1.08 var(--serif);letter-spacing:-0.04em}
 .research-steps li::before{content:counter(step,decimal-leading-zero);flex:none;width:2.1em;font:400 1rem/1 var(--sans);letter-spacing:-0.03em;color:var(--verm)}
-/* an entry under the steps that stands outside their numbering and opens a sheet of its own */
-.research-more{display:grid;grid-template-columns:fit-content(45%) minmax(0,1fr) auto;align-items:baseline;column-gap:14px;flex:1 1 100%;min-width:0;margin:-8px 0 0;padding:18px 0 0;border:0;border-top:1px dashed var(--line-cream);background:transparent;color:var(--cream);font:inherit;letter-spacing:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.more-label{min-width:0;font-size:1rem;line-height:1.25rem;color:var(--verm)}   /* whole pixels for every line of the entry, so the blocks under it keep their place on the pixel grid */
+/* an entry under the steps that stands outside their numbering and opens a sheet of its own: its name, the headline
+   of that sheet, and right after the words the arrow that says it opens */
+.research-more{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;flex:1 1 100%;min-width:0;margin:-8px 0 0;padding:18px 0 0;border:0;border-top:1px dashed var(--line-cream);background:transparent;color:var(--cream);font:inherit;letter-spacing:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.more-label{flex:0 1 auto;min-width:0;font-size:1rem;line-height:1.25rem;color:var(--verm)}   /* whole pixels for every line of the entry, so the blocks under it keep their place on the pixel grid */
+.more-main{display:flex;align-items:center;gap:14px;flex:0 1 auto;min-width:0}   /* the headline and its arrow stay together */
 .more-name{min-width:0;font:700 1.375rem/1.5rem var(--serif);letter-spacing:-0.03em}
 .more-name:empty{display:none}   /* a sheet without a headline: the entry is its name alone */
-.more-go{grid-column:3;align-self:center;display:grid;place-items:center;width:32px;height:32px;border:1.5px solid var(--line-cream);border-radius:50%;transition:background-color .18s ease,color .18s ease,border-color .18s ease}
+.more-go{flex:none;display:grid;place-items:center;width:32px;height:32px;border:1.5px solid var(--line-cream);border-radius:50%;transition:background-color .18s ease,color .18s ease,border-color .18s ease}
 .more-go svg{width:14px;height:14px}
 .research-more:active .more-go,.research-more:focus-visible .more-go{border-color:var(--cream);background:var(--cream);color:var(--ink)}
 @media (hover:hover){.research-more:hover .more-go{border-color:var(--cream);background:var(--cream);color:var(--ink)}}
@@ -461,10 +463,11 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
   .bg-in{gap:22px;padding:24px 22px 26px}
   .bg-quote{padding:18px 18px 20px;border-radius:16px}
   .research-steps li.has-sheet{padding-right:46px}
-  .research-more{flex:none;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;margin:-10px 0 0}   /* its name above the headline, the arrow beside both */
-  .more-label,.more-name{grid-column:1}
+  .research-more{flex:none;margin:-10px 0 0}
+  .more-label{flex-basis:100%}   /* its name above the headline; the arrow follows the headline */
+  .research-more.bare .more-label{flex-basis:auto}   /* no headline: the arrow follows the name */
+  .more-main{gap:12px}
   .more-name{font-size:1.25rem;line-height:1.375rem}
-  .more-go{grid-column:2;grid-row:1 / span 2}
   .step-go{top:calc(13px + (1.08em - 36px) / 2);width:36px;height:36px}
   .figbox{padding:16px 14px 14px;border-radius:16px}
   .fig-photo{padding:0;border-radius:0}
