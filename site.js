@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-22a
+/* omeraydin.coffee v2026-11-22c
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar,
    which photos were uploaded for the learner cards and which texts were written there, and sends the message form there.
@@ -419,13 +419,19 @@
     if (!response.ok) throw new Error(name + ' ' + response.status);
     return response.json();
   };
-  /* The play button of the research block. It plays the recording chosen in the site manager (the text "rm:sound"
-     names its file in the store), else the recording that comes with the site files (roastSound in content.js).
-     The button shows only while there is one of the two, and nothing is fetched before it is pressed. */
+  /* The recording of the research block. Its play button plays the recording chosen in the site manager (the text
+     "rm:sound" names its file in the store), else the recording that comes with the site files (roastSound in
+     content.js). The button shows only while there is one of the two, and nothing is fetched before it is pressed.
+     The sheet behind the first step has a second button for the same player, and a picture of the recording with
+     a line that runs along it while it plays. */
   const SOUND_PATH = /^sounds\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mp3|m4a|wav)$/;
   const SOUND_FILE = /^assets\/sounds\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mp3|m4a|wav)$/;
   const ownSound = typeof content.roastSound === 'string' && SOUND_FILE.test(content.roastSound.trim()) ? content.roastSound.trim() : '';
   const hear = $('#hear');
+  const hear2 = $('#hear2');
+  const soundFig = $('#fig-sound');
+  const wave = soundFig ? soundFig.querySelector('.wave') : null;
+  const pops = wave ? [...wave.querySelectorAll('.wave-pops i')] : [];
   const acts = hear ? hear.parentElement : null;
   let sound = null;
   let soundFrom = '';   /* "store:<path>" for an uploaded recording, "file:<path>" for the one of the site files */
@@ -436,10 +442,43 @@
     if (typeof hide === 'string') hostOff = (' ' + hide + ' ').includes(' host ');
     if (acts) acts.hidden = hear.hidden && hostOff;
   };
-  const quiet = () => {
-    if (!hear) return;
-    hear.classList.remove('is-playing');
-    hear.setAttribute('aria-pressed', 'false');
+  const clock = (seconds) => Math.floor(seconds / 60) + ':' + String(Math.floor(seconds % 60)).padStart(2, '0');
+  /* where the recording stands: the line on its picture, the pops it has passed, the time */
+  const paint = () => {
+    if (!soundFig) return;
+    const known = !!sound && isFinite(sound.duration) && sound.duration > 0;
+    const at = known ? Math.min(1, sound.currentTime / sound.duration) : 0;
+    const live = !!sound && (at > 0 || !sound.paused);
+    soundFig.style.setProperty('--at', at.toFixed(4));
+    soundFig.classList.toggle('is-live', live);
+    for (const pop of pops) pop.classList.toggle('is-on', live && sound.currentTime >= +pop.dataset.t);
+    const time = soundFig.querySelector('.wave-time');
+    const drawn = wave && !soundFig.classList.contains('no-wave') ? +wave.dataset.seconds : 0;   /* the length of the recording the outline was drawn from */
+    if (time) time.textContent = known ? clock(sound.currentTime) + ' / ' + clock(sound.duration) : drawn > 0 ? clock(0) + ' / ' + clock(drawn) : '';
+  };
+  let ticking = 0;
+  const tick = () => {
+    paint();
+    ticking = sound && !sound.paused ? requestAnimationFrame(tick) : 0;
+  };
+  const mark = (playing) => {
+    for (const button of [hear, hear2]) {
+      if (!button) continue;
+      button.classList.toggle('is-playing', playing);
+      button.setAttribute('aria-pressed', playing ? 'true' : 'false');
+    }
+    if (playing && !ticking) ticking = requestAnimationFrame(tick);
+    if (!playing) paint();
+  };
+  const quiet = () => mark(false);
+  /* the button, and the picture in the sheet, show while there is a recording; the drawn outline only for the file it was drawn from */
+  const soundShown = (on) => {
+    if (hear) hear.hidden = !on;
+    if (soundFig) {
+      soundFig.hidden = !on;
+      soundFig.classList.toggle('no-wave', !wave || soundFrom !== 'file:' + wave.dataset.for);
+      paint();
+    }
   };
   hush = () => { if (sound && !sound.paused) sound.pause(); };
   const setSound = (texts) => {
@@ -454,48 +493,339 @@
       sound = null;
     }
     quiet();
-    hear.hidden = !from;
+    soundShown(!!from);
+  };
+  /* the player: made at the first press, so nothing is fetched before */
+  const player = () => {
+    if (sound) return sound;
+    const made = new Audio();
+    made.preload = 'auto';
+    made.addEventListener('playing', () => { if (sound === made) mark(true); });
+    made.addEventListener('pause', () => { if (sound === made) quiet(); });
+    made.addEventListener('seeked', () => { if (sound === made) paint(); });
+    made.addEventListener('ended', () => {
+      if (sound !== made) return;
+      made.currentTime = 0;
+      quiet();
+    });
+    made.addEventListener('error', () => {
+      if (sound !== made) return;
+      sound = null;
+      quiet();
+      if (soundFrom.startsWith('store:')) {
+        lost = soundFrom.slice(6);
+        if (ownSound) {
+          /* the uploaded file is gone or the store is away: the recording of the site files takes its place */
+          soundFrom = 'file:' + ownSound;
+          soundShown(true);
+          hear.click();
+          return;
+        }
+      }
+      soundShown(false);   /* nothing to play: the button goes */
+      setActs();
+      if (typeof setSteps === 'function') setSteps();
+    });
+    made.src = soundFrom.startsWith('store:') ? storeFile(soundFrom.slice(6)) : soundFrom.slice(5);
+    sound = made;
+    return made;
+  };
+  const start = (made) => {
+    const started = made.play();
+    if (started && started.catch) started.catch(() => {});
   };
   if (hear) {
     hear.addEventListener('click', () => {
       if (!soundFrom) return;
-      if (!sound) {
-        const player = new Audio();
-        player.preload = 'auto';
-        player.addEventListener('playing', () => {
-          if (sound !== player) return;
-          hear.classList.add('is-playing');
-          hear.setAttribute('aria-pressed', 'true');
-        });
-        player.addEventListener('pause', () => { if (sound === player) quiet(); });
-        player.addEventListener('ended', () => {
-          if (sound !== player) return;
-          player.currentTime = 0;
-          quiet();
-        });
-        player.addEventListener('error', () => {
-          if (sound !== player) return;
-          sound = null;
-          quiet();
-          if (soundFrom.startsWith('store:')) {
-            lost = soundFrom.slice(6);
-            if (ownSound) {
-              /* the uploaded file is gone or the store is away: the recording of the site files takes its place */
-              soundFrom = 'file:' + ownSound;
-              hear.click();
-              return;
-            }
-          }
-          hear.hidden = true;   /* nothing to play: the button goes */
-          setActs();
-        });
-        player.src = soundFrom.startsWith('store:') ? storeFile(soundFrom.slice(6)) : soundFrom.slice(5);
-        sound = player;
+      const made = player();
+      if (made.paused) start(made);
+      else made.pause();
+    });
+  }
+  if (hear && hear2) hear2.addEventListener('click', () => hear.click());
+  if (hear && wave) {
+    /* a press on the picture plays from that place */
+    wave.addEventListener('click', (event) => {
+      if (!soundFrom) return;
+      const box = wave.getBoundingClientRect();
+      const part = box.width > 0 ? Math.min(1, Math.max(0, (event.clientX - box.left) / box.width)) : 0;
+      const made = player();
+      const seek = () => {
+        if (sound !== made || !isFinite(made.duration) || !(made.duration > 0) || !made.seekable.length) return;   /* a recording that cannot be searched plays on from where it is */
+        made.currentTime = Math.max(0, Math.min(made.duration - 0.05, part * made.duration));
+      };
+      if (made.readyState >= 1) seek();
+      else made.addEventListener('loadedmetadata', seek, { once: true });
+      if (made.paused) start(made);
+    });
+  }
+
+  /* ---------- the steps of the research block: each of the first four can open a sheet (the dialogs with class
+     "step" inside the block). A sheet shows the number and name of its step, a headline, a text, a figure, and the
+     way to the next sheet. Its words stand in index.html as first drafts and can be changed in the site manager.
+     A step opens while its sheet has a headline or a text and is not switched off in the site manager; otherwise it
+     is a plain name. The address of an open sheet is the name of its step (#acoustic-stages), so a link can open
+     the page at that sheet; #sheet-2 does the same whatever the step is called. ---------- */
+  const stepList = $('.research-steps');
+  const sheets = [...document.querySelectorAll('dialog.step')];
+  const canSheet = !!stepList && sheets.length > 0 && typeof sheets[0].showModal === 'function';
+  const NS = 'http://www.w3.org/2000/svg';
+  const draw = (tag, set) => {
+    const node = document.createElementNS(NS, tag);
+    for (const key of Object.keys(set || {})) node.setAttribute(key, set[key]);
+    return node;
+  };
+  const rowsOf = (list) => (list && !list.hidden ? [...list.children].map((item) => item.textContent.replace(/\s+/g, ' ').trim()).filter(Boolean).slice(0, 12) : []);
+  /* a bell with named points along it: drawn at the size it is shown, so its letters stay readable on a phone */
+  const drawBell = () => {
+    const fig = $('#fig-bell');
+    if (!fig) return false;
+    const box = fig.querySelector('.bell');
+    const key = fig.querySelector('.bell-key');
+    const axes = rowsOf(fig.querySelector('.bell-axes'));   /* the word for the axis that points up, then the one for the axis along the bottom */
+    const points = rowsOf(fig.querySelector('.step-data:not(.bell-axes)')).map((line) => {
+      const cut = line.indexOf(':');
+      return cut < 0 ? [line, ''] : [line.slice(0, cut).trim(), line.slice(cut + 1).trim()];
+    }).filter((point) => point[0]);
+    fig.hidden = points.length < 2;
+    if (fig.hidden) return false;
+    const told = points.filter((point) => point[1]);
+    key.hidden = !told.length;
+    key.replaceChildren(...told.map((point) => {
+      const row = make('div');
+      row.append(make('dt', '', point[0]), make('dd', '', point[1]));
+      return row;
+    }));
+    box.setAttribute('role', 'img');
+    box.setAttribute('aria-label', points.map((point) => point[0]).join(', '));
+    const W = Math.round(box.clientWidth);
+    if (!W) return true;   /* not on the screen yet: drawn when its sheet opens */
+    const small = W < 420;
+    const size = small ? 14 : 17;
+    const high = Math.round(Math.max(110, Math.min(210, W * 0.34)));
+    const base = 12 + high;
+    const x0 = W * 0.04, x1 = W * 0.96, peak = x0 + (x1 - x0) * 0.45;
+    const y = (x) => base - (high - 6) * Math.exp(-1.55 * Math.pow((x - peak) / (x < peak ? (peak - x0) * 0.41 : (x1 - peak) * 0.5), 2));
+    const first = x0 + (x1 - x0) * 0.03, last = x1 - (x1 - x0) * 0.05;
+    const crown = Math.floor(points.length / 2);
+    const xs = points.map((point, n) => (n <= crown
+      ? first + (peak - first) * Math.pow(crown ? n / crown : 1, 0.7)
+      : peak + (last - peak) * Math.pow((n - crown) / (points.length - 1 - crown), 1.3)));
+    /* names that would touch their neighbour stand one line lower */
+    const gap = size * 0.68 * Math.max(...points.map((point) => point[0].length)) + 8;
+    const lower = [];
+    xs.forEach((x, n) => { lower.push(n > 0 && x - xs[n - 1] < gap && !lower[n - 1]); });
+    const H = base + size + 10 + (lower.some(Boolean) ? size + 4 : 0) + 4;
+    const svg = draw('svg', { viewBox: '0 0 ' + W + ' ' + H, width: W, height: H, 'aria-hidden': 'true' });
+    let line = '';
+    for (let x = x0; x <= x1 + 0.01; x += Math.max(2, (x1 - x0) / 160)) line += (line ? ' L' : 'M') + x.toFixed(1) + ' ' + y(x).toFixed(1);
+    svg.append(draw('path', { d: line + ' L' + x1.toFixed(1) + ' ' + base + ' L' + x0.toFixed(1) + ' ' + base + ' Z', fill: 'currentColor', opacity: '.07' }));
+    svg.append(draw('path', { d: line, fill: 'none', stroke: 'currentColor', 'stroke-width': '2.2', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    svg.append(draw('path', { d: 'M' + (x0 - 4).toFixed(1) + ' ' + base + 'H' + (x1 + 4).toFixed(1), stroke: 'currentColor', 'stroke-width': '1', opacity: '.45' }));
+    const word = (said, x, at, anchor) => {
+      if (!said) return;
+      const label = draw('text', { x: x.toFixed(1), y: at, 'text-anchor': anchor, class: 'bell-axis', 'font-size': small ? 11 : 12 });
+      label.textContent = said;
+      svg.append(label);
+    };
+    word(axes[0], x0 - 4, 11, 'start');           /* up: in the free corner at the top left */
+    word(axes[1], x1 + 4, base - 9, 'end');       /* along: at the right end, above the line */
+    points.forEach((point, n) => {
+      const x = xs[n], top = y(x);
+      svg.append(draw('path', { d: 'M' + x.toFixed(1) + ' ' + top.toFixed(1) + 'V' + base, stroke: 'currentColor', 'stroke-width': '1', opacity: '.3' }));
+      svg.append(draw('circle', { cx: x.toFixed(1), cy: top.toFixed(1), r: small ? '4.5' : '5.5', class: 'bell-dot' }));
+      const name = draw('text', { x: Math.min(W - 2, Math.max(2, x)).toFixed(1), y: base + size + 6 + (lower[n] ? size + 4 : 0), 'text-anchor': x < size ? 'start' : x > W - size ? 'end' : 'middle', class: 'bell-name', 'font-size': size });
+      name.textContent = point[0];
+      svg.append(name);
+    });
+    box.replaceChildren(svg);
+    return true;
+  };
+  /* measured roasts on one scale: a dot per roast with its value and its label, and a band where a line names two values */
+  const NUM = '-?\\d+(?:[.,]\\d+)?';
+  const BAND = new RegExp('^(' + NUM + ')\\s*(?:-|–|to)\\s*(' + NUM + ')$');
+  const ONE = new RegExp('^(' + NUM + ')$');
+  const number = (written) => parseFloat(written.replace(',', '.'));
+  const drawRoasts = () => {
+    const fig = $('#fig-roasts');
+    if (!fig) return false;
+    const box = fig.querySelector('.roasts');
+    const roasts = [], bands = [];
+    for (const line of rowsOf(fig.querySelector('.step-data'))) {
+      const cut = line.indexOf('|');
+      const head = (cut < 0 ? line : line.slice(0, cut)).trim();
+      const label = cut < 0 ? '' : line.slice(cut + 1).trim();
+      const two = BAND.exec(head), one = ONE.exec(head);
+      if (two && number(two[1]) !== number(two[2])) bands.push([Math.min(number(two[1]), number(two[2])), Math.max(number(two[1]), number(two[2])), label]);
+      else if (one) roasts.push([number(one[1]), one[1], label]);
+    }
+    fig.hidden = !roasts.length;
+    if (fig.hidden) return false;
+    const all = roasts.map((roast) => roast[0]).concat(...bands.map((band) => [band[0], band[1]]));
+    let low = Math.min(...all), top = Math.max(...all);
+    const least = low;
+    const room = top > low ? (top - low) * 0.35 : Math.max(Math.abs(top) * 0.04, 1);   /* air at both ends; a single value gets a scale around it */
+    const rough = (top - low + 2 * room) / 5;
+    const ten = Math.pow(10, Math.floor(Math.log10(rough)));
+    const step = [1, 2, 5, 10].map((k) => k * ten).find((k) => k >= rough * 0.999);
+    low = Math.floor((low - room) / step + 1e-9) * step;
+    top = Math.ceil((top + room) / step - 1e-9) * step;
+    if (least >= 0 && low < 0) low = 0;   /* values that are not below zero get no scale below zero */
+    const at = (value) => ((value - low) / (top - low) * 100).toFixed(2) + '%';
+    const digits = Math.max(0, -Math.floor(Math.log10(step) + 1e-9));
+    const plot = make('div', 'roasts-plot');
+    for (const band of bands) {
+      const strip = make('div', 'roasts-band');
+      strip.style.left = at(band[0]);
+      strip.style.width = ((band[1] - band[0]) / (top - low) * 100).toFixed(2) + '%';
+      plot.append(strip);
+    }
+    const axis = make('div', 'roasts-axis');
+    for (let value = low; value <= top + step / 1000; value += step) {
+      const grid = make('i', 'roasts-grid');
+      grid.style.left = at(value);
+      plot.append(grid);
+      const tick = make('span', '', value.toFixed(digits));
+      tick.style.left = at(value);
+      axis.append(tick);
+    }
+    for (const roast of roasts) {
+      const row = make('div', 'roast' + ((roast[0] - low) / (top - low) > 0.56 ? ' left' : ''));
+      row.style.setProperty('--x', at(roast[0]));
+      row.append(make('b', '', roast[1]));
+      if (roast[2]) row.append(make('span', '', roast[2]));
+      plot.append(row);
+    }
+    plot.append(axis);
+    const keys = bands.filter((band) => band[2]).map((band) => {
+      const row = make('p', 'roasts-key');
+      row.append(make('i'), make('span', '', band[2]));
+      return row;
+    });
+    box.setAttribute('role', 'img');
+    box.setAttribute('aria-label', roasts.map((roast) => roast[1] + (roast[2] ? ' (' + roast[2] + ')' : '')).join(', '));
+    box.replaceChildren(...keys, plot);
+    return true;
+  };
+
+  const slug = (name) => name.toLowerCase().replace(/ı/g, 'i').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  let stepNames = [];   /* the steps as the block lists them */
+  let openable = [];    /* which of them open a sheet (0 for the first step) */
+  let stepOpen = -1;
+  let stepHide = '';
+  const addressOf = (n) => {
+    const name = slug(stepNames[n] || '');
+    return name && !document.getElementById(name) ? name : 'sheet-' + (n + 1);
+  };
+  const setSteps = (hide) => {
+    if (!canSheet) return;
+    if (typeof hide === 'string') stepHide = ' ' + hide + ' ';
+    const items = [...stepList.children].filter((item) => item.tagName === 'LI');
+    stepNames = stepList.hidden ? [] : items.map((item) => [...item.childNodes].filter((node) => !(node.nodeType === 1 && node.classList.contains('step-go'))).map((node) => node.textContent).join('').replace(/\s+/g, ' ').trim());
+    drawBell();
+    drawRoasts();
+    const blockOn = !stepHide.includes(' research ');
+    /* a step opens while its sheet has a headline or a text: a sheet emptied of both is not put before visitors */
+    openable = sheets.map((sheet, n) => n).filter((n) => blockOn && !!stepNames[n] && !stepHide.includes(' sheet:' + (n + 1) + ' ')
+      && [...sheets[n].querySelectorAll('.statement, .step-text')].some((part) => !part.hidden && part.textContent.trim()));
+    items.forEach((item, n) => {
+      const can = openable.includes(n);
+      let go = item.querySelector('.step-go');
+      item.classList.toggle('has-sheet', can);
+      if (can && !go) {
+        go = make('button', 'step-go');
+        go.type = 'button';
+        go.setAttribute('aria-haspopup', 'dialog');
+        go.append(arrow());
+        item.append(go);
       }
-      if (sound.paused) {
-        const started = sound.play();
-        if (started && started.catch) started.catch(() => {});
-      } else sound.pause();
+      if (!can && go) go.remove();
+      if (can) go.setAttribute('aria-label', stepNames[n]);
+    });
+    const coursesName = ($('#courses .label') || {}).textContent || '';
+    const hostName = ($('[data-edit="rm:host"]') || {}).textContent || '';
+    const hearName = ($('[data-edit="rm:hear"]') || {}).textContent || '';
+    if (hear2) hear2.querySelector('span').textContent = hearName.trim();
+    sheets.forEach((sheet, n) => {
+      const next = openable.find((m) => m > n);
+      const put = (sel, value) => { const node = sheet.querySelector(sel); if (node) node.textContent = value; };
+      put('.step-name', stepNames[n] || '');
+      put('.next-name', next === undefined ? '' : stepNames[next]);
+      put('.courses-name', coursesName.trim());
+      put('.host-name', hostName.trim());
+      const on = sheet.querySelector('[data-next]');
+      if (on) on.hidden = next === undefined;
+      const dots = sheet.querySelector('.step-dots');
+      if (dots) {
+        dots.hidden = openable.length < 2;
+        dots.replaceChildren(...openable.map((m) => make('i', m === n ? 'on' : '')));
+      }
+    });
+    if (stepOpen >= 0 && !openable.includes(stepOpen) && sheets[stepOpen].open) sheets[stepOpen].close();
+  };
+  const setAddress = (n) => {
+    try {
+      const hash = n >= 0 ? '#' + addressOf(n) : '';
+      if (location.hash !== hash) history.replaceState(history.state, '', location.pathname + location.search + hash);
+    } catch (error) { /* the address stays as it is */ }
+  };
+  const openStep = (n) => {
+    if (!canSheet || !openable.includes(n)) return;
+    const before = stepOpen;
+    stepOpen = n;
+    if (before >= 0 && before !== n && sheets[before].open) sheets[before].close();
+    if (!sheets[n].open) sheets[n].showModal();
+    const name = sheets[n].querySelector('.step-kicker');
+    if (name && document.activeElement !== name) name.focus({ preventScroll: true });   /* a browser that does not know autofocus in a dialog starts at the close button */
+    sheets[n].scrollTop = 0;
+    drawBell();
+    drawRoasts();
+    paint();
+    setAddress(n);
+  };
+  let hashSeen = '';
+  const tryHash = () => {
+    if (!canSheet || !location.hash || location.hash === hashSeen) return;
+    let named = '';
+    try { named = decodeURIComponent(location.hash.slice(1)).toLowerCase(); } catch (error) { named = ''; }
+    const numbered = /^sheet-([1-9])$/.exec(named);
+    const n = numbered ? +numbered[1] - 1 : openable.find((m) => addressOf(m) === named);
+    if (n === undefined || n === stepOpen || !openable.includes(n)) return;
+    hashSeen = location.hash;
+    const block = $('#research');
+    if (stepOpen < 0 && block) {
+      /* the sheet opens over its block, so the visitor stands there when it closes */
+      root.style.scrollBehavior = 'auto';
+      block.scrollIntoView();
+      root.style.scrollBehavior = '';
+    }
+    openStep(n);
+  };
+  if (canSheet) {
+    stepList.addEventListener('click', (event) => {
+      const item = event.target.closest('li.has-sheet');
+      if (!item || !plainClick(event) || (event.target.closest('a') && !event.target.closest('.step-go'))) return;
+      openStep([...stepList.children].indexOf(item));
+    });
+    sheets.forEach((sheet, n) => {
+      sheet.addEventListener('click', (event) => {
+        if (event.target === sheet || event.target.closest('[data-close]')) return sheet.close();   /* the dark surround, or a close button */
+        if (event.target.closest('[data-next]')) openStep(openable.find((m) => m > n));
+      });
+      sheet.addEventListener('close', () => {
+        if (stepOpen !== n) return;   /* the next sheet is open already */
+        stepOpen = -1;
+        if (location.hash === '#' + addressOf(n) || location.hash === '#sheet-' + (n + 1)) setAddress(-1);
+        const go = stepList.children[n] ? stepList.children[n].querySelector('.step-go') : null;
+        if (go) go.focus({ preventScroll: true });
+      });
+    });
+    window.addEventListener('hashchange', () => { hashSeen = ''; tryHash(); });
+    let drawQueued = false;
+    window.addEventListener('resize', () => {
+      if (stepOpen < 0 || drawQueued) return;
+      drawQueued = true;
+      requestAnimationFrame(() => { drawQueued = false; drawBell(); drawRoasts(); });
     });
   }
 
@@ -769,13 +1099,18 @@
 
   /* first what this browser remembers, then what the store says now */
   let state = { hide: '', trainings: null, form: false, texts: {} };
-  const show = (next) => steady(() => {
+  const show = (next) => {
+    render(next);
+    tryHash();   /* an address that names a sheet of the research block opens it */
+  };
+  const render = (next) => steady(() => {
     const texts = next.texts === undefined ? state.texts : cleanTexts(next.texts);   /* a call that says nothing about texts leaves them */
     setCards(texts);
     setTexts(texts);
     setSound(texts);
     state = { hide: setHidden(next.hidden), trainings: Array.isArray(next.trainings) ? next.trainings : null, form: !!next.form, texts };
     setActs(state.hide);
+    setSteps(state.hide);
     fitQuotes();
     drawDates(state.trainings);
     showForm(state.form, state.hide);

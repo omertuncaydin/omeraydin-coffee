@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-22a
+/* omeraydin.coffee v2026-11-22c
    Fonts: Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see assets/fonts/fonts-license.txt */
 
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
@@ -202,6 +202,13 @@ button.pill:disabled{opacity:.55;cursor:default}
 .research-steps{flex:1 1 320px;align-self:flex-end;display:flex;flex-direction:column;min-width:0;margin:0;padding:0;list-style:none;counter-reset:step;border-bottom:1px solid var(--line-cream)}
 .research-steps li{counter-increment:step;display:flex;align-items:baseline;gap:18px;padding:clamp(13px,1.4vw,20px) 0;border-top:1px solid var(--line-cream);font:700 clamp(1.5rem,2.55vw,2.375rem)/1.08 var(--serif);letter-spacing:-0.04em}
 .research-steps li::before{content:counter(step,decimal-leading-zero);flex:none;width:2.1em;font:400 1rem/1 var(--sans);letter-spacing:-0.03em;color:var(--verm)}
+/* a step that opens a sheet: the whole row answers a press, and the round button at its right says so */
+.research-steps li.has-sheet{position:relative;padding-right:54px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.step-go{position:absolute;right:0;top:calc(clamp(13px,1.4vw,20px) + (1.08em - 40px) / 2);display:grid;place-items:center;width:40px;height:40px;padding:0;border:1.5px solid var(--line-cream);border-radius:50%;background:transparent;color:var(--cream);font:inherit;cursor:pointer;transition:background-color .18s ease,color .18s ease,border-color .18s ease}
+.step-go svg{width:18px;height:18px}
+.research-steps li.has-sheet:active .step-go,.step-go:focus-visible{border-color:var(--cream);background:var(--cream);color:var(--ink)}
+@media (hover:hover){.research-steps li.has-sheet:hover .step-go{border-color:var(--cream);background:var(--cream);color:var(--ink)}}   /* a mouse over the row lights its button; a finger leaves nothing lit behind */
+.step-go:focus-visible{outline-color:var(--cream)}
 
 /* dates */
 .dates{display:flex;flex-direction:column;justify-content:space-between;gap:clamp(80px,13vw,220px)}
@@ -268,6 +275,78 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
 .bg-quote blockquote{font-weight:700;font-size:clamp(1.1875rem,1.62vw,1.375rem);line-height:1.26;text-wrap:pretty}
 .bg-quote figcaption{font-size:.9375rem}
 .bg-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:4px}
+
+/* the sheets behind the steps of the research block: number and name of the step, a headline, a text, a figure,
+   and the way on. Headline, text and the line under the figure can be changed in the site manager; an emptied one takes no room. */
+.bg.step{width:min(720px,calc(100vw - 32px))}
+.step-kicker{display:flex;align-items:baseline;gap:14px;font-size:clamp(1.05rem,1.36vw,1.3rem);line-height:1.2;overflow-wrap:anywhere}
+.step-kicker b{flex:none;font-weight:400;color:var(--verm-ink)}
+.step-kicker:focus{outline:none}   /* an opened sheet starts at its name, not at the close button; the name is no control and shows no ring */
+.bg.step p.statement{font-family:var(--serif);font-size:clamp(1.625rem,2.5vw,2.25rem);line-height:1.08;letter-spacing:-0.035em;text-wrap:balance}
+.step [data-edit]:empty{display:none}
+.step-data{display:none!important}   /* what a figure is drawn from, not shown itself */
+.figbox{display:flex;flex-direction:column;gap:12px;min-width:0;margin:0;padding:20px 22px 18px;border-radius:20px;background:#FBF9EE;box-shadow:inset 0 0 0 1px var(--rule)}
+.figbox.dark{background:var(--ink);color:var(--cream);box-shadow:none}
+.figbox figcaption{font-size:.9375rem;line-height:1.34;text-wrap:pretty}
+/* 01: the recording as a picture. The line runs along it while it plays, and a press on it plays from that place. */
+.wave{position:relative;height:clamp(92px,16vw,112px);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wave svg{position:absolute;left:0;top:0;width:100%;height:calc(100% - 16px);fill:none;stroke:currentColor;stroke-width:1;color:var(--muted);transition:opacity .2s ease}
+.wave path{vector-effect:non-scaling-stroke}
+.wave .wave-done{color:var(--cream);opacity:0;clip-path:inset(0 calc(100% - var(--at,0) * 100%) 0 0)}
+.wave-pops{position:absolute;left:0;right:0;bottom:0;height:8px}
+.wave-pops i{position:absolute;top:1px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--verm);transition:opacity .15s ease}
+.wave-head{position:absolute;top:0;bottom:0;left:calc(var(--at,0) * 100%);width:2px;margin-left:-1px;border-radius:1px;background:var(--verm);opacity:0}
+.is-live .wave svg{opacity:.38}
+.is-live .wave .wave-done,.is-live .wave-head,.is-live .wave-pops i.is-on{opacity:1}
+.is-live .wave-pops i{opacity:.32}
+.wave-bar{display:none;height:4px;border-radius:2px;background:rgba(244,241,224,.22);overflow:hidden}
+.wave-bar i{display:block;width:calc(var(--at,0) * 100%);height:100%;background:var(--cream)}
+.no-wave .wave{display:none}
+.no-wave .wave-bar{display:block}
+.wave-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px}
+.wave-time{margin-left:auto;font-size:.9375rem;text-align:right;color:var(--muted)}
+#hear2{background:var(--cream);color:var(--ink)}
+#hear2:hover{border-color:var(--cream);background:transparent;color:var(--cream)}
+#hear2:focus-visible{outline-color:var(--cream)}
+#hear2 .ic-pause,#hear2.is-playing .ic-play{display:none}
+#hear2.is-playing .ic-pause{display:block}
+/* 02: the bell with its named points, drawn by site.js at the width it is shown */
+.bell svg{max-width:100%;height:auto;overflow:visible}
+.bell-dot{fill:var(--verm)}
+.bell-name{font-family:var(--serif);font-weight:700;letter-spacing:-0.02em;fill:currentColor}
+.bell-axis{font-family:var(--sans);letter-spacing:-0.01em;fill:currentColor;opacity:.62}
+.bell-key{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 20px;margin:0;font-size:.9375rem;line-height:1.3}
+.bell-key div{display:flex;align-items:baseline;gap:8px;min-width:0}
+.bell-key dt{flex:none;min-width:1.6em;font:700 1rem/1.2 var(--serif);letter-spacing:-0.02em}
+.bell-key dd{min-width:0;margin:0}
+/* 03: measured roasts on one scale: a dot per roast with its value and label, and a band where one is given */
+.roasts{display:flex;flex-direction:column;gap:10px}
+.roasts-key{display:flex;align-items:center;gap:8px;font-size:.8125rem;line-height:1.25}
+.roasts-key i{flex:none;width:22px;height:12px;border-radius:3px;background:rgba(246,205,69,.6)}
+.roasts-plot{position:relative;display:flex;flex-direction:column;margin:0 18px;padding-top:8px}
+.roasts-band{position:absolute;top:0;bottom:24px;border-radius:6px;background:rgba(246,205,69,.5)}
+.roasts-grid{position:absolute;top:0;bottom:24px;width:1px;margin-left:-.5px;background:rgba(29,29,29,.14)}
+.roast{position:relative;display:flex;align-items:center;gap:9px;min-height:34px;padding:5px 0 5px calc(var(--x) + 15px)}
+.roast::before{content:"";position:absolute;left:0;top:50%;width:var(--x);border-top:1px dotted rgba(29,29,29,.3)}
+.roast::after{content:"";position:absolute;left:var(--x);top:50%;width:13px;height:13px;margin:-6.5px 0 0 -6.5px;border-radius:50%;background:var(--verm-ink)}
+.roast b{font:700 1.0625rem/1 var(--serif);letter-spacing:-0.02em;white-space:nowrap}
+.roast span{min-width:0;font-size:.8125rem;line-height:1.2;color:rgba(29,29,29,.78)}
+.roast.left{flex-direction:row-reverse;padding:5px calc(100% - var(--x) + 15px) 5px 0}
+.roast.left::before{left:var(--x);width:calc(100% - var(--x))}
+.roast.left span{text-align:right}
+.roasts-axis{position:relative;height:18px;margin-top:6px;font-size:.75rem;line-height:1;font-variant-numeric:tabular-nums;color:rgba(29,29,29,.7)}
+.roasts-axis span{position:absolute;top:6px;transform:translateX(-50%);white-space:nowrap}
+.roasts-unit{margin-top:-6px;text-align:center;font-size:.75rem;line-height:1.2;color:rgba(29,29,29,.7)}
+/* 04: a photograph */
+.fig-photo{padding:0;border-radius:0;background:none;box-shadow:none}
+.fig-photo img{width:100%;height:auto;aspect-ratio:16/8;object-fit:cover;object-position:50% 40%;border-radius:16px}
+/* the way on: the next sheet, or out */
+.step-nav{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:4px}
+.step-nav button.pill-solid{background:var(--verm-ink);color:var(--cream)}
+.step-nav button.pill-solid:hover{border-color:var(--ink);background:var(--ink)}
+.step-dots{display:flex;gap:7px;margin-left:auto}
+.step-dots i{width:8px;height:8px;border-radius:50%;background:var(--rule)}
+.step-dots i.on{background:var(--verm-ink)}
 
 /* narrower than a desktop window the three columns of a date row do not fit side by side: the row stacks, as on phones */
 @media (max-width:1000px){
@@ -362,11 +441,21 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
   .bg{border-radius:20px}
   .bg-in{gap:22px;padding:24px 22px 26px}
   .bg-quote{padding:18px 18px 20px;border-radius:16px}
+  .research-steps li.has-sheet{padding-right:46px}
+  .step-go{top:calc(13px + (1.08em - 36px) / 2);width:36px;height:36px}
+  .figbox{padding:16px 14px 14px;border-radius:16px}
+  .fig-photo{padding:0;border-radius:0}
+  .fig-photo img{border-radius:12px}
+  .bell-key{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px}
+  .roasts-plot{margin:0 12px}
+  .roast{flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding-left:calc(var(--x) + 13px)}
+  .roast.left{flex-direction:column;align-items:flex-end;padding-right:calc(100% - var(--x) + 13px)}
+  .step-dots{flex-basis:100%;justify-content:center;margin-left:0}
 }
 
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .pill,.stk,.lvl svg,.date-row svg,.menu-btn path,.hd,.hd-in{transition:none}
+  .pill,.stk,.lvl svg,.date-row svg,.menu-btn path,.hd,.hd-in,.step-go,.wave svg,.wave-pops i{transition:none}
   .pill-glass:hover,.pill-glass:active{transform:none}
 }
 
