@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Site manager · omeraydin.coffee</title>
 <meta name="robots" content="noindex,nofollow">
-<meta name="version" content="v2026-11-23a">
+<meta name="version" content="v2026-11-23b">
 <meta name="theme-color" content="#F4F1E0">
 <link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
 <link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
 <style>
-/* omeraydin.coffee site manager v2026-11-23a. Same colours and fonts as the site it manages. */
+/* omeraydin.coffee site manager v2026-11-23b. Same colours and fonts as the site it manages. */
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-ext-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -270,8 +270,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
   </section>
 
   <section id="pane-res" role="tabpanel" aria-labelledby="tab-res" hidden>
-    <p class="lead">The block “Original Research &amp; Methodology” on the site: its texts, the pop-ups behind its steps, and the recording that its play button plays. Change a text and press Save; visitors see it the next time they open the site. Bold is written as **words**, a link as [words](https://address). In the steps every line is one step. A text you empty is left out of the block; the label, the title and the two buttons cannot be empty.</p>
-    <p class="lead">Each of the first four steps opens a pop-up. Its headline, its text and the line under its figure come as first drafts: change them under “Pop-up behind step …” below. A step whose pop-up has neither a headline nor a text is a plain name on the site, without its round button. Where a pop-up has a place for a picture, its group has “Choose picture”; without a picture that place is left out. The eye for the whole block and one for each pop-up are on the Visibility tab.</p>
+    <p class="lead">The block “Original Research &amp; Methodology” on the site: its texts, the pop-ups behind its steps, the pop-up “Further research” under them, and the recording that its play button plays. Change a text and press Save; visitors see it the next time they open the site. Bold is written as **words**, a link as [words](https://address). In the steps every line is one step. A text you empty is left out of the block; the label, the title and the two buttons cannot be empty.</p>
+    <p class="lead">Each of the first four steps opens a pop-up. Its headline, its text and the line under its figure come as first drafts: change them under “Pop-up behind step …” below. A step whose pop-up has neither a headline nor a text is a plain name on the site, without its round button. Under the steps the block has one more entry, outside their numbering, with a pop-up of its own: “Further research”, the last group below. Its name cannot be empty; while its pop-up has neither a headline nor a text, the entry is not shown. Where a pop-up has a place for a picture, its group has “Choose picture”; without a picture that place is left out. The eye for the whole block and one for each pop-up are on the Visibility tab.</p>
     <p class="say" id="res-off" role="status" aria-live="polite"></p>
     <div class="pop" id="res"></div>
     <div class="learner-acts" id="res-acts">
@@ -282,7 +282,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     <div class="sound" id="sound"></div>
   </section>
 
-  <p class="foot">Site manager v2026-11-23a · <a href="./">Open omeraydin.coffee</a></p>
+  <p class="foot">Site manager v2026-11-23b · <a href="./">Open omeraydin.coffee</a></p>
 </main>
 
 <div class="publish" id="publish" hidden>
@@ -297,7 +297,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 <script src="content.js?v=2026-11-22a"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* omeraydin.coffee site manager v2026-11-23a
+/* omeraydin.coffee site manager v2026-11-23b
    Signs in with the CoffeeNutz admin account and edits what the store holds for the site:
    which blocks are hidden (table site_settings), the messages visitors sent (table site_messages), the photos
    of the learner cards (table site_photos, files in the photo store "site") and the texts written here in place
@@ -307,7 +307,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
    and every element that carries data-edit is a text that can be replaced. The list of learners is read from content.js. */
 (() => {
   'use strict';
-  const VERSION = 'v2026-11-23a';
+  const VERSION = 'v2026-11-23b';
   const content = window.siteContent || {};
   const $ = (id) => document.getElementById(id);
   const make = (tag, cls, text) => {
@@ -1627,7 +1627,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
       const stepName = step ? stepLines[+step[1] - 1] || '' : '';
       const off = !!eye && (live.has(eye) || live.has(eye.split(':')[0] === 'sheet' ? 'research' : ''));
       const words = inside.some((f) => /-(?:head|text)$/.test(f.key) && popTidy(popNow(f)));   /* the rule of the site: a headline or a text opens the step */
-      if (!step) return [group, off ? 'switched off on the Visibility tab' : ''];   /* a group that is no pop-up of a step */
+      if (!step && eye.split(':')[0] === 'sheet') {
+        /* the pop-up of the entry under the steps: the site shows the entry while that pop-up has a headline or a text */
+        const label = inside.find((f) => /-label$/.test(f.key));
+        const named = label ? oneLine(popTidy(popNow(label))).replace(/\*\*/g, '') : '';
+        return [group + (named && !group.includes(named) ? ' · ' + named : ''), off ? 'switched off on the Visibility tab' : words ? 'opens on the site' : 'no headline or text: the entry is not shown'];
+      }
+      if (!step) return [group, off ? 'switched off on the Visibility tab' : ''];   /* a group that is no pop-up */
       return [group + (stepName ? ' · ' + stepName : ''), off ? 'switched off on the Visibility tab' : !stepName ? 'the list of steps has no line ' + step[1] : words ? 'opens on the site' : 'no headline or text: the step does not open'];
     };
     let group = '';

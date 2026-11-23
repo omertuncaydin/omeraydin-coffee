@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-23a
+/* omeraydin.coffee v2026-11-23b
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar,
    which photos were uploaded for the learner cards and which texts were written there, and sends the message form there.
@@ -606,7 +606,7 @@
      is a plain name. The address of an open sheet is the name of its step (#acoustic-stages), so a link can open
      the page at that sheet; #sheet-2 does the same whatever the step is called. ---------- */
   const stepList = $('.research-steps');
-  const sheets = [...document.querySelectorAll('dialog.step')];
+  const sheets = [...document.querySelectorAll('dialog.step:not(.extra)')];   /* the sheets of the numbered steps; the sheet of the entry under them is handled further down */
   const canSheet = !!stepList && sheets.length > 0 && typeof sheets[0].showModal === 'function';
   const NS = 'http://www.w3.org/2000/svg';
   const draw = (tag, set) => {
@@ -756,6 +756,27 @@
     const name = slug(stepNames[n] || '');
     return name && !document.getElementById(name) ? name : 'sheet-' + (n + 1);
   };
+  /* The entry under the steps stands outside their numbering and opens a sheet of its own (#further). It shows while
+     that sheet has a headline or a text and is not switched off; it carries its name and the headline of the sheet.
+     The address of the open sheet is the name of the entry in plain letters (#further-research); #further works too. */
+  const entry = $('#more-open');
+  const further = $('#further');
+  const canMore = canSheet && !!entry && !!further;
+  let moreOpen = false;
+  const moreAddress = () => {
+    const name = slug(entry.querySelector('.more-label').textContent);
+    return name && !document.getElementById(name) && !openable.some((n) => addressOf(n) === name) ? name : 'further';
+  };
+  const setMore = () => {
+    if (!canMore) return;
+    const head = further.querySelector('.statement');
+    const said = [...further.querySelectorAll('.statement, .step-text')].some((part) => !part.hidden && part.textContent.trim());
+    const on = said && !stepHide.includes(' research ') && !stepHide.includes(' sheet:further ');
+    entry.hidden = !on;
+    entry.querySelector('.more-name').textContent = head && !head.hidden ? head.textContent.replace(/\s+/g, ' ').trim() : '';
+    further.querySelector('.step-name').textContent = entry.querySelector('.more-label').textContent.replace(/\s+/g, ' ').trim();
+    if (!on && further.open) further.close();
+  };
   const setSteps = (hide) => {
     if (!canSheet) return;
     if (typeof hide === 'string') stepHide = ' ' + hide + ' ';
@@ -803,10 +824,11 @@
       }
     });
     if (stepOpen >= 0 && !openable.includes(stepOpen) && sheets[stepOpen].open) sheets[stepOpen].close();
+    setMore();
   };
-  const setAddress = (n) => {
+  const setAddress = (n) => {   /* the number of a step, the address of the entry under the steps, or -1 for none */
     try {
-      const hash = n >= 0 ? '#' + addressOf(n) : '';
+      const hash = typeof n === 'string' ? '#' + n : n >= 0 ? '#' + addressOf(n) : '';
       if (location.hash !== hash) history.replaceState(history.state, '', location.pathname + location.search + hash);
     } catch (error) { /* the address stays as it is */ }
   };
@@ -814,6 +836,10 @@
     if (!canSheet || !openable.includes(n)) return;
     const before = stepOpen;
     stepOpen = n;
+    if (canMore && moreOpen && further.open) {
+      moreOpen = false;
+      further.close();
+    }
     if (before >= 0 && before !== n && sheets[before].open) sheets[before].close();
     if (!sheets[n].open) sheets[n].showModal();
     const name = sheets[n].querySelector('.step-kicker');
@@ -824,11 +850,49 @@
     paint();
     setAddress(n);
   };
+  const openMore = () => {
+    if (!canMore || entry.hidden) return;
+    if (stepOpen >= 0 && sheets[stepOpen].open) {
+      const was = stepOpen;
+      stepOpen = -1;   /* so the step's sheet does not take the focus and the address with it */
+      sheets[was].close();
+    }
+    moreOpen = true;
+    if (!further.open) further.showModal();
+    const name = further.querySelector('.step-kicker');
+    if (name && document.activeElement !== name) name.focus({ preventScroll: true });
+    further.scrollTop = 0;
+    setAddress(moreAddress());
+  };
+  if (canMore) {
+    entry.addEventListener('click', (event) => { if (plainClick(event)) openMore(); });
+    further.addEventListener('click', (event) => {
+      if (event.target === further || event.target.closest('[data-close]')) further.close();   /* the dark surround, or a close button */
+    });
+    further.addEventListener('close', () => {
+      if (!moreOpen) return;   /* a sheet of a step took its place */
+      moreOpen = false;
+      if (location.hash === '#' + moreAddress() || location.hash === '#further') setAddress(-1);
+      if (!entry.hidden) entry.focus({ preventScroll: true });
+    });
+  }
+
   let hashSeen = '';
   const tryHash = () => {
     if (!canSheet || !location.hash || location.hash === hashSeen) return;
     let named = '';
     try { named = decodeURIComponent(location.hash.slice(1)).toLowerCase(); } catch (error) { named = ''; }
+    if (canMore && !entry.hidden && (named === 'further' || named === moreAddress())) {
+      if (moreOpen) return;
+      hashSeen = location.hash;
+      const panel = $('#research');
+      if (stepOpen < 0 && panel) {
+        root.style.scrollBehavior = 'auto';
+        panel.scrollIntoView();
+        root.style.scrollBehavior = '';
+      }
+      return openMore();
+    }
     const numbered = /^sheet-([1-9])$/.exec(named);
     const n = numbered ? +numbered[1] - 1 : openable.find((m) => addressOf(m) === named);
     if (n === undefined || n === stepOpen || !openable.includes(n)) return;
