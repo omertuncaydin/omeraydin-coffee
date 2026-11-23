@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-22c
+/* omeraydin.coffee v2026-11-23a
    Fonts: Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see assets/fonts/fonts-license.txt */
 
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:block}
@@ -337,9 +337,13 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
 .roasts-axis{position:relative;height:18px;margin-top:6px;font-size:.75rem;line-height:1;font-variant-numeric:tabular-nums;color:rgba(29,29,29,.7)}
 .roasts-axis span{position:absolute;top:6px;transform:translateX(-50%);white-space:nowrap}
 .roasts-unit{margin-top:-6px;text-align:center;font-size:.75rem;line-height:1.2;color:rgba(29,29,29,.7)}
-/* 04: a photograph */
+/* a photograph chosen in the site manager: shown whole, in its own shape (site.js sets its width from the file's size);
+   an upright one stands at the left with the line that belongs to it beside it */
 .fig-photo{padding:0;border-radius:0;background:none;box-shadow:none}
-.fig-photo img{width:100%;height:auto;aspect-ratio:16/8;object-fit:cover;object-position:50% 40%;border-radius:16px}
+.fig-photo img{display:block;max-width:100%;height:auto;border-radius:16px;background:rgba(29,29,29,.06)}
+.fig-photo.tall{flex-direction:row;align-items:flex-end;justify-content:center;gap:18px}
+.fig-photo.tall img{flex:none;max-width:56%}
+.fig-photo.tall figcaption{flex:1 1 0;min-width:0}
 /* the way on: the next sheet, or out */
 .step-nav{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:4px}
 .step-nav button.pill-solid{background:var(--verm-ink);color:var(--cream)}
@@ -446,11 +450,15 @@ a.date-row:hover svg{transform:translate(4px,-4px)}
   .figbox{padding:16px 14px 14px;border-radius:16px}
   .fig-photo{padding:0;border-radius:0}
   .fig-photo img{border-radius:12px}
+  .fig-photo.tall{flex-direction:column;align-items:flex-start}
+  .fig-photo.tall img{max-width:100%}
   .bell-key{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px}
   .roasts-plot{margin:0 12px}
   .roast{flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding-left:calc(var(--x) + 13px)}
   .roast.left{flex-direction:column;align-items:flex-end;padding-right:calc(100% - var(--x) + 13px)}
-  .step-dots{flex-basis:100%;justify-content:center;margin-left:0}
+  .step-nav>[data-back]{order:2}   /* on a phone the way on comes first, Back and Close share the row under it */
+  .step-nav>button[data-close]{order:3}
+  .step-dots{order:4;flex-basis:100%;justify-content:center;margin-left:0}
 }
 
 @media (prefers-reduced-motion:reduce){

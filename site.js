@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-22c
+/* omeraydin.coffee v2026-11-23a
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar,
    which photos were uploaded for the learner cards and which texts were written there, and sends the message form there.
@@ -560,9 +560,48 @@
     });
   }
 
+  /* A picture chosen in the site manager for a figure of the page (a figure with data-photo="key"): the text under that
+     key names its file in the store, "pictures/<name>-<width>x<height>.jpg". The picture is shown whole. The figure
+     is left out while there is no picture or its file cannot be fetched. Nothing is fetched before the figure is on
+     the screen. */
+  const PICTURE_PATH = /^pictures\/[a-z0-9]+(?:-[a-z0-9]+)*-([1-9]\d{0,3})x([1-9]\d{0,3})\.(?:jpg|png|webp)$/;
+  const pictureFigs = [...document.querySelectorAll('figure[data-photo]')];
+  const setPictures = (texts) => {
+    for (const fig of pictureFigs) {
+      const named = texts && typeof texts[fig.dataset.photo] === 'string' ? texts[fig.dataset.photo] : '';
+      const size = storeOn && named.length <= 120 ? PICTURE_PATH.exec(named) : null;
+      const from = size ? named : '';
+      let img = fig.querySelector('img');
+      if ((fig.dataset.from || '') !== from) {
+        fig.dataset.from = from;
+        if (img) img.remove();
+        img = null;
+        if (from) {
+          img = make('img');
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          /* whole and in its own shape: as wide as the figure, never larger than the file, never higher than most of the window */
+          img.style.aspectRatio = size[1] + ' / ' + size[2];
+          img.style.width = 'min(100%, ' + size[1] + 'px, calc(min(64vh, 560px) * ' + (size[1] / size[2]).toFixed(4) + '))';
+          fig.classList.toggle('tall', +size[2] > size[1] * 1.15);   /* an upright picture stands beside the line that belongs under it */
+          img.addEventListener('error', () => {
+            if (fig.dataset.from !== from) return;
+            fig.dataset.lost = from;   /* the file is gone or the store is away: the figure goes */
+            fig.hidden = true;
+          });
+          img.src = storeFile(from);
+          fig.prepend(img);
+        }
+      }
+      fig.hidden = !from || fig.dataset.lost === from;
+      const said = fig.querySelector('.photo-alt');
+      if (img) img.alt = said && !said.hidden ? said.textContent.replace(/\s+/g, ' ').trim() : '';
+    }
+  };
+
   /* ---------- the steps of the research block: each of the first four can open a sheet (the dialogs with class
      "step" inside the block). A sheet shows the number and name of its step, a headline, a text, a figure, and the
-     way to the next sheet. Its words stand in index.html as first drafts and can be changed in the site manager.
+     way back to the sheet before it and on to the next one. Its words stand in index.html as first drafts and can be changed in the site manager.
      A step opens while its sheet has a headline or a text and is not switched off in the site manager; otherwise it
      is a plain name. The address of an open sheet is the name of its step (#acoustic-stages), so a link can open
      the page at that sheet; #sheet-2 does the same whatever the step is called. ---------- */
@@ -755,6 +794,8 @@
       put('.host-name', hostName.trim());
       const on = sheet.querySelector('[data-next]');
       if (on) on.hidden = next === undefined;
+      const back = sheet.querySelector('[data-back]');
+      if (back) back.hidden = !openable.some((m) => m < n);   /* nothing to go back to from the first sheet that opens */
       const dots = sheet.querySelector('.step-dots');
       if (dots) {
         dots.hidden = openable.length < 2;
@@ -810,6 +851,7 @@
     sheets.forEach((sheet, n) => {
       sheet.addEventListener('click', (event) => {
         if (event.target === sheet || event.target.closest('[data-close]')) return sheet.close();   /* the dark surround, or a close button */
+        if (event.target.closest('[data-back]')) return openStep([...openable].reverse().find((m) => m < n));
         if (event.target.closest('[data-next]')) openStep(openable.find((m) => m > n));
       });
       sheet.addEventListener('close', () => {
@@ -1107,6 +1149,7 @@
     const texts = next.texts === undefined ? state.texts : cleanTexts(next.texts);   /* a call that says nothing about texts leaves them */
     setCards(texts);
     setTexts(texts);
+    setPictures(texts);
     setSound(texts);
     state = { hide: setHidden(next.hidden), trainings: Array.isArray(next.trainings) ? next.trainings : null, form: !!next.form, texts };
     setActs(state.hide);

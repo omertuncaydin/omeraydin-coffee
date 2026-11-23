@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ömer Aydın | Coffee Education Worldwide</title>
 <meta name="description" content="International coffee education with Ömer Aydın, Authorized SCA Trainer and Q Instructor.">
-<meta name="version" content="v2026-11-22c">
+<meta name="version" content="v2026-11-23a">
 <meta name="theme-color" content="#F4F1E0">
 <link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
 <link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
@@ -25,7 +25,7 @@
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-ext-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://efjvfggwnhqkunjvoyjb.supabase.co" crossorigin>
-<link rel="stylesheet" href="style.css?v=2026-11-22c">
+<link rel="stylesheet" href="style.css?v=2026-11-23a">
 <script>
 (function (d) {
   var h = d.documentElement, known = false;
@@ -211,7 +211,8 @@
   </ol>
 
   <!-- what opens behind the first four steps: one sheet each. The words below are first drafts: each can be changed in
-       the site manager (Research). A step opens while its sheet has a headline or a text. -->
+       the site manager (Research). A step opens while its sheet has a headline or a text. A figure with data-photo
+       shows a picture chosen in the site manager, and is left out while there is none. -->
   <dialog class="bg step" id="sheet-1" data-vis="sheet:1" data-vis-name="Pop-up behind step 01" data-edit-group="Pop-up behind step 01" aria-labelledby="sheet-1-name">
     <div class="bg-in">
       <div class="bg-head">
@@ -237,6 +238,7 @@
         <figcaption data-edit="rm:s1-note" data-edit-name="Line under the figure">36 seconds from the first crack of one of my roasts, recorded on 21 July 2026. Each dot under the outline is one pop: three in the first six seconds, seven in the last six.</figcaption>
       </figure>
       <div class="step-nav">
+        <button class="pill pill-line-ink" type="button" data-back><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg><span>Back</span></button>
         <button class="pill pill-solid" type="button" data-next><span>Next: <span class="next-name"></span></span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
         <button class="pill pill-line-ink" type="button" data-close>Close</button>
         <span class="step-dots" aria-hidden="true"></span>
@@ -271,6 +273,7 @@
         <figcaption data-edit="rm:s2-note" data-edit-name="Line under the figure">A schematic drawing of first crack with its six points.</figcaption>
       </figure>
       <div class="step-nav">
+        <button class="pill pill-line-ink" type="button" data-back><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg><span>Back</span></button>
         <button class="pill pill-solid" type="button" data-next><span>Next: <span class="next-name"></span></span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
         <button class="pill pill-line-ink" type="button" data-close>Close</button>
         <span class="step-dots" aria-hidden="true"></span>
@@ -299,6 +302,7 @@
         <figcaption data-edit="rm:s3-note" data-edit-name="Line under the figure">The same colour, within measurement noise.</figcaption>
       </figure>
       <div class="step-nav">
+        <button class="pill pill-line-ink" type="button" data-back><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg><span>Back</span></button>
         <button class="pill pill-solid" type="button" data-next><span>Next: <span class="next-name"></span></span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
         <button class="pill pill-line-ink" type="button" data-close>Close</button>
         <span class="step-dots" aria-hidden="true"></span>
@@ -315,11 +319,12 @@
       </div>
       <p class="statement" data-edit="rm:s4-head" data-edit-name="Headline">Part of my roasting courses</p>
       <p class="step-text" data-edit="rm:s4-text" data-edit-name="Text">This work is part of my SCA Roasting courses, which take place in a working roastery. Learners roast real batches, measure the colour of every roast and follow its first crack stage by stage. For teams and schools elsewhere, the same content is available as a workshop.</p>
-      <figure class="figbox fig-photo">
-        <img src="assets/classroom.jpg" alt="Coffee learners evaluating samples at a cupping table" width="1600" height="1113" loading="lazy">
+      <figure class="figbox fig-photo" data-photo="rm:s4-photo" data-photo-name="Picture" hidden>
+        <span class="step-data photo-alt" data-edit="rm:s4-photo-alt" data-edit-name="What the picture shows" data-edit-hint="One sentence for visitors who cannot see the picture: a screen reader reads it out. It is not shown on the page."></span>
         <figcaption data-edit="rm:s4-note" data-edit-name="Line under the picture"></figcaption>
       </figure>
       <div class="step-nav">
+        <button class="pill pill-line-ink" type="button" data-back><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg><span>Back</span></button>
         <button class="pill pill-solid" type="button" data-next><span>Next: <span class="next-name"></span></span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
         <a class="pill pill-solid" href="#courses" data-close><span class="courses-name"></span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></a>
         <a class="pill pill-line-ink" href="#host" data-close><span class="host-name"></span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></a>
@@ -417,6 +422,6 @@
   </div>
 </dialog>
 <script src="content.js?v=2026-11-22a"></script>
-<script src="site.js?v=2026-11-22c"></script>
+<script src="site.js?v=2026-11-23a"></script>
 </body>
 </html>

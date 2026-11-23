@@ -1,6 +1,6 @@
 # omeraydin.coffee
 
-Static one-page site, version v2026-11-22c, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
+Static one-page site, version v2026-11-23a, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
 
 ## What changes without an upload
 
@@ -49,7 +49,7 @@ The black panel after "Your instructor" (`<section id="research">` in `index.htm
 
 ### The pop-ups behind the steps
 
-Each of the first four steps can open a sheet (the four `<dialog class="bg step" id="sheet-1">` to `sheet-4` inside the section). A step opens while its sheet has a headline or a text; one emptied of both is a plain name, as all steps were before v2026-11-22c. A step that opens gets a round button at its right; a press anywhere on its row opens the sheet. The sheet shows the number and name of its step, a headline, a text, a figure with a line under it, "Next: <the following step>" and "Close", and dots for its place in the line. The last one links to the courses and to "Host a course" under the names those two carry on the page.
+Each of the first four steps can open a sheet (the four `<dialog class="bg step" id="sheet-1">` to `sheet-4` inside the section). A step opens while its sheet has a headline or a text; one emptied of both is a plain name, as all steps were before v2026-11-22c. A step that opens gets a round button at its right; a press anywhere on its row opens the sheet. The sheet shows the number and name of its step, a headline, a text, a figure with a line under it, "Back" (not on the first one), "Next: <the following step>" and "Close", and dots for its place in the line. The last one links to the courses and to "Host a course" under the names those two carry on the page.
 
 - The words stand in `index.html` as first drafts and are changed in the site manager (Research): `rm:s1-head`, `rm:s1-text`, `rm:s1-note` and the same for `s2`, `s3`, `s4`. An emptied one takes no room. The line under the picture of the fourth sheet is empty in the site files.
 - A sheet with words can be switched off again: the eyes are `sheet:1` to `sheet:4` in the Visibility list, under the block.
@@ -57,7 +57,7 @@ Each of the first four steps can open a sheet (the four `<dialog class="bg step"
 - Sheet 1 shows the recording of the site files as a picture (its outline and a mark for each pop, computed once and written into `index.html`) with a play button for the same player as "Hear a roast". A line runs along the picture while it plays, and a press on the picture plays from that place. While a recording chosen in the site manager is the one that plays, a plain bar stands in for the outline. If `assets/sounds/first-crack.mp3` is ever replaced, the outline in `index.html` (`.wave`, with `data-for` and `data-seconds`) has to be made again from the new file.
 - Sheet 2 draws a bell with named points from the lines of `rm:s2-points`: one line per point, `name` or `name: what it stands for`; what stands after the colon is listed under the bell. Two to twelve points; with fewer the figure is left out. `rm:s2-axes` holds the words on its two axes: the one that points up, then the one along the bottom.
 - Sheet 3 draws measured roasts on one scale from the lines of `rm:s3-roasts`: `value | label` is a roast, `value - value | label` a band behind the dots (its label is shown above the figure). The scale sets itself; `rm:s3-axis` is the unit under it.
-- Sheet 4 shows `assets/classroom.jpg`.
+- Sheet 4 shows a picture chosen in the site manager (Research, "Pop-up behind step 04", "Choose picture"). The text `rm:s4-photo` names its file in the photo store (`pictures/s4-photo-<stamp>-<width>x<height>.jpg`), `rm:s4-photo-alt` says what it shows for visitors who cannot see it. The picture keeps its own shape; a very tall or very wide one is cut to fit. Without a picture the sheet shows none. Any figure with `data-photo="key"` in `index.html` gets such a "Choose picture" in the tab that lists its key.
 - Without scripts, or in a browser without `<dialog>`, the steps are plain names.
 
 ## Training dates
