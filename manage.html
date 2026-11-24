@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Site manager · omeraydin.coffee</title>
 <meta name="robots" content="noindex,nofollow">
-<meta name="version" content="v2026-11-24a">
+<meta name="version" content="v2026-11-24b">
 <meta name="theme-color" content="#F4F1E0">
 <link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
 <link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
 <style>
-/* omeraydin.coffee site manager v2026-11-24a. Same colours and fonts as the site it manages. */
+/* omeraydin.coffee site manager v2026-11-24b. Same colours and fonts as the site it manages. */
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-ext-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -136,6 +136,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .move button:hover:not(:disabled){background:rgba(29,29,29,.08)}
 .move button:disabled{opacity:.28}
 .move svg{width:22px;height:22px}
+.row .move{margin:0}
 .logo-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
 .logo-row .ask{flex:1 1 100%;font-weight:700}
 .logo-box{flex:none;display:grid;place-items:center;width:112px;height:60px;padding:6px 8px;border-radius:12px;background:var(--cream);box-shadow:inset 0 0 0 1px var(--line);color:var(--soft);font-size:.8125rem;text-align:center}
@@ -230,7 +231,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
   </div>
 
   <section id="pane-vis" role="tabpanel" aria-labelledby="tab-vis">
-    <p class="lead">An open eye means the block shows on omeraydin.coffee, a closed eye hides it. The list follows the page from top to bottom. Nothing changes on the site until you press Publish.</p>
+    <p class="lead">An open eye means the block shows on omeraydin.coffee, a closed eye hides it. The list follows the page from top to bottom. Nothing changes on the site until you press Publish. The arrows on a course move it up or down in “Explore the courses”; that order is saved at once, without Publish.</p>
     <ul class="tree" id="tree"></ul>
     <p class="say" id="vis-say" role="status" aria-live="polite"></p>
   </section>
@@ -282,7 +283,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     <div class="sound" id="sound"></div>
   </section>
 
-  <p class="foot">Site manager v2026-11-24a · <a href="./">Open omeraydin.coffee</a></p>
+  <p class="foot">Site manager v2026-11-24b · <a href="./">Open omeraydin.coffee</a></p>
 </main>
 
 <div class="publish" id="publish" hidden>
@@ -297,7 +298,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 <script src="content.js?v=2026-11-22a"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* omeraydin.coffee site manager v2026-11-24a
+/* omeraydin.coffee site manager v2026-11-24b
    Signs in with the CoffeeNutz admin account and edits what the store holds for the site:
    which blocks are hidden (table site_settings), the messages visitors sent (table site_messages), the photos
    of the learner cards (table site_photos, files in the photo store "site") and the texts written here in place
@@ -307,7 +308,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
    and every element that carries data-edit is a text that can be replaced. The list of learners is read from content.js. */
 (() => {
   'use strict';
-  const VERSION = 'v2026-11-24a';
+  const VERSION = 'v2026-11-24b';
   const content = window.siteContent || {};
   const $ = (id) => document.getElementById(id);
   const make = (tag, cls, text) => {
@@ -417,6 +418,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
       const parent = up ? found.find((b) => b.key === up.getAttribute('data-vis')) : null;
       found.push({
         key,
+        file: found.length,   /* its place in the file, for the courses the saved order does not name */
         name: (el.getAttribute('data-vis-name') || (el.classList.contains('course') && head ? head.textContent : el.textContent) || key).replace(/\s+/g, ' ').trim().slice(0, 80),
         parent: parent ? parent.key : null,
         depth: parent ? parent.depth + 1 : 0,
@@ -535,12 +537,46 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
         if (draft.has(block.key)) draft.delete(block.key);
         else draft.add(block.key);
         sayPub('');
+        courseSaid.text = '';
         drawTree();
         drawLearners();
         const again = tree.querySelector('.row[data-key="' + block.key + '"] .eye');
         if (again) again.focus();
       });
-      row.append(chip, what, state, eye);
+      const among = COURSE_KEY.test(block.key) ? blocks.filter((b) => COURSE_KEY.test(b.key) && b.parent === block.parent) : [];
+      if (among.length > 1) {
+        /* a course can be moved up and down among the courses: saved at once, without Publish (see saveCourses) */
+        const here = among.indexOf(block);
+        const move = make('div', 'move');
+        for (const [dir, paths, word] of [[-1, UP, 'up'], [1, DOWN, 'down']]) {
+          const arrow = make('button', dir < 0 ? 'up' : 'down');
+          arrow.type = 'button';
+          arrow.disabled = !among[here + dir] || !!textsOff;
+          arrow.setAttribute('aria-label', 'Move ' + block.name + ' ' + word);
+          arrow.title = textsOff ? 'The order cannot be saved yet.' : 'Move ' + word;
+          arrow.append(icon(paths));
+          arrow.addEventListener('click', () => {
+            const ids = among.map((b) => b.key.slice(7));
+            ids.splice(here, 1);
+            ids.splice(here + dir, 0, block.key.slice(7));
+            saveCourses(ids, block.key);
+            syncCourses();
+            drawTree();
+            const again = tree.querySelector('.row[data-key="' + block.key + '"] .move .' + (dir < 0 ? 'up' : 'down'));
+            if (again && !again.disabled) again.focus();
+            else { const turn = tree.querySelector('.row[data-key="' + block.key + '"] .move button:not(:disabled)'); if (turn) turn.focus(); }
+          });
+          move.append(arrow);
+        }
+        if (courseSaid.key === block.key && courseSaid.text) {
+          const told = make('span', 'sub', courseSaid.text);
+          told.setAttribute('role', 'status');
+          what.append(told);
+        }
+        row.append(chip, what, move, state, eye);
+      } else {
+        row.append(chip, what, state, eye);
+      }
       const item = make('li');
       item.append(row);
       tree.append(item);
@@ -816,6 +852,60 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     learners.sort((a, b) => place(a) - place(b));
     if (blocks.length) blocks = withLearners(blocks.filter((b) => !b.card));
   };
+  /* The courses of "Explore the courses" in the order the site shows them. The text "courses:order" names them (the
+     part after "course:" in their key) in the order given here; a course it does not name comes after those it names,
+     in the order of the file. The levels of a course stay under it. */
+  const COURSE_KEY = /^course:[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  const syncCourses = () => {
+    const rows = blocks.filter((b) => COURSE_KEY.test(b.key));
+    if (rows.length < 2) return;
+    const named = typeof texts['courses:order'] === 'string' ? texts['courses:order'].split(' ').filter((id) => LEARNER_ID.test(id)) : [];
+    const place = (course) => {
+      const at = named.indexOf(course.key.slice(7));
+      return at < 0 ? named.length + course.file : at;
+    };
+    const groups = rows.slice().sort((a, b) => place(a) - place(b)).map((course) => [course].concat(blocks.filter((b) => b.parent === course.key)));
+    const moved = new Set(groups.flat());
+    const start = blocks.findIndex((b) => moved.has(b));
+    blocks = blocks.slice(0, start).concat(groups.flat(), blocks.slice(start).filter((b) => !moved.has(b)));
+  };
+  /* the order of the courses is saved at once; presses that come while a save is on its way are sent after it, the last one wins */
+  let coursesWant = null;
+  let coursesBusy = false;
+  const courseSaid = { key: '', text: '' };   // the course that was moved last, and the line about the save shown on its row
+  const saveCourses = async (ids, key) => {
+    coursesWant = ids.join(' ');
+    courseSaid.key = key;
+    courseSaid.text = '';
+    texts['courses:order'] = coursesWant;
+    if (coursesBusy) return;
+    coursesBusy = true;
+    let failed = '';
+    while (coursesWant !== null) {
+      const value = coursesWant;
+      coursesWant = null;
+      const { error } = await SB.from('site_texts').upsert({ key: 'courses:order', value }, { onConflict: 'key' }).select('key');
+      failed = error ? (error.message || 'the store did not keep it') : '';
+      if (failed) break;
+    }
+    coursesBusy = false;
+    coursesWant = null;
+    if (failed) {
+      await loadTexts();
+      syncCards();
+      syncCourses();
+    }
+    courseSaid.text = failed ? 'The order was not saved: ' + failed + '. The courses are back where the site has them.' : 'Moved. Visitors see the new order the next time they open the site.';
+    /* the list is drawn again to show that line: an arrow that holds the focus keeps it, so it can be pressed again */
+    const held = document.activeElement && document.activeElement.closest ? document.activeElement.closest('.row .move button') : null;
+    const mark = held ? { key: held.closest('.row').dataset.key, way: held.className } : null;
+    drawTree();
+    if (mark) {
+      const arrows = [...$('tree').querySelectorAll('.row[data-key="' + mark.key + '"] .move button')].filter((b) => !b.disabled);
+      const again = arrows.find((b) => b.className === mark.way) || arrows[0];
+      if (again) again.focus();
+    }
+  };
   const missingTable = (error) => error.code === '42P01' || error.code === 'PGRST205' || /does not exist|could not find the table/i.test(error.message || '');
   const loadTexts = async () => {
     const { data, error } = await SB.from('site_texts').select('key,value');
@@ -864,6 +954,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     if (failed) {
       await loadTexts();
       syncCards();
+      syncCourses();
       drawTree();
     }
     said[orderWho] = failed ? 'The order was not saved: ' + failed + '. The cards are back where the site has them.' : 'Moved. Visitors see the new order the next time they open the site.';
@@ -2113,6 +2204,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     }
     await loadTexts();
     syncCards();   /* the cards join the list of blocks with the words and in the order the site shows */
+    syncCourses(); /* and the courses stand in the order the site shows */
     const hidden = data.data && Array.isArray(data.data.hidden) ? data.data.hidden : [];
     live = fromStore(hidden);
     draft = new Set(live);

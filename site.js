@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-23e
+/* omeraydin.coffee v2026-11-24b
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar,
    which photos were uploaded for the learner cards and which texts were written there, and sends the message form there.
@@ -302,6 +302,24 @@
     const now = [...quoteGrid.children];
     if (sorted.length === now.length && sorted.every((figure, n) => figure === now[n])) return;
     quoteGrid.append(...sorted);
+  };
+  /* the order of the courses in "Explore the courses". "courses:order" names them (the part after "course:" in
+     their data-vis) in the order the site manager gave them; a course it does not name comes after those it names,
+     in the order of the file. Without that text the order of the file stays. */
+  const courseList = $('.course-list');
+  const courseRows = courseList ? [...courseList.children].filter((row) => /^course:[a-z0-9]+(?:-[a-z0-9]+)*$/.test(row.dataset.vis || '')) : [];
+  const setCourses = (texts) => {
+    if (courseRows.length < 2 || courseRows.length !== courseList.children.length) return;
+    const named = typeof texts['courses:order'] === 'string' && texts['courses:order'].length <= 400
+      ? texts['courses:order'].split(' ').filter((id) => LEARNER_ID.test(id)) : [];
+    const place = (row, n) => {
+      const at = named.indexOf(row.dataset.vis.slice(7));
+      return at < 0 ? named.length + n : at;
+    };
+    const sorted = courseRows.map((row, n) => ({ row, at: place(row, n) })).sort((x, y) => x.at - y.at).map((x) => x.row);
+    const now = [...courseList.children];
+    if (sorted.every((row, n) => row === now[n])) return;
+    courseList.append(...sorted);
   };
   /* a quote shows three lines; a longer one gets "Read more". Each quote is measured at its full length, so this
      is done again whenever the width of the cards or their words may have changed. */
@@ -1323,6 +1341,7 @@
   const render = (next) => steady(() => {
     const texts = next.texts === undefined ? state.texts : cleanTexts(next.texts);   /* a call that says nothing about texts leaves them */
     setCards(texts);
+    setCourses(texts);
     setTexts(texts);
     setPictures(texts);
     setSound(texts);
