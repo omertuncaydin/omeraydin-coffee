@@ -25,7 +25,12 @@ window.siteContent = {
   // change an id once a photo was uploaded for it.
   // starts: "hidden" keeps a card off the site until its eye is opened in the site manager and Publish is pressed.
   // Every public course review on coffeenutz.net has an entry here; the ones not chosen yet start hidden.
-  // "original" (the review as it was written) and "reviewed" (its date) are kept for the record and are never shown.
+  // "original" (the review as it was written) and "reviewed" (its date) are kept for the record. The English page
+  // never shows them.
+  // The Turkish page (omeraydin.coffee/tr) shows the same cards with: tr: { headline, position, company, quote },
+  // first drafts that the site manager can replace (tab "Türkçe"). Where tr has no quote, the Turkish page shows
+  // "original", the learner's own Turkish words; where it has neither, the English quote. A value left out of tr
+  // is taken from the English card. The name is the same on both pages.
   // photo is the picture used when none was uploaded: a file in assets/learners, shown 4:3. photoAt moves its crop:
   // "50% 16%" means centred, a little below the top edge. Full names, employers and photos only where the person
   // has agreed to it. "course" is kept for the record and is shown only for an entry without a headline.
@@ -34,21 +39,33 @@ window.siteContent = {
       headline: "Starbucks Reserve Roaster in Milan chose Ömer for SCA Roasting Professional.",
       photo: "assets/learners/samuel-murgatroyd.jpg", photoAt: "50% 50%",
       quote: "He is extremely knowledgeable, highly professional, and has a great teaching style that makes complex roasting concepts easy to understand.",
-      name: "Samuel Murgatroyd", position: "roaster", company: "Starbucks Reserve, Milan", course: "Roasting · Professional" },
+      name: "Samuel Murgatroyd", position: "roaster", company: "Starbucks Reserve, Milan", course: "Roasting · Professional",
+      tr: { headline: "Starbucks Reserve Milano’nun kavurucusu, SCA Roasting Professional için Ömer’i seçti.",
+            position: "kavurucu", company: "Starbucks Reserve, Milano",
+            quote: "SCA Roasting Professional sertifikamı Ömer ile tamamlamak inanılmaz bir deneyimdi. Son derece bilgili, çok profesyonel ve karmaşık kavurma kavramlarını kolay anlaşılır kılan harika bir öğretme tarzı var. Sabrı, yol göstericiliği ve derin uzmanlığı sayesinde kendimi tamamen hazır hissettim ve sınavı rahatlıkla geçtim. Kavurma becerilerinizi en üst seviyeye taşımak istiyorsanız, eğitimini ne kadar tavsiye etsem az!" } },
     { id: "kagan-giritli",
       headline: "Years of SCA training for Tchibo Türkiye’s head barista and dozens of his trainers.",
       photo: "assets/learners/kagan-giritli.jpg", photoAt: "50% 16%",
       quote: "…Ömer’s command of the subject and his systematic teaching method made even complex technical details easy to understand. Thanks to the patience, one-to-one guidance and professional approach he showed throughout the training, I was fully prepared for every learning outcome.",
-      name: "Kağan Giritli", position: "head barista", company: "Tchibo Türkiye", course: "Barista Skills · Professional" },
+      name: "Kağan Giritli", position: "head barista", company: "Tchibo Türkiye", course: "Barista Skills · Professional",
+      tr: { headline: "Tchibo Türkiye’nin baş baristası ve onlarca eğitmeni Ömer’den eğitim aldı.",
+            position: "baş barista", company: "Tchibo Türkiye",
+            quote: "Ekibim ile CoffeeNutz’da gerçekleştirdiğimiz uzun SCA Barista eğitimleri ve Profesyonel için de birebir Tchibo merkezde geçen 3 günlük eğitimimizde Ömer Hoca’nın; konuya hakimiyeti ve sistematik öğretim metodu, karmaşık teknik detayları dahi anlaşılır kıldı." } },
     { id: "doruk-osman",
       headline: "A historic boutique coffee shop in Greece chose Ömer for SCA Roasting.",
       photo: "assets/learners/doruk-osman.jpg", photoAt: "50% 66%",
       quote: "One of the best if not the best teacher in the industry",
-      name: "Doruk Osman", course: "Roasting · Foundation + Intermediate" },
+      name: "Doruk Osman", course: "Roasting · Foundation + Intermediate",
+      tr: { headline: "Yunanistan’dan bir nitelikli kahve dükkânı sahibi, SCA Roasting için Ömer’i seçti.",
+            position: "işletme sahibi", company: "Nitelikli Kahve Dükkânı, Yunanistan",
+            quote: "Sektördeki en iyi eğitmenlerden biri, belki de en iyisi" } },
     { id: "yakup-cankir",
       headline: "Head roaster of Türkiye’s most popular coffee roasting company kahve.com chose Ömer for roasting training.",
       quote: "I took roasting training from Ömer and left 100% satisfied. His knowledge and the way he conveys it were truly incredible. A professional extremely well versed in his field, who blends his passion for coffee with science and combines a scientist’s rigour with a coffee lover’s excitement…",
-      name: "Yakup Çankır", position: "head roaster", company: "kahve.com", course: "Roasting" },
+      name: "Yakup Çankır", position: "head roaster", company: "kahve.com", course: "Roasting",
+      tr: { headline: "kahve.com’un baş kavurucusu, ileri seviye kavurma eğitimi için Ömer’i seçti.",
+            position: "baş kavurucu", company: "kahve.com",
+            quote: "Ömer Hoca’dan kavurma eğitimi aldım ve %100 memnuniyetle ayrıldım. Bilgi birikimi ve bu bilgiyi aktarma şekli gerçekten inanılmazdı. Kahveye olan tutkusunu bilimle harmanlayan, bilim insanı titizliğini bir kahve severin heyecanıyla birleştiren, alanında son derece donanımlı bir profesyonel." } },
     // The other public course reviews on coffeenutz.net, newest first. Hidden until switched on in the site manager.
     // Names are as the review shows them, until Ömer gives the full name, the position and the company of a learner;
     // the card then gets its headline as well (kemal-a, ferhat-m). A card without a headline shows its photo (if one
@@ -57,6 +74,7 @@ window.siteContent = {
       headline: "Owner and roaster of Shady Coffee Works chose Ömer for SCA Roasting Professional.",
       quote: "The trainings were packed with both knowledge and practice, and a thoroughly enjoyable time as well. Thanks to Ömer’s kind and generous approach, it was a training in which we felt at ease, found answers to our questions and got something out of every moment. I thank him for sharing his knowledge and experience so sincerely and for making learning this enjoyable.",
       name: "Kemal Akdaş", position: "owner and roaster", company: "Shady Coffee Works", course: "Roasting · Professional", reviewed: "2026-11-06",
+      tr: { headline: "Shady Coffee Roastery’nin kurucusu, SCA Roasting Professional için Ömer’i seçti.", position: "kurucu ve kavurucu", company: "Shady Coffee Roastery" },
       original: "Eğitimler hem bilgi ve uygulama açısından dolu dolu hem de oldukça keyifli bir süreçti. Ömer Hoca’nın nazik, ve paylaşımcı yaklaşımı sayesinde kendimizi rahat hissettiğimiz, sorularımıza karşılık bulabildiğimiz ve her anından verim aldığımız bir eğitim oldu. Bilgi ve deneyimlerini içtenlikle paylaştığı, öğrenmeyi bu kadar keyifli hâle getirdiği için kendisine teşekkür ederim." },
     { id: "emin-g", starts: "hidden",
       quote: "I was truly very pleased with the Roasting training I took from Ömer Aydın. Besides his depth of knowledge, he is an extremely kind, patient and sincere instructor. Above all, his ability to look at topics from different perspectives and explain them again with different teaching methods makes learning far more productive. This training did not just improve my roasting knowledge, it also changed the way I look at coffee. The experience and valuable advice he shared with my goal of becoming a Q Grader in mind were especially precious to me. Thank you very much for everything.",
@@ -70,6 +88,7 @@ window.siteContent = {
       headline: "Head roaster of Can Kardeşler chose Ömer for SCA Roasting.",
       quote: "Taking part in this training was a very valuable experience for me. I gained technical knowledge about coffee roasting and also had the chance to benefit from years of experience. Most importantly, it made my passion for coffee grow even further. It was a sincere, professional and instructive training. I thank Ömer for his work and recommend it to everyone who wants to lay a solid foundation for their coffee journey.",
       name: "Ferhat Mete", position: "head roaster", company: "Can Kardeşler", course: "Roasting · Foundation + Intermediate", reviewed: "2026-06-14",
+      tr: { headline: "Can Kardeşler’in baş kavurucusu, SCA Roasting Professional için Ömer’i seçti.", position: "baş kavurucu", company: "Can Kardeşler" },
       original: "Bu eğitime katılmak benim için çok değerli bir deneyimdi. Kahve kavurma konusunda hem teknik bilgiler edindim hem de yılların deneyiminden faydalanma fırsatı buldum. En önemlisi, kahveye olan tutkumun daha da artmasını sağladı. Samimi, profesyonel ve öğretici bir eğitim süreciydi. Emeği geçen Ömer hocama teşekkür ediyor, kahve yolculuğuna sağlam bir temel atmak isteyen herkese tavsiye ediyorum." },
     { id: "saggezza", starts: "hidden",
       quote: "During the Q Grader training, the way CoffeeNutz, that is Ömer, passed on knowledge was truly very valuable. Running a training this technical and this demanding in a way that is both disciplined and clear takes serious competence. Ömer’s command of the subject, the calm confidence in his approach and the importance he gives to detail made the process far more productive. I thank CoffeeNutz, that is Ömer, for this strong training experience.",

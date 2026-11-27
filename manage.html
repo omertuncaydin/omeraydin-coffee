@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Site manager · omeraydin.coffee</title>
 <meta name="robots" content="noindex,nofollow">
-<meta name="version" content="v2026-11-24b">
+<meta name="version" content="v2026-11-27a">
 <meta name="theme-color" content="#F4F1E0">
 <link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
 <link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
 <style>
-/* omeraydin.coffee site manager v2026-11-24b. Same colours and fonts as the site it manages. */
+/* omeraydin.coffee site manager v2026-11-27a. Same colours and fonts as the site it manages. */
 @font-face{font-family:"Averia Serif Libre";src:url("assets/fonts/averia-serif-libre-700.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-ext-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:"Schibsted Grotesk";src:url("assets/fonts/schibsted-grotesk-latin-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -149,6 +149,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .field input:disabled,.field textarea:disabled{opacity:.6}
 .field .hint{font-size:.875rem;color:var(--soft);text-wrap:pretty}
 .field .hint button{padding:0;border:0;background:transparent;text-decoration:underline;text-underline-offset:.2em;color:var(--ink)}
+.field .hint.en{padding-left:12px;border-left:2px solid var(--line-strong);white-space:pre-line}   /* the English of a text, under its Turkish field */
+.field .hint.en b{font-weight:400;color:var(--ink)}
 .words{grid-column:1/-1;display:flex;flex-direction:column;gap:14px;padding-top:18px;border-top:1px solid var(--line)}
 .words-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px}
 .words .learner-acts{margin-top:2px}
@@ -228,6 +230,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     <button class="tab" id="tab-learn" type="button" role="tab" aria-selected="false" aria-controls="pane-learn">Learners</button>
     <button class="tab" id="tab-pop" type="button" role="tab" aria-selected="false" aria-controls="pane-pop">Pop-up</button>
     <button class="tab" id="tab-res" type="button" role="tab" aria-selected="false" aria-controls="pane-res">Research</button>
+    <button class="tab" id="tab-tr" type="button" role="tab" aria-selected="false" aria-controls="pane-tr" lang="tr">Türkçe</button>
   </div>
 
   <section id="pane-vis" role="tabpanel" aria-labelledby="tab-vis">
@@ -283,7 +286,19 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     <div class="sound" id="sound"></div>
   </section>
 
-  <p class="foot">Site manager v2026-11-24b · <a href="./">Open omeraydin.coffee</a></p>
+  <section id="pane-tr" role="tabpanel" aria-labelledby="tab-tr" hidden>
+    <p class="lead">The Turkish page of the site, omeraydin.coffee/tr: every text it shows, block by block. Each text is a first draft; under each field stands the English that the site shows for that place now. Change a text and press Save; visitors see it the next time they open the Turkish page. Bold is written as **words**, a link as [words](https://address); in a list every line is one entry. “Put the text of the site files into this field” brings a draft back. A text you empty is left out of the Turkish page; a text marked as needed cannot be empty.</p>
+    <p class="lead">The cards of “What learners say” have a group each here, for the cards that are on the site: headline, title, company and quote in Turkish. The name of a learner is the same in both languages. An emptied quote goes back to the Turkish of the site files. Pictures, logos, the recording, the eyes of the Visibility tab and the order of courses and cards are shared by both languages and are set on their own tabs.</p>
+    <p class="say" id="tr-off" role="status" aria-live="polite"></p>
+    <div class="pop" id="tr"></div>
+    <div class="learner-acts" id="tr-acts">
+      <button class="pill pill-sm pill-solid" id="tr-save" type="button">Save</button>
+      <button class="pill pill-sm" id="tr-undo" type="button">Undo changes</button>
+    </div>
+    <p class="say" id="tr-say" role="status" aria-live="polite"></p>
+  </section>
+
+  <p class="foot">Site manager v2026-11-27a · <a href="./">Open omeraydin.coffee</a></p>
 </main>
 
 <div class="publish" id="publish" hidden>
@@ -298,7 +313,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 <script src="content.js?v=2026-11-22a"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* omeraydin.coffee site manager v2026-11-24b
+/* omeraydin.coffee site manager v2026-11-27a
    Signs in with the CoffeeNutz admin account and edits what the store holds for the site:
    which blocks are hidden (table site_settings), the messages visitors sent (table site_messages), the photos
    of the learner cards (table site_photos, files in the photo store "site") and the texts written here in place
@@ -308,7 +323,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
    and every element that carries data-edit is a text that can be replaced. The list of learners is read from content.js. */
 (() => {
   'use strict';
-  const VERSION = 'v2026-11-24b';
+  const VERSION = 'v2026-11-27a';
   const content = window.siteContent || {};
   const $ = (id) => document.getElementById(id);
   const make = (tag, cls, text) => {
@@ -442,6 +457,39 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
         hint: (el.getAttribute('data-edit-hint') || '').replace(/\s+/g, ' ').trim().slice(0, 400)
       });
     }
+    /* The Turkish page (./tr): its texts carry keys "tr:…". Each is paired with the element that stands at the same
+       place of the English page, so that the Turkish tab can show the English next to it: "en" is the key of that
+       English text when it can be changed here too, "enFirst" what the site files say there. A site without a
+       Turkish page simply has no such texts. */
+    try {
+      const other = await fetch('./tr?manage=' + Date.now(), { cache: 'no-store' });
+      const turkish = other.ok ? new DOMParser().parseFromString(await other.text(), 'text/html') : null;
+      const pathOf = (el) => {
+        const path = [];
+        for (let node = el; node.parentElement && node !== turkish.body; node = node.parentElement) path.unshift([...node.parentElement.children].indexOf(node));
+        return path;
+      };
+      for (const el of turkish ? turkish.querySelectorAll('[data-edit]') : []) {
+        const key = el.getAttribute('data-edit');
+        if (!/^tr:[a-z0-9]+(?:-[a-z0-9]+)*$/.test(key) || /^tr:l-/.test(key) || editable.some((f) => f.key === key)) continue;
+        const grouped = el.closest('[data-edit-group]');
+        const twin = pathOf(el).reduce((node, n) => (node ? node.children[n] : null), doc.body);
+        const same = twin && twin.tagName === el.tagName ? twin : null;
+        const enKey = same ? same.getAttribute('data-edit') || '' : '';
+        editable.push({
+          key,
+          name: (el.getAttribute('data-edit-name') || key).replace(/\s+/g, ' ').trim().slice(0, 80),
+          list: el.tagName === 'UL' || el.tagName === 'OL',
+          need: el.hasAttribute('data-edit-need'),
+          first: noted(el),
+          group: grouped ? grouped.getAttribute('data-edit-group').replace(/\s+/g, ' ').trim().slice(0, 80) : '',
+          eye: grouped && /^[a-z0-9]+(?::[a-z0-9-]+)?$/.test(grouped.getAttribute('data-vis') || '') ? grouped.getAttribute('data-vis') : '',
+          hint: (el.getAttribute('data-edit-hint') || '').replace(/\s+/g, ' ').trim().slice(0, 400),
+          en: /^[a-z0-9]+:[a-z0-9]+(?:-[a-z0-9]+)*$/.test(enKey) ? enKey : '',
+          enFirst: same ? noted(same) : ''
+        });
+      }
+    } catch (error) { /* the Turkish tab then says that the page has no text for it */ }
     fields = editable;
     /* places for a picture that is chosen here: a figure with data-photo="key". Each stands in its tab right after the
        last text that comes before it on the page. */
@@ -783,12 +831,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     .filter((q) => q.starts !== 'hidden' || LEARNER_ID.test(text(q.id)))
     .map((q, at) => {
       const base = { headline: text(q.headline), name: text(q.name), position: text(q.position), company: text(q.company), quote: text(q.quote) };
+      const turkish = q.tr && typeof q.tr === 'object' ? q.tr : {};
       return Object.assign({
         id: LEARNER_ID.test(text(q.id)) ? text(q.id) : '',
         at,                               // its place in content.js
         base,                             // its words in content.js
         course: text(q.course),
         original: text(q.original),       // the review as it was written, when content.js keeps it
+        tr: { headline: text(turkish.headline), position: text(turkish.position), company: text(turkish.company), quote: text(turkish.quote) },   // its words on the Turkish page, as content.js has them
         startsOff: q.starts === 'hidden',
         file: /^assets\/[\w./-]+\.(?:jpe?g|png|webp|avif)$/i.test(text(q.photo)) ? text(q.photo) : '',
         fileAt: PHOTO_AT.test(text(q.photoAt)) ? text(q.photoAt) : '50% 50%'
@@ -797,15 +847,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
   /* ---------- texts written here: the words of a card, the order of the cards, the pop-up ---------- */
   let texts = {};             // key -> text, as the store holds it (table site_texts)
   let textsOff = '';          // why texts cannot be read or saved
-  let fields = [];            // the texts of the page that can be replaced: { key, name, list, need, first, group, eye, hint }, read from the live page
-  const groupOpen = new Set();   // the groups of fields that stand open in the Pop-up or the Research tab
+  let fields = [];            // the texts of the two pages that can be replaced: { key, name, list, need, first, group, eye, hint } and, for a text of the Turkish page, { en, enFirst }; read from the live pages
+  const groupOpen = new Set();   // the groups of fields that stand open in the Pop-up, the Research or the Turkish tab
   let pictures = [];          // the places for a picture chosen here: { key, name, after }, read from the live page
   let picAsk = '';            // key of the picture whose Remove was pressed once
   const picSaid = {};         // key -> line shown under its buttons
   let editing = null;         // { id, values, ask } while the words of one card are open here
   let popDraft = {};          // key -> text typed in the Pop-up or the Research tab and not saved yet
-  const SHEETS = { pop: 'bg:', res: 'rm:' };   // the two tabs of texts, each with the start of its keys
-  const sheetSaid = { pop: '', res: '' };
+  const SHEETS = { pop: 'bg:', res: 'rm:', tr: 'tr:' };   // the tabs of texts, each with the start of its keys ("tr:": every text of the Turkish page)
+  const sheetSaid = { pop: '', res: '', tr: '' };
   let soundStore = null;      // 'ready' once the store takes recordings (database script v2026-11-21f or newer), else the reason
   let soundAsk = false;       // Remove recording was pressed once
   let soundBusy = false;      // a recording is on its way to the store
@@ -978,7 +1028,33 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
   const publicUrl = (path) => url + '/storage/v1/object/public/site/' + path;
   const popNow = (f) => (typeof texts[f.key] === 'string' ? texts[f.key] : f.first);   // what the site shows for a text of the pop-up
   const popTidy = (value) => String(value).replace(/\r\n?/g, '\n').split('\n').map((line) => line.trim()).join('\n').trim();
-  const popChanges = () => fields.filter((f) => f.key in popDraft && popTidy(popDraft[f.key]) !== popTidy(popNow(f)));
+  /* The Turkish words of the learner cards are fields of the Turkish tab: a group for every card that is on the site
+     (and for a card whose Turkish was written here already). Their keys are "tr:l-<id>-<field>". Without a text
+     here the Turkish page shows the Turkish of content.js (for the quote also the review as it was written), and
+     without that the English words: the rule of drawCard in site.js. */
+  const CARD_TR = [['headline', 'Headline', 200], ['position', 'Title', 80], ['company', 'Company', 120], ['quote', 'Quote', 1500]];
+  const cardFields = () => {
+    const out = [];
+    for (const L of learners) {
+      if (!L.id) continue;
+      const keys = CARD_TR.map(([field]) => 'tr:l-' + L.id + '-' + field);
+      if (live.has('learner:' + L.id) && !keys.some((key) => key in texts || key in popDraft)) continue;
+      CARD_TR.forEach(([field, label, max], n) => out.push({
+        key: keys[n], name: label, list: false, need: false, max,
+        first: L.tr[field] || (field === 'quote' ? L.original : '') || L[field] || '',
+        group: 'Card · ' + [L.name, L.company || L.course].filter(Boolean).join(' · '), eye: 'learner:' + L.id,
+        hint: field === 'headline' ? 'The red line above the quote. Left empty, the Turkish card shows without one.' : field === 'quote' ? 'The quote marks are added by the site. Left empty, the card shows the Turkish of the site files.' : '',
+        en: '', enFirst: '', enNow: L[field] || ''
+      }));
+    }
+    return out;
+  };
+  const allFields = () => {   /* the cards stand right after the texts of their block */
+    const cards = cardFields();
+    const at = fields.reduce((last, f, n) => (f.key.startsWith('tr:') && f.eye === 'quotes' ? n : last), -1);
+    return at < 0 ? fields.concat(cards) : fields.slice(0, at + 1).concat(cards, fields.slice(at + 1));
+  };
+  const popChanges = () => allFields().filter((f) => f.key in popDraft && popTidy(popDraft[f.key]) !== popTidy(popNow(f)));
   const unsaved = () => Object.keys(pending).length + (wordsDirty() ? 1 : 0) + popChanges().length;
   /* the cards join the list of blocks right under "What learners say", so the eye, Undo and Publish treat them like any other block */
   const withLearners = (found) => {
@@ -1706,7 +1782,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
   const drawSheet = (name) => {
     const box = $(name);
     box.replaceChildren();
-    const mine = fields.filter((f) => f.key.startsWith(SHEETS[name]));
+    const mine = allFields().filter((f) => f.key.startsWith(SHEETS[name]));
     $(name + '-off').textContent = textsOff;
     $(name + '-say').textContent = sheetSaid[name];
     box.hidden = !mine.length;
@@ -1718,7 +1794,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     }
     /* the texts of one pop-up behind a step stand together in a group that opens and closes; its line says which step
        it belongs to and, in few words, how it stands on the site */
-    const stepLines = popTidy(popNow(mine.find((f) => f.key === 'rm:steps') || { key: '', first: '' })).split('\n').filter(Boolean);
+    const stepLines = popTidy(popNow(mine.find((f) => f.key === (name === 'tr' ? 'tr:rm-steps' : 'rm:steps')) || { key: '', first: '' })).split('\n').filter(Boolean);
     const groupLine = (group) => {
       const inside = mine.filter((f) => f.group === group);
       const eye = inside[0].eye;
@@ -1744,7 +1820,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
       const value = f.key in popDraft ? popDraft[f.key] : popNow(f);
       area.value = value;
       area.rows = f.list ? 3 : 1;
-      area.maxLength = 4000;
+      area.maxLength = f.max || 4000;
       area.dataset.key = f.key;
       area.disabled = !!textsOff;
       area.spellcheck = true;
@@ -1757,6 +1833,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
       });
       wrap.append(area);
       if (f.hint) wrap.append(make('span', 'hint', f.hint));
+      if (name === 'tr') {
+        /* the English of this place, as the site shows it now */
+        const twin = f.en ? fields.find((x) => x.key === f.en) : null;
+        const english = popTidy(typeof f.enNow === 'string' ? f.enNow : twin ? popNow(twin) : f.enFirst || '');
+        if (english) {
+          const line = make('span', 'hint en');
+          line.lang = 'en';
+          line.append(make('b', '', 'English: '), english);
+          wrap.append(line);
+        }
+      }
       if (f.first && popTidy(value) !== f.first) {
         /* one press writes the text of the site files into the field; Save then makes it so */
         const hint = make('span', 'hint');
@@ -2157,7 +2244,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 
   /* ---------- tabs ---------- */
   const tab = (name) => {
-    for (const t of ['vis', 'inbox', 'learn', 'pop', 'res']) {
+    for (const t of ['vis', 'inbox', 'learn', 'pop', 'res', 'tr']) {
       $('tab-' + t).setAttribute('aria-selected', t === name ? 'true' : 'false');
       $('pane-' + t).hidden = t !== name;
     }
@@ -2171,12 +2258,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     if (name === 'learn') { if (!unsaved()) loadPhotos(); else drawLearners(); }
     if (name === 'pop') drawPop();
     if (name === 'res') drawSheet('res');
+    if (name === 'tr') drawSheet('tr');
   };
   $('tab-vis').addEventListener('click', () => tab('vis'));
   $('tab-inbox').addEventListener('click', () => tab('inbox'));
   $('tab-learn').addEventListener('click', () => tab('learn'));
   $('tab-pop').addEventListener('click', () => tab('pop'));
   $('tab-res').addEventListener('click', () => tab('res'));
+  $('tab-tr').addEventListener('click', () => tab('tr'));
 
   /* ---------- signing in and loading ---------- */
   const start = async () => {
@@ -2265,6 +2354,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
     popDraft = {};
     sheetSaid.pop = '';
     sheetSaid.res = '';
+    sheetSaid.tr = '';
     soundStore = null;
     soundAsk = false;
     soundBusy = false;

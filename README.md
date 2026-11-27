@@ -1,6 +1,6 @@
 # omeraydin.coffee
 
-Static one-page site, version v2026-11-24b, with a small manager page at `/manage`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
+Static one-page site in two languages, version v2026-11-27a, with a small manager page at `/manage`. English is `index.html` at `/`, Turkish is `tr.html` at `/tr`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
 
 ## What changes without an upload
 
@@ -18,6 +18,17 @@ If the store does not answer, the page shows itself as the visitor's browser las
 
 The database part is one SQL file, `omeraydin-site.sql`. It is kept outside this repository and is run in the Supabase SQL editor. A newer version of the file is run the same way on top of the old one; settings, messages, photos and texts stay. Texts need the version of 21 November 2026 or later (table `site_texts`); until it has been run, the site manager says so and the site shows the texts of the site files. A recording needs v2026-11-21f or later, which lets the photo store take sound files (MP3, M4A, WAV, 6 MB at most); until it has been run, the Research tab says so and everything else works.
 
+## Two languages
+
+- `index.html` is the English page, `tr.html` the Turkish one (`https://omeraydin.coffee/tr`). Both use the same `style.css`, `site.js` and `content.js`. Each names the other in its head (`hreflang`).
+- The switch "EN | TR" in the top bar is a link between the two pages. It stands twice in each page: before "Enquire" on wide screens, and in the bar itself where the links fold into the menu (760 px and below). A press opens the other page at the block the visitor was reading and tells the browser which language was chosen; the English page then sends that visitor on to the Turkish one (the small script in its head). `/tr` sends nobody anywhere, so a link to it always opens in Turkish. A browser set to Turkish is not switched by itself.
+- `tr.html` has the same elements as `index.html`, in the same order: only words, a few attributes and the head differ. When one page changes, the other has to follow. The site manager relies on it: it finds the English of a Turkish text at the same place of the English page.
+- Every text of the Turkish page that can be changed carries `data-edit="tr:<name>"` in `tr.html` (`tr:hero-lead`, `tr:rm-s1-head`, `tr:bg-list` and so on). The texts in the file are first drafts; the site manager replaces them on its tab "Türkçe", and the store keeps what was written under the same key. The English page keeps its own keys (`rm:…`, `bg:…`); the two never touch each other.
+- Shared by both pages, set once: pictures, logos and photos, the recording, the eyes of the Visibility tab, the order of the courses and of the cards.
+- Learner cards: `content.js` gives an entry `tr: { headline, position, company, quote }`. Where `tr` has no quote the Turkish page shows `original`, the review as the learner wrote it; where it has neither, the English quote. The site manager keeps what is written for a card under `tr:l-<id>-<field>`. The name is the same on both pages.
+- What `site.js` writes itself (month names, "Read more", the lines of the message form, a few labels for screen readers) stands in both languages in `SAY` at the top of `site.js`.
+- The headline typeface has no Ğ ğ İ Ş ş. `assets/fonts/serif-turkish-700.woff2` holds these five letters, put together from the typeface's own letters and accents; a page fetches it only when it uses one of them.
+
 ## Site manager
 
 `https://omeraydin.coffee/manage`, sign-in with the CoffeeNutz admin account.
@@ -28,6 +39,7 @@ The database part is one SQL file, `omeraydin-site.sql`. It is kept outside this
 
 - Pop-up: the texts of the pop-up that "More about Ömer Aydın" opens, one field each. A link is written as `[words](https://address)`, bold as `**words**`, a new line is a line break, and in the list every line is one entry. An emptied text is left out of the pop-up; the title cannot be emptied. A field that holds the text of the site files again is no longer kept in the store.
 - Research: the texts of the block "Original Research & Methodology", one field each, written the same way as in the Pop-up tab; in the steps every line is one step. The line under the title, the paragraph and the steps can be emptied and are then left out; the label, the title and the texts of the two buttons cannot. Under them, one group per pop-up behind a step (a press on its line opens it): headline, text and the line under its figure, and for the second and third pop-up the data of the figure. A group says in its line whether its pop-up opens on the site, has no headline or text, or is switched off. Under the fields: the recording that the play button plays. The site comes with one (see `roastSound` below); "Choose recording" takes an MP3, M4A or WAV file of 6 MB at most from the computer, saves it at once, as it is, and the site plays it in place of its own. It can be listened to there, replaced, or removed after a second press; removing it brings back the recording of the site files. The eye of the whole block is in the Visibility list, and under it one eye for each pop-up.
+- Türkçe: every text of the Turkish page (`/tr`), block by block, each as a field with its first draft, written the same way as in the Pop-up tab. Under each field stands the English the site shows for that place now. The cards of "What learners say" have a group each, for the cards that are on the site: headline, title, company and quote in Turkish. "Put the text of the site files into this field" brings a draft back. The fields are read from the live Turkish page: an element of `tr.html` with `data-edit="tr:<name>"` is one field, grouped by the `data-edit-group` of its block.
 
 The manager reads its list of blocks from the live page: every element in `index.html` with a `data-vis="key"` attribute is one row, named by `data-vis-name` or by its own text. To make a new block switchable, give it a `data-vis` key (lower-case letters and digits, optionally `group:name`). Nothing else has to change. The learner cards are added to that list from `content.js`: a card with an `id` has the key `learner:<id>`.
 
@@ -110,7 +122,8 @@ The menu is a glass capsule that stays in view while the page scrolls. Its label
 
 ## Files
 
-- `index.html`: the page.
+- `index.html`: the page in English.
+- `tr.html`: the page in Turkish, served at `/tr` (see "Two languages").
 - `style.css`: layout and colours. Desktop first. Date rows stack at 1000 px and below, the menu button appears at 760 px and below, the phone layout at 520 px and below. The glass of the menu is in the header section.
 - `site.js`: menu button, menu label colours, film player, background pop-up, the learner cards, the button that plays the recording, and everything that comes from the store (hidden blocks, dates, photos, texts and card order, message form). A text from the store is put into the page as text, never as HTML.
 - `content.js`: the values described above.
@@ -118,10 +131,10 @@ The menu is a glass capsule that stays in view while the page scrolls. Its label
 - `favicon.svg`, `favicon.ico`, `apple-touch-icon.png`: the ÖA mark for browser tabs and phone home screens.
 - `assets/learners/`: the photos of the learner cards.
 - `assets/sounds/`: the recording that "Hear a roast" plays while none was chosen in the site manager.
-- `assets/`: photos and the two typefaces in `assets/fonts/` (Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see `assets/fonts/fonts-license.txt`).
+- `assets/`: photos and the two typefaces in `assets/fonts/` (Averia Serif Libre and Schibsted Grotesk, SIL Open Font License 1.1, see `assets/fonts/fonts-license.txt`), with the five Turkish letters added to the first as a file of its own.
 
 When the page loads it asks the store one question (two when the stored calendar copy is older than ten minutes). A learner photo or a logo uploaded in the site manager is fetched from the store when the visitor comes near that block, and the recording only after "Hear a roast" was pressed (from the site itself, or from the store when one was chosen in the site manager). Nothing else is requested from another host. The film loads from YouTube's privacy-enhanced player only after a visitor presses play.
 
 ## After changing style.css, site.js or content.js
 
-Raise the version in `index.html`: the `version` meta tag and the `?v=` value of each file that changed (stylesheet, the two scripts, and the three icon links when an icon changes). A file that did not change keeps its value. `manage.html` carries its own version in its `version` meta tag, in its footer line and in its `?v=` for `content.js`.
+Raise the version in `index.html` and in `tr.html`: the `version` meta tag and the `?v=` value of each file that changed (stylesheet, the two scripts, and the three icon links when an icon changes). A file that did not change keeps its value. `manage.html` carries its own version in its `version` meta tag, in its footer line and in its `?v=` for `content.js`.

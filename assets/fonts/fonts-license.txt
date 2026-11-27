@@ -5,6 +5,12 @@ Copyright (c) 2011, Dan Sayers (i@iotic.com),
 with Reserved Font Name 'Averia' and 'Averia Libre'.
 The original font file, unchanged apart from WOFF2 compression.
 
+Five Turkish letters for the same typeface (serif-turkish-700.woff2)
+The letters U+011E, U+011F, U+0130, U+015E and U+015F, which Averia Serif Libre Bold does not have, put together
+from its own letters (G, g, I, S, s) and its own accents (breve, dot above, cedilla). A Modified Version in the
+sense of the license below: it carries the name "OA Serif Turkish" inside, not a Reserved Font Name, and is
+distributed under the same license. Copyright (c) 2011, Dan Sayers (i@iotic.com) for the outlines it is made of.
+
 Schibsted Grotesk Regular and Bold (schibsted-grotesk-latin-*.woff2, schibsted-grotesk-latin-ext-*.woff2)
 Copyright 2023 The Schibsted-Grotesk Project Authors (https://github.com/schibsted/schibsted-grotesk)
 Subset files as published in the @fontsource/schibsted-grotesk package.

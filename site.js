@@ -1,13 +1,35 @@
-/* omeraydin.coffee v2026-11-24b
+/* omeraydin.coffee v2026-11-27a
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar,
    which photos were uploaded for the learner cards and which texts were written there, and sends the message form there.
    Plays the recording of the research block when its button is pressed.
-   Keeps the glass menu readable: sets data-tone on the header from what is under its labels. */
+   Keeps the glass menu readable: sets data-tone on the header from what is under its labels.
+   Serves both pages: index.html in English and tr.html in Turkish (see TR below). */
 (() => {
   'use strict';
   const content = window.siteContent || {};
   const root = document.documentElement;
+  /* The Turkish page (tr.html) says lang="tr". Its texts stand in tr.html, each with a key "tr:…" of its own in the
+     store; pictures, the recording, the switched-off blocks and the orders are the same for both pages. What this
+     script writes itself (dates, the lines of the form, a few labels) and the words of the cards follow TR. */
+  const TR = root.lang === 'tr';
+  const SAY = TR ? {
+    menuOpen: 'Menüyü aç', menuClose: 'Menüyü kapat', film: 'Film: Ömer Aydın ile kahve eğitimi',
+    more: 'Devamını oku', less: 'Daha az göster', logoOf: (company) => company + ' logosu', photoOf: (name) => name + ' fotoğrafı',
+    months: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+    to: '–', toWide: ' – ', langs: { turkish: 'Türkçe', english: 'İngilizce' }, inLang: (lang) => lang, details: 'eğitim ayrıntıları',
+    email: 'Lütfen e-posta adresini kontrol edip yeniden deneyin.', message: 'Lütfen birkaç kelime yazın (en fazla 4.000 karakter).',
+    busy: 'Şu anda çok fazla mesaj var. Lütfen birkaç dakika sonra yeniden deneyin.', sending: 'Gönderiliyor…',
+    thanks: 'Teşekkürler. Mesajınız Ömer’e ulaştı.', failed: 'Mesaj gönderilemedi. Lütfen biraz sonra yeniden deneyin ya da Instagram’dan yazın.'
+  } : {
+    menuOpen: 'Open menu', menuClose: 'Close menu', film: 'Film: coffee education with Ömer Aydın',
+    more: 'Read more', less: 'Show less', logoOf: (company) => 'Logo of ' + company, photoOf: (name) => 'Photo of ' + name,
+    months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    to: ' to ', toWide: ' to ', langs: {}, inLang: (lang) => 'in ' + lang, details: 'course details',
+    email: 'Please check the email address and try again.', message: 'Please write a few words (up to 4,000 characters).',
+    busy: 'Too many messages just now. Please try again in a few minutes.', sending: 'Sending…',
+    thanks: 'Thank you. Your message has reached Ömer.', failed: 'That did not go through. Please try again in a moment, or write on Instagram.'
+  };
   const $ = (sel) => document.querySelector(sel);
   const make = (tag, cls, text) => {
     const node = document.createElement(tag);
@@ -34,7 +56,7 @@
     const setOpen = (open) => {
       header.classList.toggle('is-open', open);
       menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      menuBtn.setAttribute('aria-label', open ? SAY.menuClose : SAY.menuOpen);
     };
     menuBtn.addEventListener('click', () => setOpen(!header.classList.contains('is-open')));
     header.addEventListener('click', (event) => {
@@ -51,6 +73,43 @@
       }
     });
   }
+
+  /* The language switch of the top bar is a link to the other page. A press also tells this browser which language
+     was chosen (the English page sends a visitor who chose Turkish on to the Turkish one, see the head of
+     index.html), and notes the block in the middle of the window, so that the other page opens at the same block. */
+  const PLACE = 'oa-place';
+  const pageBlocks = () => [...document.querySelectorAll('main > section, footer')];
+  for (const go of document.querySelectorAll('.lang-go')) {
+    go.addEventListener('click', (event) => {
+      try { localStorage.setItem('oa-lang', TR ? 'en' : 'tr'); } catch (error) { /* private mode: the link works without it */ }
+      if (!plainClick(event)) return;
+      try {
+        sessionStorage.removeItem(PLACE);
+        const blocks = pageBlocks();
+        const middle = window.innerHeight / 2;
+        const n = blocks.findIndex((el) => el.getClientRects().length && el.getBoundingClientRect().bottom > middle);
+        if (n < 0 || window.scrollY < 8) return;   /* at the very top the other page opens at its top */
+        const box = blocks[n].getBoundingClientRect();
+        sessionStorage.setItem(PLACE, JSON.stringify({ n, part: (middle - box.top) / Math.max(1, box.height), at: Date.now() }));
+      } catch (error) { /* without it the other page opens at its top */ }
+    });
+  }
+  const arrive = () => {
+    let from = null;
+    try {
+      from = JSON.parse(sessionStorage.getItem(PLACE) || 'null');
+      sessionStorage.removeItem(PLACE);
+    } catch (error) {
+      from = null;
+    }
+    if (!from || typeof from.n !== 'number' || typeof from.part !== 'number' || !(Date.now() - from.at < 30000) || location.hash.length > 1) return;
+    const block = pageBlocks()[from.n];
+    if (!block || !block.getClientRects().length) return;
+    const box = block.getBoundingClientRect();
+    root.style.scrollBehavior = 'auto';   /* arriving must not glide */
+    window.scrollTo(0, Math.max(0, window.scrollY + box.top + Math.min(1, Math.max(0, from.part)) * box.height - window.innerHeight / 2));
+    root.style.scrollBehavior = '';
+  };
 
   /* glass menu: label colour follows what passes under the labels.
      No tone at the top of the page, "page" once scrolled, "media" over a photo or the film, "dark" over dark panels.
@@ -110,7 +169,7 @@
       hush();
       const player = document.createElement('iframe');
       player.src = 'https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&rel=0';
-      player.title = 'Film: coffee education with Ömer Aydın';
+      player.title = SAY.film;
       player.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
       player.allowFullscreen = true;
       const frame = make('div', 'film-frame');
@@ -195,11 +254,23 @@
      are put in again; the photo stays where it is. */
   const drawCard = (person, texts) => {
     const q = person.q;
-    const said = (field) => {
+    const english = (field) => {
       const over = person.id && texts ? texts['learner:' + person.id + ':' + field] : null;
       if (typeof over !== 'string' || over.length > CARD_TEXT[field]) return text(q[field]);
       const clean = over.replace(/\s+/g, ' ').trim();
       return clean || (field === 'name' || field === 'quote' ? text(q[field]) : '');   /* a card always has a name and a quote */
+    };
+    /* On the Turkish page: what the site manager holds under "tr:l-<id>-<field>", else the Turkish of content.js
+       (tr: {…}; for the quote also the review as it was written, when that is kept there), else the English words.
+       The name is the same on both pages. */
+    const said = (field) => {
+      if (!TR || field === 'name') return english(field);
+      const own = q.tr && typeof q.tr === 'object' ? text(q.tr[field]) : '';
+      const base = own || (field === 'quote' ? text(q.original) : '') || english(field);
+      const over = person.id && texts ? texts['tr:l-' + person.id + '-' + field] : null;
+      if (typeof over !== 'string' || over.length > CARD_TEXT[field]) return base;
+      const clean = over.replace(/\s+/g, ' ').trim();
+      return clean || (field === 'quote' ? base : '');
     };
     const headline = said('headline'), name = said('name'), position = said('position'), company = said('company'), quote = said('quote');
     /* the logo: the file the site manager uploaded for this card, unless it is switched off there */
@@ -222,14 +293,14 @@
       if (headline) figure.append(make('h3', 'quote-hl', headline));
       /* the quote and, for a quote longer than three lines, the button that opens and closes it */
       const say = make('div', 'quote-say');
-      const more = make('button', 'quote-more', 'Read more');
+      const more = make('button', 'quote-more', SAY.more);
       more.type = 'button';
       more.setAttribute('aria-expanded', 'false');
       more.addEventListener('click', () => {
         const open = !figure.classList.contains('is-open');
         figure.classList.toggle('is-open', open);
         more.setAttribute('aria-expanded', open ? 'true' : 'false');
-        more.textContent = open ? 'Show less' : 'Read more';
+        more.textContent = open ? SAY.less : SAY.more;
         if (!open && more.getBoundingClientRect().top < 96) more.scrollIntoView({ block: 'center' });   /* closed from below: the button went up behind the menu */
       });
       say.append(words, more);
@@ -241,7 +312,7 @@
       if (text(q.note)) who.append(make('span', 'quote-note', text(q.note)));
       if (logo) {
         const mark = make('img', 'quote-logo');
-        mark.alt = company ? 'Logo of ' + company : '';
+        mark.alt = company ? SAY.logoOf(company) : '';
         [mark.width, mark.height] = logoSize(+logo[1], +logo[2]);
         mark.loading = 'lazy';
         mark.decoding = 'async';
@@ -257,7 +328,7 @@
       figure.append(say, by);
     }
     if (person.card) {
-      person.card.alt = text(q.photoAlt) || 'Photo of ' + name;
+      person.card.alt = text(q.photoAlt) || SAY.photoOf(name);
       if (person.card.img) person.card.img.alt = person.card.alt;
     }
   };
@@ -338,7 +409,7 @@
       const more = figure.querySelector('.quote-more');   /* it was open and now fits in three lines */
       figure.classList.remove('is-open');
       more.setAttribute('aria-expanded', 'false');
-      more.textContent = 'Read more';
+      more.textContent = SAY.more;
     });
   };
 
@@ -927,8 +998,8 @@
       if (can) go.setAttribute('aria-label', stepNames[n]);
     });
     const coursesName = ($('#courses .label') || {}).textContent || '';
-    const hostName = ($('[data-edit="rm:host"]') || {}).textContent || '';
-    const hearName = ($('[data-edit="rm:hear"]') || {}).textContent || '';
+    const hostName = ($('[data-edit="' + (TR ? 'tr:rm-host' : 'rm:host') + '"]') || {}).textContent || '';   /* the Turkish page has keys of its own */
+    const hearName = ($('[data-edit="' + (TR ? 'tr:rm-hear' : 'rm:hear') + '"]') || {}).textContent || '';
     if (hear2) hear2.querySelector('span').textContent = hearName.trim();
     sheets.forEach((sheet, n) => {
       const next = openable.find((m) => m > n);
@@ -1202,7 +1273,7 @@
   const dateBox = $('#dates-list');
   const noDates = dateBox ? dateBox.firstElementChild : null;
   const ISO = /^\d{4}-\d{2}-\d{2}$/;
-  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const MONTHS = SAY.months;
   const FIELDS = { barista: 'Barista Skills', roasting: 'Roasting', sensory: 'Sensory Skills', brewing: 'Brewing', 'green coffee': 'Green Coffee' };
   const LEVELS = { 'f+i': 'Foundation + Intermediate', pro: 'Professional', professional: 'Professional', foundation: 'Foundation', intermediate: 'Intermediate' };
   const todayIn = (zone) => {
@@ -1214,12 +1285,24 @@
       return new Date().toISOString().slice(0, 10);
     }
   };
+  /* On the Turkish page the names of a course and of its level are the ones its list of courses shows (the texts
+     "tr:course-…" and "tr:level-…" of tr.html, as the site manager may have changed them). */
+  const LEVEL_KEYS = { 'f+i': 'fi', pro: 'pro', professional: 'pro', foundation: 'foundation' };
+  const shownAs = (key, otherwise) => {
+    if (!TR || !key) return otherwise;
+    const el = document.querySelector('[data-edit="tr:' + key + '"]');
+    const words = el && !el.hidden ? el.textContent.replace(/\s+/g, ' ').trim() : '';
+    return words || otherwise;
+  };
   /* "SCA Barista F+I" on the calendar is "Barista Skills" + "Foundation + Intermediate" here */
   const courseOf = (name) => {
     const plain = String(name).replace(/^SCA\s+/i, '').trim();
-    if (/^q[\s-]*grader/i.test(plain)) return { field: 'Q Grader', level: 'Certification programme' };
+    if (/^q[\s-]*grader/i.test(plain)) return { field: shownAs('course-q', 'Q Grader'), level: shownAs('level-programme', 'Certification programme') };
     const parts = plain.match(/^(.+?)\s+(F\+I|Pro|Professional|Foundation|Intermediate)$/i);
-    if (parts && FIELDS[parts[1].toLowerCase()]) return { field: FIELDS[parts[1].toLowerCase()], level: LEVELS[parts[2].toLowerCase()] };
+    if (parts && FIELDS[parts[1].toLowerCase()]) {
+      const field = parts[1].toLowerCase(), level = parts[2].toLowerCase();
+      return { field: shownAs(/^[a-z]+$/.test(field) ? 'course-' + field : '', FIELDS[field]), level: shownAs(LEVEL_KEYS[level] ? 'level-' + LEVEL_KEYS[level] : '', LEVELS[level]) };
+    }
     return { field: plain, level: '' };
   };
   const period = (from, to, spoken) => {
@@ -1227,8 +1310,8 @@
     const b = { y: +to.slice(0, 4), m: +to.slice(5, 7), d: +to.slice(8, 10) };
     const month = (m) => (spoken ? MONTHS[m - 1] : MONTHS[m - 1].slice(0, 3));
     if (from === to) return a.d + ' ' + month(a.m) + ' ' + a.y;
-    if (a.y === b.y && a.m === b.m) return a.d + (spoken ? ' to ' : '–') + b.d + ' ' + month(a.m) + ' ' + a.y;
-    const join = spoken ? ' to ' : ' – ';
+    if (a.y === b.y && a.m === b.m) return a.d + (spoken ? SAY.to : '–') + b.d + ' ' + month(a.m) + ' ' + a.y;
+    const join = spoken ? SAY.toWide : ' – ';
     if (a.y === b.y) return a.d + ' ' + month(a.m) + join + b.d + ' ' + month(b.m) + ' ' + a.y;
     return a.d + ' ' + month(a.m) + ' ' + a.y + join + b.d + ' ' + month(b.m) + ' ' + b.y;
   };
@@ -1252,7 +1335,7 @@
         when: period(x.start, x.end, false),
         said: period(x.start, x.end, true),
         course: course.field,
-        lines: [course.level, [place, lang ? 'in ' + lang : ''].filter(Boolean).join(' · ')].filter(Boolean),
+        lines: [course.level, [place, lang ? SAY.inLang(SAY.langs[lang.toLowerCase()] || lang) : ''].filter(Boolean).join(' · ')].filter(Boolean),
         url: x.url
       };
     });
@@ -1272,7 +1355,7 @@
       const row = make(hasLink ? 'a' : 'div', 'date-row');
       if (hasLink) {
         row.href = r.url;
-        row.setAttribute('aria-label', [r.course].concat(r.lines.map((line) => line.replace(/ · /g, ', ')), r.said, 'course details').join(', '));
+        row.setAttribute('aria-label', [r.course].concat(r.lines.map((line) => line.replace(/ · /g, ', ')), r.said, SAY.details).join(', '));
       }
       const where = make('span', 'date-where');
       for (const line of r.lines) where.append(make('span', '', line));
@@ -1299,11 +1382,7 @@
   if (form && storeOn) {
     const status = $('#msg-status');
     const sendBtn = form.querySelector('button[type="submit"]');
-    const SAID = {
-      email: 'Please check the email address and try again.',
-      message: 'Please write a few words (up to 4,000 characters).',
-      busy: 'Too many messages just now. Please try again in a few minutes.'
-    };
+    const SAID = { email: SAY.email, message: SAY.message, busy: SAY.busy };
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (sendBtn.disabled) return;
@@ -1315,7 +1394,7 @@
         p_fax: String(fields.get('fax') || '')
       };
       sendBtn.disabled = true;
-      status.textContent = 'Sending…';
+      status.textContent = SAY.sending;
       let answer = null;
       try {
         answer = await ask('site_message_send', letter);
@@ -1325,9 +1404,9 @@
       sendBtn.disabled = false;
       if (answer && answer.ok === true) {
         form.reset();
-        status.textContent = 'Thank you. Your message has reached Ömer.';
+        status.textContent = SAY.thanks;
       } else {
-        status.textContent = (answer && SAID[answer.error]) || 'That did not go through. Please try again in a moment, or write on Instagram.';
+        status.textContent = (answer && SAID[answer.error]) || SAY.failed;
       }
     });
   }
@@ -1372,6 +1451,7 @@
     show({ hidden: [], trainings: null, form: false, texts: null });
     setPhotos(null);
     settled();
+    arrive();
     return;
   }
   const kept = recall();
@@ -1385,6 +1465,7 @@
   } else {
     show({ hidden: [], trainings: null, form: false, texts: null });   /* first visit: the photos wait for the store's answer */
   }
+  arrive();   /* from the other language: back at the block the visitor was reading */
   const keep = () => remember({ hide: state.hide, trainings: state.trainings, form: state.form, photos: photos || {}, texts: state.texts, at: Date.now() });
   (async () => {
     let now;
