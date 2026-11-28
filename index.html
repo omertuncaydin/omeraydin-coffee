@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ömer Aydın | Coffee Education Worldwide</title>
 <meta name="description" content="International coffee education with Ömer Aydın, Authorized SCA Trainer and Q Instructor.">
-<meta name="version" content="v2026-11-27a">
+<meta name="version" content="v2026-11-28a">
 <meta name="theme-color" content="#F4F1E0">
 <link rel="icon" href="favicon.ico?v=2026-11-19c" sizes="32x32">
 <link rel="icon" href="favicon.svg?v=2026-11-19c" type="image/svg+xml">
@@ -32,8 +32,13 @@
 <script>
 (function (d) {
   var h = d.documentElement, known = false;
-  /* a visitor who chose Turkish with the switch in the top bar gets the Turkish page here as well */
-  try { if (localStorage.getItem('oa-lang') === 'tr' && !/[?&]manage=/.test(location.search)) { location.replace('tr' + location.hash); return; } } catch (e) {}
+  /* The Turkish page for a visitor who chose it with the switch in the top bar, and for a browser whose first
+     language is Turkish, unless its visitor chose English with that switch (the address says so once, with
+     ?lang=en, where the browser cannot remember it). */
+  var chosen = null, first = '';
+  try { chosen = localStorage.getItem('oa-lang'); } catch (e) {}
+  try { first = String((navigator.languages && navigator.languages[0]) || navigator.language || '').toLowerCase(); } catch (e) {}
+  if ((chosen === 'tr' || (chosen !== 'en' && /^tr(-|$)/.test(first))) && !/[?&](manage=|lang=en(&|$))/.test(location.search)) { location.replace('tr' + location.hash); return; }
   h.className = 'js';
   try {
     var kept = JSON.parse(localStorage.getItem('oa-site') || 'null'), keys = kept && typeof kept.hide === 'string' ? kept.hide : null;
@@ -464,6 +469,6 @@
   </div>
 </dialog>
 <script src="content.js?v=2026-11-27a"></script>
-<script src="site.js?v=2026-11-27a"></script>
+<script src="site.js?v=2026-11-28a"></script>
 </body>
 </html>

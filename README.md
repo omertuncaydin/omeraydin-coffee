@@ -1,6 +1,6 @@
 # omeraydin.coffee
 
-Static one-page site in two languages, version v2026-11-27a, with a small manager page at `/manage`. English is `index.html` at `/`, Turkish is `tr.html` at `/tr`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
+Static one-page site in two languages, version v2026-11-28a, with a small manager page at `/manage`. English is `index.html` at `/`, Turkish is `tr.html` at `/tr`. Cloudflare Pages publishes the `main` branch as it is: no build step, the repository root is the site.
 
 ## What changes without an upload
 
@@ -21,7 +21,7 @@ The database part is one SQL file, `omeraydin-site.sql`. It is kept outside this
 ## Two languages
 
 - `index.html` is the English page, `tr.html` the Turkish one (`https://omeraydin.coffee/tr`). Both use the same `style.css`, `site.js` and `content.js`. Each names the other in its head (`hreflang`).
-- The switch "EN | TR" in the top bar is a link between the two pages. It stands twice in each page: before "Enquire" on wide screens, and in the bar itself where the links fold into the menu (760 px and below). A press opens the other page at the block the visitor was reading and tells the browser which language was chosen; the English page then sends that visitor on to the Turkish one (the small script in its head). `/tr` sends nobody anywhere, so a link to it always opens in Turkish. A browser set to Turkish is not switched by itself.
+- The switch "EN | TR" in the top bar is a link between the two pages. It stands twice in each page: before "Enquire" on wide screens, and in the bar itself where the links fold into the menu (760 px and below). A press opens the other page at the block the visitor was reading and tells the browser which language was chosen. The small script in the head of the English page sends two kinds of visitors on to the Turkish one: a visitor who chose Turkish with the switch, and a browser whose first language is Turkish, unless its visitor chose English with the switch. Where a browser cannot remember the choice, the switch of the Turkish page writes it into the address once (`/?lang=en`). `/tr` sends nobody anywhere, so a link to it always opens in Turkish. Search engines read with an English browser and get each page at its own address.
 - `tr.html` has the same elements as `index.html`, in the same order: only words, a few attributes and the head differ. When one page changes, the other has to follow. The site manager relies on it: it finds the English of a Turkish text at the same place of the English page.
 - Every text of the Turkish page that can be changed carries `data-edit="tr:<name>"` in `tr.html` (`tr:hero-lead`, `tr:rm-s1-head`, `tr:bg-list` and so on). The texts in the file are first drafts; the site manager replaces them on its tab "Türkçe", and the store keeps what was written under the same key. The English page keeps its own keys (`rm:…`, `bg:…`); the two never touch each other.
 - Shared by both pages, set once: pictures, logos and photos, the recording, the eyes of the Visibility tab, the order of the courses and of the cards.

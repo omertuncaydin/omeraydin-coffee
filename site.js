@@ -1,4 +1,4 @@
-/* omeraydin.coffee v2026-11-27a
+/* omeraydin.coffee v2026-11-28a
    Reads window.siteContent (content.js) and fills the film, portrait and learner cards.
    Asks the store behind the site manager which blocks are switched off, which classes are on the calendar,
    which photos were uploaded for the learner cards and which texts were written there, and sends the message form there.
@@ -75,13 +75,19 @@
   }
 
   /* The language switch of the top bar is a link to the other page. A press also tells this browser which language
-     was chosen (the English page sends a visitor who chose Turkish on to the Turkish one, see the head of
-     index.html), and notes the block in the middle of the window, so that the other page opens at the same block. */
+     was chosen: the English page sends a visitor who chose Turkish, and a browser set to Turkish whose visitor did
+     not choose English, on to the Turkish one (see the head of index.html). Where the browser cannot remember,
+     the address of the English page carries the choice once (?lang=en). A press also notes the block in the middle
+     of the window, so that the other page opens at the same block. */
   const PLACE = 'oa-place';
   const pageBlocks = () => [...document.querySelectorAll('main > section, footer')];
   for (const go of document.querySelectorAll('.lang-go')) {
     go.addEventListener('click', (event) => {
-      try { localStorage.setItem('oa-lang', TR ? 'en' : 'tr'); } catch (error) { /* private mode: the link works without it */ }
+      try {
+        localStorage.setItem('oa-lang', TR ? 'en' : 'tr');
+      } catch (error) {
+        if (TR) go.href = './?lang=en';   /* nothing can be kept here: without this a browser set to Turkish would be sent straight back */
+      }
       if (!plainClick(event)) return;
       try {
         sessionStorage.removeItem(PLACE);
